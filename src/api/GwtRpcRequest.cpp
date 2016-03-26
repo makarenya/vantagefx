@@ -80,7 +80,7 @@ namespace vantagefx {
             stream << request._url << " " << request._serviceName << "::" << request._methodName << "(";
             auto types = request._parameterTypes;
             auto values = request._parameterValues;
-            for(int i = 0; i < types.size(); i++) {
+            for(auto i = 0; i < types.size(); i++) {
                 if (i != 0) stream << ", ";
                 if (types[i] == "Z") stream << "bool ";
                 else if (types[i] == "B") stream << "byte: " << values[i];
