@@ -45,13 +45,6 @@ int main(int argc, char *argv[])
 
 		std::cerr << "elements lost: " << ctx.count();
 
-        /*
-        for(int i = 0; i < 50; i++) {
-            boost::apply_visitor(api::PrintVisitor(std::cout, data.strings), *(--last)) << std::endl;
-        }
-         */
-
-
         return 0;
     }
     return 1;
