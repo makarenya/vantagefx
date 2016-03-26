@@ -7,7 +7,6 @@
 
 #include "Lut.h"
 #include "SerializableParameter.h"
-#include <string>
 
 namespace vantagefx {
 	namespace serialized {

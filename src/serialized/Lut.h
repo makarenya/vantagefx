@@ -7,6 +7,7 @@
 
 #include <src/api/GwtParseContext.h>
 
+
 namespace vantagefx {
     namespace serialized {
 
