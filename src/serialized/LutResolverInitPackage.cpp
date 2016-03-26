@@ -42,6 +42,18 @@ namespace vantagefx {
 			ctx >> result.some10;
 			ctx >> result.some11;
 			ctx >> checked(result.markets);
+			ctx >> checked(result.messages);
+			ctx >> checked(result.servers);
+			ctx >> checked(result.acceptedMethods);
+            ctx >> checked(result.pspCcTypeRels);
+            ctx >> result.some12;
+            ctx >> checked(result.someArray);
+            ctx >> checked(result.states);
+			ctx >> checked(result.someArray2);
+            ctx >> checked(result.trackingInfo);
+            ctx >> checked(result.verifications);
+			ctx >> result.some13;
+			ctx >> result.some14;
 			return ctx;
         }
     }
@@ -82,6 +94,18 @@ namespace std {
 			<< "<some10>" << item.some10 << "</some10>"
 			<< "<some11>" << item.some10 << "</some11>"
 			<< "<markets>" << item.markets << "</markets>"
+			<< "<messages>" << item.messages << "</messages>"
+			<< "<servers>" << item.servers << "</servers>"
+			<< "<acceptedMethods>" << item.acceptedMethods << "</acceptedMethods>"
+            << "<pspCcTypeRels>" << item.pspCcTypeRels << "</pspCcTypeRels>"
+            << "<some12>" << item.some12 << "</some12>"
+            << "<someArray>" << item.someArray << "</someArray>"
+            << "<states>" << item.states << "</states>"
+			<< "<someArray2>" << item.someArray2 << "</someArray2>"
+            << "<trackingInfo>" << item.trackingInfo << "</trackingInfo>"
+            << "<verifications>" << item.verifications << "</verifications>"
+			<< "<some13>" << item.some13 << "</some13>"
+			<< "<some14>" << item.some14 << "</some14>"
 			;
 	}
 }

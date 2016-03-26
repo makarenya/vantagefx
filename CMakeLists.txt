@@ -6,13 +6,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (MSVC)
     set(CMAKE_PREFIX_PATH "c:/msvc_2015")
+	set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 add_definitions(-DSRC_FILE="${CMAKE_SOURCE_DIR}/request.bin")
 
-set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 
@@ -22,7 +22,7 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5Qml REQUIRED)
-find_package(Boost 1.6 REQUIRED COMPONENTS date_time filesystem)
+find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem)
 
 set(SOURCE_FILES
         src/main.cpp
@@ -85,7 +85,7 @@ set(SOURCE_FILES
 		src/serialized/SubMarket.cpp
 		src/serialized/SubMarket.h
 		src/serialized/Market.cpp
-		src/serialized/Market.h)
+		src/serialized/Market.h src/serialized/MapMessageSource.cpp src/serialized/MapMessageSource.h src/serialized/MTServer.cpp src/serialized/MTServer.h src/serialized/PspCcTypeRel.cpp src/serialized/PspCcTypeRel.h src/serialized/State.cpp src/serialized/State.h src/serialized/TrackingInfo.cpp src/serialized/TrackingInfo.h src/serialized/FieldVerification.cpp src/serialized/FieldVerification.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

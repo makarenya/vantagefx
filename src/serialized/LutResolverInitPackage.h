@@ -14,6 +14,12 @@
 #include "InstrumentTypeFilter.h"
 #include "InstrumentTypeSuperRel.h"
 #include "Market.h"
+#include "MapMessageSource.h"
+#include "MTServer.h"
+#include "PspCcTypeRel.h"
+#include "State.h"
+#include "TrackingInfo.h"
+#include "FieldVerification.h"
 
 namespace vantagefx {
     namespace serialized {
@@ -50,6 +56,18 @@ namespace vantagefx {
 			int some10;
 			int some11;
 			std::vector<Market> markets;
+			MapMessageSource messages;
+			std::map<std::string, MTServer> servers;
+			std::vector<PaymentMethod> acceptedMethods;
+            std::vector<PspCcTypeRel> pspCcTypeRels;
+            int some12;
+            std::vector<int> someArray;
+            std::vector<State> states;
+			std::vector<int> someArray2;
+			TrackingInfo trackingInfo;
+            std::map<std::string, std::map<std::string, FieldVerification>> verifications;
+			int some13;
+			int some14;
 		};
     }
 
