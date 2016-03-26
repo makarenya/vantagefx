@@ -19,7 +19,7 @@ using namespace vantagefx::serialized;
 
 int main(int argc, char *argv[])
 {
-    std::ifstream file_stream("C:\\Users\\AMakarenya\\OneDrive\\projects\\qt_second\\request.bin", std::ios::in | std::ios::binary);
+    std::ifstream file_stream(SRC_FILE, std::ios::in | std::ios::binary);
 
 	auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
 
