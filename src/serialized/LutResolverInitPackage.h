@@ -48,6 +48,7 @@ namespace vantagefx {
 			int some8;
 			int some9;
 			int some10;
+			int some11;
 			std::vector<Market> markets;
 		};
     }

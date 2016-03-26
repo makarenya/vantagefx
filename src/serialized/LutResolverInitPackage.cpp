@@ -40,6 +40,7 @@ namespace vantagefx {
 			ctx >> result.some8;
 			ctx >> result.some9;
 			ctx >> result.some10;
+			ctx >> result.some11;
 			ctx >> checked(result.markets);
 			return ctx;
         }
@@ -79,6 +80,7 @@ namespace std {
 			<< "<some8>" << item.some8 << "</some8>"
 			<< "<some9>" << item.some9 << "</some9>"
 			<< "<some10>" << item.some10 << "</some10>"
+			<< "<some11>" << item.some10 << "</some11>"
 			<< "<markets>" << item.markets << "</markets>"
 			;
 	}
