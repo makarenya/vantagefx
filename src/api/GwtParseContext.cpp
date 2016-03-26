@@ -126,6 +126,7 @@ namespace vantagefx
 		void GwtParseContext::print(std::ostream& stream, int count)
 		{
 			for (auto i = 0; i < count; i++) {
+				if (_it == _end) return;
 				boost::apply_visitor(print_visitor(stream, *this), *--_it);
 			}
 		}
