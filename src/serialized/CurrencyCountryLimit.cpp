@@ -41,7 +41,7 @@ namespace vantagefx {
 	}
 }
 namespace std {
-	ostream& std::operator<<(ostream& stream, const vantagefx::serialized::CurrencyCountryLimit& item)
+	ostream& operator<<(ostream& stream, const vantagefx::serialized::CurrencyCountryLimit& item)
 	{
 		return stream
 			<< "<id>" << item.id << "</id>"
