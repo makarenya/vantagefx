@@ -32,8 +32,10 @@ namespace vantagefx
 
 			bool eof() const { return _end == _it; }
 			int maxWord() const { return _maxWord; }
+			std::string peekType() const;
 
 			std::string word(int id);
+			std::string str(int id);
 			std::string typeName(int id);
 			void print(std::ostream& stream, int count);
 			int count() const;

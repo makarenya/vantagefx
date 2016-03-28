@@ -111,6 +111,11 @@ namespace vantagefx
 			std::ostream &_stream;
 		};
 
+		std::string GwtParseContext::peekType() const
+		{
+			return _it->type().name();
+		}
+
 		std::string GwtParseContext::word(int id)
 		{
 			if (id == 0) return std::string();
@@ -120,6 +125,12 @@ namespace vantagefx
 					", while max word is: " + boost::lexical_cast<std::string>(_maxWord));
 			}
 			_maxWord = std::max(_maxWord, id + 1);
+			return _strings[id - 1];
+		}
+
+		std::string GwtParseContext::str(int id)
+		{
+            if (id <= 0 || id > _maxWord) return std::string();
 			return _strings[id - 1];
 		}
 
