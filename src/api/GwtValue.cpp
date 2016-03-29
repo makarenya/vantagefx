@@ -19,11 +19,13 @@ namespace vantagefx {
             int64_t _value;
         };
 
-        class DateValue : public LongValue {
+        class DateValue : public GwtValue {
         public:
-            void print(std::ostream &stream) override;
+			void parse(GwtParser &ctx) override;
+			void print(std::ostream &stream) override;
             GwtValueType type() override;
-        private:
+			int value() override;
+		private:
             int64_t _value;
         };
 
@@ -140,7 +142,11 @@ namespace vantagefx {
             return static_cast<int>(_value);
         }
 
-        void DateValue::print(std::ostream &stream) {
+	    void DateValue::parse(GwtParser& ctx) {
+			ctx >> _value;
+		}
+
+	    void DateValue::print(std::ostream &stream) {
             using boost::posix_time::ptime;
             using boost::posix_time::milliseconds;
             namespace gregorian = boost::gregorian;
@@ -153,7 +159,11 @@ namespace vantagefx {
             return GwtValueType::Date;
         }
 
-        void StdValue::parse(GwtParser &ctx) {
+	    int DateValue::value() {
+			return static_cast<int>(_value);
+	    }
+
+	    void StdValue::parse(GwtParser &ctx) {
             ctx >> _value;
             _string  = ctx.str(_value);
         }

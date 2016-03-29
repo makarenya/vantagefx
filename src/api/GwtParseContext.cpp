@@ -38,28 +38,28 @@ namespace vantagefx
 			return *this;
 		}
 
+		inline uint64_t base64Value(char c) {
+			if (c >= 'A' && c <= 'Z') {
+				return c - 'A';
+			}
+			if (c >= 'a' && c <= 'z') {
+				return c - 'a' + 26;
+			}
+			if (c >= '0' && c <= '9') {
+				return c - '0' + 52;
+			}
+			if (c == '$') return 62;
+			if (c == '_') return 63;
+			if (c == '=') return 0;
+			throw new std::runtime_error("invalid base64 symbol");
+		}
+
 		GwtParseContext &GwtParseContext::operator>>(int64_t &value) {
 			auto val = boost::get<std::string>(*--_it);
 			int64_t result = 0;
-			auto shift = 0;
-			for (auto c: val) {
-				int64_t b;
-				if (c >= 'A' && c <= 'Z') {
-					b = c - 'A';
-				}
-				else if (c >= 'a' && c <= 'z') {
-					b = c - 'a' + 26;
-				}
-				else if (c >= '0' && c <= '9') {
-					b = c - '0' + 52;
-				}
-				else if (c == '$') b = 62;
-				else if (c == '_') b = 63;
-				else {
-					throw new std::runtime_error("invalid base64 symbol");
-				}
-				result |= (b << shift);
-				shift += 6;
+			for (auto i = 0; i < val.length(); i++)
+			{
+				result = result << 6 | base64Value(val[i]);
 			}
 			value = result;
 			return *this;
