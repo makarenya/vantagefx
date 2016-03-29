@@ -27,8 +27,7 @@ namespace vantagefx {
                 obj = _fetched[~typeId];
             }
             else {
-
-                GwtTypePtr it = _bundle.type(typeName(typeId));
+	            auto it = _bundle.type(typeName(typeId));
                 if (!it) {
                     throw ParseError("type " + typeName(typeId) + " not found");
                 }
