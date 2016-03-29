@@ -7,51 +7,62 @@
 #include "api/ResponseParser.h"
 #include <iostream>
 #include <fstream>
-#include <map>
 #include <src/api/GwtRpcRequest.h>
 #include <src/api/GwtParseContext.h>
-#include <boost/shared_ptr.hpp>
 #include <src/api/GwtParser.h>
 #include <src/api/GwtType.h>
-#include <src/api/GwtObject.h>
-#include <src/api/GwtField.h>
-//#include <boost/filesystem.hpp>
 #include <src/api/GwtBundle.h>
 #include "src/serialized/LutResolverInitPackage.h"
+#include <boost/filesystem.hpp>
 
 
 using namespace vantagefx::api;
 using namespace vantagefx::serialized;
+namespace fs = boost::filesystem;
+
+void processFile(fs::path filename)
+{
+	std::cout << "processing " << filename << std::endl;
+	fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
+	auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
+	auto data = ParseResponse(content);
+	if (data.version == 7) {
+		GwtVantageFxBundle bundle;
+		GwtParser parser(data.strings, data.data, bundle);
+		try
+		{
+            auto dir = filename.parent_path() / filename.stem();
+            fs::create_directories(dir);
+			auto result = parser.parse();
+
+			fs::ofstream fs(filename.parent_path() / (filename.stem().string() + ".xml"));
+			bundle.printTables(dir.string());
+			result->print(fs, GwtPrintStyle::Xml);
+			parser.print(std::cout, 100);
+		}
+		catch (std::exception &ex)
+		{
+			std::cout << ex.what() << std::endl;
+			parser.print(std::cout, 20);
+		}
+	}
+}
 
 int main(int argc, char *argv[]) {
 
-    for(auto i = 1; i <= 6; i++) {
-        std::string num = boost::lexical_cast<std::string>(i);
-        std::string path = DATA_DIR + std::string("request") + num + ".bin";
-		std::cout << "processing " << path;
-        std::ifstream file_stream(path, std::ios::in | std::ios::binary);
-        auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
-        auto data = ParseResponse(content);
-        if (data.version == 7) {
-            GwtVantageFxBundle bundle;
-            GwtParser parser(data.strings, data.data, bundle);
-            try
-            {
-				//boost::filesystem::create_directories(DATA_DIR + num);
-				auto result = parser.parse();
-                std::ofstream fs(DATA_DIR + num + "/result.xml");
-                bundle.printTables(DATA_DIR + num + "/");
-                result->print(fs, GwtPrintStyle::Xml);
-				parser.print(std::cout, 300);
-            }
-            catch(std::exception &ex)
-            {
-                std::cout << ex.what() << std::endl;
-                parser.print(std::cout, 20);
-                return 2;
-            }
+	if (argc == 2)
+	{
+        processFile(argv[1]);
+	}
+	else
+	{
+        fs::path current = DATA_DIR;// fs::current_path() / "data";
+        for(fs::path path: fs::directory_iterator(current)) {
+            std::cout << path << ":   " << path.extension();
+            if (path.extension() == ".bin")
+                processFile(path);
         }
-    }
+	}
     return 0;
 
     //auto data = api::ParseRequest("7|0|5|https://binaryoptions.vantagefx.com/app/Basic/|46123D47AC2C515447AEF3C2580787E2|com.optionfair.client.common.services.TradingService|getAssetIntradayTicks|J|1|2|3|4|3|5|5|5|b|VOYMBnE|VOYPdVk|");
