@@ -28,6 +28,95 @@ namespace vantagefx {
         }
 
         GwtVantageFxBundle::GwtVantageFxBundle() {
+
+            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.ClientUpdatePack", std::vector<GwtField>({
+                StdField("some_1"),
+                PtrField("assetUpdates"),
+				PtrField("some_2"),
+				PtrField("some_3"),
+				StdField("some_4"),
+				PtrField("some_5"),
+				StdField("some_6"),
+				StdField("some_7"),
+				PtrField("options"),
+				StdField("some_10"),
+				PtrField("some_11"),
+				PtrField("optionUpdates"),
+				StdField("some_12"),
+				StdField("some_13"),
+				StdField("some_14"),
+				StdField("some_15"),
+				PtrField("positionsSentimentDto"),
+				PtrField("some_16"),
+				StdField("some_17"),
+				StdField("some_18"),
+				StdField("some_19"),
+				PtrField("some_20"),
+				LongField("some_21"),
+				PtrField("some_22"),
+				StdField("some_23"),
+				StdField("some_24"),
+			})));
+
+			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.PositionsSentimentDTO", std::vector<GwtField>({
+				PtrField("map"),
+				StdField("some_1"),
+				StdField("some_2"),
+			})));
+			
+			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Option", std::vector<GwtField>({
+				StringField("serialuid"),
+				IntField("assetId"), // Для какой пары текущий опцион
+				StdField("some_2"),
+				StdField("some_3"),
+				StdField("some_4"),
+				StdField("some_5"),
+				PtrField("closeDate"),
+				StdField("some_7"),
+				StdField("some_8"),
+				LongField("some_9"),
+				FloatField("some_10"),
+				StdField("some_11"),
+				StdField("some_12"),
+				PtrField("some_13"),
+				FloatField("some_14"),
+				FloatField("some_15"),
+				LongField("some_16"),
+				StdField("some_17"),
+				StdField("some_18"),
+				StdField("some_19"),
+				LongField("some_20"),
+				StdField("some_21"),
+				StdField("some_22"),
+				StdField("some_23"),
+				IntField("return"),
+				FloatField("some_25"),
+				StdField("some_26"),
+				PtrField("some_27"),
+				StdField("some_28"),
+				FloatField("some_29"),
+				FloatField("some_30"),
+				FloatField("some_31"),
+				FloatField("some_32"),
+				LongField("some_33"),
+			})));
+
+			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.AssetUpdate", std::vector<GwtField>({
+				StringField("serialuid"),
+				IntField("assetStatusId"), // статус лота (нужен Production)
+				IntField("assetId"), // Идентификатор лота
+				FloatField("targetPrice"), // Текущая цена
+			})));
+			
+			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.OptionUpdateChangeStrike", std::vector<GwtField>({
+                FloatField("some_1"),
+                FloatField("some_2"),
+				LongField("some_3"),
+                FloatField("some_4"),
+				FloatField("some_5"),
+				StdField("some_6"),
+			})));
+
             add(std::make_shared<GwtComplexType>("com.optionfair.client.model.LutResolverInitPackage", std::vector<GwtField>({
                 PtrField("paymentMethodTypes"),
                 PtrField("lutTypes"),
@@ -508,8 +597,9 @@ namespace vantagefx {
 			add(std::make_shared<GwtMapType>("java.util.LinkedHashMap", 1));
 			add(std::make_shared<GwtSimpleType>("java.lang.Integer", GwtValueType::Integer));
 			add(std::make_shared<GwtSimpleType>("com.optionfair.client.luts.Instrument", GwtValueType::Integer));
-            add(std::make_shared<GwtSimpleType>("java.lang.String", GwtValueType::String));
-            add(std::make_shared<GwtSimpleType>("java.util.Date", GwtValueType::Date));
+			add(std::make_shared<GwtSimpleType>("java.lang.Long", GwtValueType::Long));
+			add(std::make_shared<GwtSimpleType>("java.lang.String", GwtValueType::String));
+			add(std::make_shared<GwtSimpleType>("java.util.Date", GwtValueType::Date));
         }
     }
 }
