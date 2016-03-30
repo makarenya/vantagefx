@@ -23,6 +23,10 @@ using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
 
 void processFile(fs::path filename) {
+    if (!fs::exists(filename) || !fs::is_regular_file(filename)) {
+        std::cout << filename << " not exists" << std::endl;
+        return;
+    }
     std::cout << "processing " << filename << std::endl;
     fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
     auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
