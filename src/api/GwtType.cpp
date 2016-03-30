@@ -64,21 +64,19 @@ namespace vantagefx {
         }
 
         void GwtComplexType::xml(GwtObject &object, QDomElement &parent) {
-            QDomDocument doc = parent.ownerDocument();
-            auto element = doc.createElement("object");
-            element.setAttribute("type", name().c_str());
+	        auto doc = parent.ownerDocument();
+			parent.setAttribute("type", name().c_str());
             for (auto field: _fields) {
-                std::string fieldName = field->name();
+	            auto fieldName = field->name();
                 auto prop = doc.createElement(fieldName.c_str());
-                GwtValuePtr value = object.value(fieldName);
+	            auto value = object.value(fieldName);
                 field->xml(value, prop);
-                element.appendChild(prop);
+                parent.appendChild(prop);
             }
-            parent.appendChild(element);
         }
 
         void GwtComplexType::printTable(std::ostream &stream) {
-            bool first = true;
+	        auto first = true;
             for (auto field: _fields) {
                 if (first) first = false;
                 else stream << ";";
@@ -119,20 +117,17 @@ namespace vantagefx {
 
         void GwtListType::xml(GwtObject &object, QDomElement &parent) {
             auto length = object.value("length");
-            QDomDocument doc = parent.ownerDocument();
-            auto element = doc.createElement("object");
-            element.setAttribute("type", name().c_str());
-            element.setAttribute("count", length->intValue());
+	        auto doc = parent.ownerDocument();
+			parent.setAttribute("type", name().c_str());
+			parent.setAttribute("count", length->intValue());
 
             for (auto i = 0; i < length->intValue(); i++) {
                 auto item = doc.createElement("item");
                 auto name = boost::lexical_cast<std::string>(i);
-                GwtValuePtr value = object.value(name);
+	            auto value = object.value(name);
                 value->objectValue()->xml(item);
-                element.appendChild(item);
-
+				parent.appendChild(item);
             }
-            parent.appendChild(element);
         }
 
         void GwtMapType::parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) {
@@ -158,18 +153,16 @@ namespace vantagefx {
         }
 
         void GwtMapType::xml(GwtObject &object, QDomElement &parent) {
-            QDomDocument doc = parent.ownerDocument();
-            auto element = doc.createElement("object");
-            element.setAttribute("type", name().c_str());
-            element.setAttribute("count", (int) object.values().size());
+	        auto doc = parent.ownerDocument();
+			parent.setAttribute("type", name().c_str());
+			parent.setAttribute("count", static_cast<int>(object.values().size()));
             for (auto pair : object.values()) {
                 auto item = doc.createElement("item");
                 item.setAttribute("key", pair.first.c_str());
-                auto object = pair.second->objectValue();
-                if (object) object->xml(item);
-                element.appendChild(item);
+                auto obj = pair.second->objectValue();
+                if (obj) obj->xml(item);
+				parent.appendChild(item);
             }
-            parent.appendChild(element);
         }
 
         GwtSimpleType::GwtSimpleType(std::string name, std::shared_ptr<GwtField> field)
@@ -181,17 +174,14 @@ namespace vantagefx {
         }
 
         void GwtSimpleType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
-            GwtValuePtr value = object.value("value");
+	        auto value = object.value("value");
             _field->print(value, stream, style);
         }
 
         void GwtSimpleType::xml(GwtObject &object, QDomElement &parent) {
             std::stringstream stream;
-            GwtValuePtr value = object.value("value");
-            _field->print(value, stream, GwtPrintStyle::Brief);
-            auto doc = parent.ownerDocument();
-            auto text = doc.createTextNode(stream.str().c_str());
-            parent.appendChild(text);
+	        auto value = object.value("value");
+			_field->xml(value, parent);
         }
     }
 }
