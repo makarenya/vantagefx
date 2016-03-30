@@ -63,7 +63,7 @@ set(SOURCE_FILES
         src/api/GwtValue.h
         src/api/GwtBundle.cpp
         src/api/GwtBundle.h
-        )
+        src/api/FiddlerLogEntry.cpp src/api/FiddlerLogEntry.h src/api/FiddlerLogParser.cpp src/api/FiddlerLogParser.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

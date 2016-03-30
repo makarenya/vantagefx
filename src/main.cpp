@@ -16,30 +16,27 @@
 #include "src/serialized/LutResolverInitPackage.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/algorithm/string.hpp>
+#include <src/api/FiddlerLogEntry.h>
+#include <src/api/FiddlerLogParser.h>
 
 
 using namespace vantagefx::api;
 using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
 
-void processFile(fs::path filename) {
-    if (!fs::exists(filename) || !fs::is_regular_file(filename)) {
-        std::cout << filename << " not exists" << std::endl;
-        return;
-    }
-    std::cout << "processing " << filename << std::endl;
-    fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
-    auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
+void processFile(fs::path dir, std::string name, std::string content) {
+    std::cout << "processing " << name << std::endl;
     auto data = ParseResponse(content);
-    auto dir = filename.parent_path();
     fs::create_directory(dir / "tables");
     fs::create_directory(dir / "results");
     if (data.version == 7) {
         GwtVantageFxBundle bundle;
         GwtParser parser(data.strings, data.data, bundle);
         try {
-            auto tables = dir / "tables" / filename.stem();
-            auto report = dir / "results" / fs::change_extension(filename.filename(), ".xml");
+
+            auto tables = dir / "tables" / name;
+            auto report = dir / "results" / (name + ".xml");
 
             fs::create_directory(tables);
 
@@ -55,21 +52,56 @@ void processFile(fs::path filename) {
     }
 }
 
-int main(int argc, char *argv[]) {
+std::vector<FiddlerLogEntry> parseEntries(fs::path filename)
+{
+    std::vector<FiddlerLogEntry> result;
+    if (!fs::exists(filename) || !fs::is_regular_file(filename)) return result;
+    fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
 
-    if (argc == 2) {
-        processFile(argv[1]);
-    }
-    else {
-        fs::path current = DATA_DIR;// fs::current_path() / "data";
-        for (fs::path path: fs::directory_iterator(current)) {
-            if (path.extension() == ".bin")
-                processFile(path);
+    FiddlerLogEntry current;
+    FiddlerLogParser parser;
+
+    for (std::istreambuf_iterator<char> it(file_stream); it != std::istreambuf_iterator<char>(); ++it) {
+        auto state = parser.advance(*it);
+        if (state == FiddlerLogParser::Invalid) {
+            std::cout << "error" << std::endl;
+        }
+        if (state == FiddlerLogParser::Complete) {
+            result.push_back(parser.result());
         }
     }
-    return 0;
+    return result;
+}
 
-    //auto data = api::ParseRequest("7|0|5|https://binaryoptions.vantagefx.com/app/Basic/|46123D47AC2C515447AEF3C2580787E2|com.optionfair.client.common.services.TradingService|getAssetIntradayTicks|J|1|2|3|4|3|5|5|5|b|VOYMBnE|VOYPdVk|");
+int main(int argc, char *argv[]) 
+{
+	auto filename = fs::path(DATA_DIR) / "log_and_work" / "17_Full.txt";
+	if (argc == 2) {
+		if (!fs::is_regular_file(argv[1])) {
+			std::cout << "file " << argv[1] << " not found" << std::endl;
+			return 1;
+		}
+		filename = argv[1];
+	}
+    if (filename.extension() == ".bin") {
+        fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
+	    auto content = std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>());
+        processFile(filename.parent_path(), filename.stem().string(), content);
+    }
+    else {
+        auto entries = parseEntries(filename);
+        auto i = 0;
+        for(auto entry: entries) {
+            i++;
+            std::vector<std::string> paths;
+            boost::split(paths, entry.url(), boost::is_any_of("/"));
+            auto name = boost::lexical_cast<std::string>(i) + "_" + paths[paths.size() - 1];
+            processFile(filename.parent_path(), name, entry.response());
+        }
+    }
+	return 0;
+
+	//auto data = api::ParseRequest("7|0|5|https://binaryoptions.vantagefx.com/app/Basic/|46123D47AC2C515447AEF3C2580787E2|com.optionfair.client.common.services.TradingService|getAssetIntradayTicks|J|1|2|3|4|3|5|5|5|b|VOYMBnE|VOYPdVk|");
     //std::cout << api::GwtRpcRequest(data);
 
 
