@@ -258,8 +258,8 @@ namespace vantagefx {
             parser >> value;
             auto string = parser.str(value);
             if (value == parser.maxWord()) {
-                std::cout << parser.currentObject()->type()->name() << "::" << name() << " can be a string" <<
-                std::endl;
+                std::cout << parser.currentObject()->type()->name() << "::" << name() << " can be a string '"
+                << string << "'" << std::endl;
             }
             updateFactor(this, value);
             return std::make_shared<GwtValue>(value, string);
