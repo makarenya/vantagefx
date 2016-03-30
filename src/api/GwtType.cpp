@@ -92,7 +92,7 @@ namespace vantagefx {
                     if (first) first = false;
                     else stream << ";";
                     stream << '"';
-                    field->print(value, stream, GwtPrintStyle::Brief);
+                    field->print(value, stream, GwtPrintStyle::CsvValue);
                     stream << '"';
                 }
                 stream << std::endl;
@@ -143,7 +143,7 @@ namespace vantagefx {
                 auto value = parser.parse();
                 if (!key) throw ParseError("null key not supported");
                 std::stringstream stream;
-                key->print(stream, GwtPrintStyle::Text);
+                key->print(stream, GwtPrintStyle::MapKey);
                 result->add(stream.str(), value);
             }
         }

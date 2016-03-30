@@ -192,7 +192,7 @@ namespace vantagefx {
 
         void GwtField::xml(GwtValuePtr &value, QDomElement &parent) const {
             std::stringstream stream;
-            print(value, stream, GwtPrintStyle::Xml);
+            print(value, stream, GwtPrintStyle::XmlFieldValue);
             auto doc = parent.ownerDocument();
             auto text = doc.createTextNode(stream.str().c_str());
             parent.appendChild(text);

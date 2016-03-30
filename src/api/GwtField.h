@@ -16,9 +16,9 @@ namespace vantagefx {
     namespace api {
 
         enum class GwtPrintStyle {
-            Text,
-            Brief,
-            Xml
+            MapKey, // Печатается для использования в качестве ключа 
+			CsvValue, // Печатается для вставки в xml
+			XmlFieldValue // Печатается для последующей вставки как значение в xml
         };
 
         class GwtValue;
@@ -27,7 +27,7 @@ namespace vantagefx {
 
         class GwtField {
         public:
-            GwtField(const std::string &name);
+	        explicit GwtField(const std::string &name);
 
             virtual ~GwtField() { }
 
