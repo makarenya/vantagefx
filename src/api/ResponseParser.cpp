@@ -20,7 +20,8 @@ namespace vantagefx {
 
         template<typename Iterator>
         struct ResponseParser : qi::grammar<Iterator, GwtResponseData()> {
-            ResponseParser() : ResponseParser::base_type(response) {
+            ResponseParser()
+                    : ResponseParser::base_type(response) {
                 using qi::lit;
                 using qi::alnum;
                 using qi::double_;

@@ -17,21 +17,21 @@ public:
 
     Q_PROPERTY(QString sourceValue
                        READ
-                       sourceValue
+                               sourceValue
                        WRITE
-                       setSourceValue
+                               setSourceValue
                        NOTIFY
                        sourceChanged);
     Q_PROPERTY(QString destinationValue
                        READ
-                       destinationValue
+                               destinationValue
                        WRITE
-                       setDestinationValue
+                               setDestinationValue
                        NOTIFY
                        destinationChanged)
     Q_PROPERTY(PersonListModel *phonebook
                        READ
-                       phonebook
+                               phonebook
                        NOTIFY
                        phonebookChanged)
 

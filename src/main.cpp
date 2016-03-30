@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QDomDocument>
 #include "model/MainModel.h"
 #include "model/PersonModel.h"
 #include "viewmodel/MainViewModel.h"
@@ -14,6 +15,7 @@
 #include <src/api/GwtBundle.h>
 #include "src/serialized/LutResolverInitPackage.h"
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 
 using namespace vantagefx::api;
@@ -25,17 +27,21 @@ void processFile(fs::path filename) {
     fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
     auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
     auto data = ParseResponse(content);
+    auto dir = filename.parent_path();
+    fs::create_directory(dir / "tables");
+    fs::create_directory(dir / "results");
     if (data.version == 7) {
         GwtVantageFxBundle bundle;
         GwtParser parser(data.strings, data.data, bundle);
         try {
-            auto dir = filename.parent_path() / filename.stem();
-            fs::create_directories(dir);
-            auto result = parser.parse();
+            auto tables = dir / "tables" / filename.stem();
+            auto report = dir / "results" / fs::change_extension(filename.filename(), ".xml");
 
-            fs::ofstream fs(filename.parent_path() / (filename.stem().string() + ".xml"));
-            bundle.printTables(dir.string());
-            result->print(fs, GwtPrintStyle::Xml);
+            fs::create_directory(tables);
+
+            auto result = parser.parse();
+            bundle.printTables(tables);
+            result->save(report);
             parser.print(std::cout, 100);
         }
         catch (std::exception &ex) {
@@ -53,7 +59,6 @@ int main(int argc, char *argv[]) {
     else {
         fs::path current = DATA_DIR;// fs::current_path() / "data";
         for (fs::path path: fs::directory_iterator(current)) {
-            std::cout << path << ":   " << path.extension();
             if (path.extension() == ".bin")
                 processFile(path);
         }

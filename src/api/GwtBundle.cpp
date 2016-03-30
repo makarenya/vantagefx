@@ -3,11 +3,12 @@
 //
 
 #include "GwtBundle.h"
-#include "GwtType.h"
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 
 namespace vantagefx {
     namespace api {
+
+        namespace fs = boost::filesystem;
 
         void GwtBundle::append(std::shared_ptr<GwtType> type) {
             _types[type->name()] = type;
@@ -19,587 +20,587 @@ namespace vantagefx {
             return it->second;
         }
 
-        void GwtBundle::printTables(std::string directory) {
+        void GwtBundle::printTables(fs::path directory) {
             for (auto kvp: _types) {
                 if (kvp.second->empty()) continue;
-                std::ofstream fs(directory + kvp.first + ".csv");
+                fs::ofstream fs(directory / (kvp.first + ".csv"));
                 kvp.second->printTable(fs);
             }
         }
 
         GwtVantageFxBundle::GwtVantageFxBundle() {
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.ClientUpdatePack", std::vector<GwtField>({
-                StdField("some_1"),
-                PtrField("assetUpdates"),
-				PtrField("some_2"),
-				PtrField("some_3"),
-				StdField("some_4"),
-				PtrField("some_5"),
-				StdField("some_6"),
-				StdField("some_7"),
-				PtrField("options"),
-				StdField("some_10"),
-				PtrField("some_11"),
-				PtrField("optionUpdates"),
-				StdField("some_12"),
-				StdField("some_13"),
-				StdField("some_14"),
-				StdField("some_15"),
-				PtrField("positionsSentimentDto"),
-				PtrField("some_16"),
-				StdField("some_17"),
-				StdField("some_18"),
-				StdField("some_19"),
-				PtrField("some_20"),
-				LongField("some_21"),
-				PtrField("some_22"),
-				StdField("some_23"),
-				StdField("some_24"),
-			})));
+            add("com.optionfair.client.model.ClientUpdatePack", {
+                    fstd("some_1"),
+                    fptr("assetUpdates"),
+                    fptr("some_2"),
+                    fstd("some_3"),
+                    fstd("some_4"),
+                    fstd("some_5"),
+                    fstd("some_6"),
+                    fstd("some_7"),
+                    fptr("options"),
+                    fstd("some_10"),
+                    fptr("some_11"),
+                    fptr("optionUpdates"),
+                    fstd("some_12"),
+                    fstd("some_13"),
+                    fptr("some_14"),
+                    fstd("some_15"),
+                    fptr("positionsSentimentDto"),
+                    fptr("some_16"),
+                    fstd("some_17"),
+                    fstd("some_18"),
+                    fstd("some_19"),
+                    fptr("some_20"),
+                    flng("some_21"),
+                    fptr("some_22"),
+                    fstd("some_23"),
+                    fstd("some_24")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.PositionsSentimentDTO", std::vector<GwtField>({
-				PtrField("map"),
-				StdField("some_1"),
-				StdField("some_2"),
-			})));
-			
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Option", std::vector<GwtField>({
-				StringField("serialuid"),
-				IntField("assetId"), // Для какой пары текущий опцион
-				StdField("some_2"),
-				StdField("some_3"),
-				StdField("some_4"),
-				StdField("some_5"),
-				PtrField("closeDate"),
-				StdField("some_7"),
-				StdField("some_8"),
-				LongField("some_9"),
-				FloatField("some_10"),
-				StdField("some_11"),
-				StdField("some_12"),
-				PtrField("some_13"),
-				FloatField("some_14"),
-				FloatField("some_15"),
-				LongField("some_16"),
-				StdField("some_17"),
-				StdField("some_18"),
-				StdField("some_19"),
-				LongField("some_20"),
-				StdField("some_21"),
-				StdField("some_22"),
-				StdField("some_23"),
-				IntField("return"),
-				FloatField("some_25"),
-				StdField("some_26"),
-				PtrField("some_27"),
-				StdField("some_28"),
-				FloatField("some_29"),
-				FloatField("some_30"),
-				FloatField("some_31"),
-				FloatField("some_32"),
-				LongField("some_33"),
-			})));
+            add("com.optionfair.client.model.PositionsSentimentDTO", {
+                    fptr("map"),
+                    fstd("some_1"),
+                    fstd("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.AssetUpdate", std::vector<GwtField>({
-				StringField("serialuid"),
-				IntField("assetStatusId"), // статус лота (нужен Production)
-				IntField("assetId"), // Идентификатор лота
-				FloatField("targetPrice"), // Текущая цена
-			})));
-			
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.OptionUpdateChangeStrike", std::vector<GwtField>({
-                FloatField("some_1"),
-                FloatField("some_2"),
-				LongField("some_3"),
-                FloatField("some_4"),
-				FloatField("some_5"),
-				StdField("some_6"),
-			})));
+            add("com.optionfair.client.model.Option", {
+                    fstr("serialuid"),
+                    fint("assetId"), // Для какой пары текущий опцион
+                    fstd("some_2"),
+                    fstd("some_3"),
+                    fstd("some_4"),
+                    fint("some_5"),
+                    fptr("closeDate"),
+                    fstd("some_7"),
+                    fstd("some_8"),
+                    flng("some_9"),
+                    fdbl("some_10"),
+                    fstd("some_11"),
+                    fstd("some_12"),
+                    fptr("some_13"),
+                    fdbl("some_14"),
+                    fdbl("some_15"),
+                    flng("some_16"),
+                    fint("some_17"),
+                    fstd("some_18"),
+                    fstd("some_19"),
+                    flng("some_20"),
+                    fstd("some_21"),
+                    fstd("some_22"),
+                    fstd("some_23"),
+                    fint("return"),
+                    fdbl("some_25"),
+                    fstd("some_26"),
+                    fptr("some_27"),
+                    fstd("some_28"),
+                    fdbl("some_29"),
+                    fdbl("some_30"),
+                    fdbl("some_31"),
+                    fdbl("some_32"),
+                    flng("some_33"),
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.LutResolverInitPackage", std::vector<GwtField>({
-                PtrField("paymentMethodTypes"),
-                PtrField("lutTypes"),
-                PtrField("paymentMethods"),
-                PtrField("assets"),
-                PtrField("some_2"),
-                PtrField("some_3"),
-                PtrField("blackWhiteList"),
-                PtrField("someList1"),
-                StdField("some_4"),
-                StdField("some_5"),
-                StringField("some_6"),
-                PtrField("some_7"),
-                PtrField("counties"),
-                StdField("some_8"),
-                PtrField("currencies"),
-                PtrField("limits"),
-                StdField("some_9"),
-                PtrField("date"),
-                StdField("some_10"),
-                StdField("some_11"),
-                PtrField("instrumentTypeFilters"),
-				PtrField("some_12"),
-				PtrField("some_13"),
-				PtrField("superRels"),
-				StdField("some_14"),
-				StdField("some_15"),
-				StdField("some_16"),
-				StdField("some_17"),
-				PtrField("LoginDTO"),
-				StdField("some_19"),
-				PtrField("markets"),
-				PtrField("messages"),
-				StdField("some_20"),
-				PtrField("servers"),
-				PtrField("acceptedMethods"),
-				PtrField("pspCcTypeRels"),
-				StdField("some_21"),
-				PtrField("some_22"),
-				PtrField("states"),
-				PtrField("some_23"),
-				PtrField("trackingInfo"),
-				PtrField("verifications"),
-				StdField("some_24"),
-				StdField("some_25"),
-            })));
+            add("com.optionfair.client.model.AssetUpdate", {
+                    fstr("serialuid"),
+                    fint("assetStatusId"), // статус лота (нужен Production)
+                    fint("assetId"), // Идентификатор лота
+                    fdbl("targetPrice"), // Текущая цена
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.TradeLimits", std::vector<GwtField>({
-				LongField("some_1"),
-				LongField("some_2"),
-				LongField("some_3"),
-			})));
+            add("com.optionfair.client.model.OptionUpdateChangeStrike", {
+                    fdbl("some_1"),
+                    fdbl("some_2"),
+                    flng("some_3"),
+                    fdbl("some_4"),
+                    fdbl("some_5"),
+                    fstd("some_6"),
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.High", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
+            add("com.optionfair.client.model.LutResolverInitPackage", {
+                    fptr("paymentMethodTypes"),
+                    fptr("lutTypes"),
+                    fptr("paymentMethods"),
+                    fptr("assets"),
+                    fptr("some_2"),
+                    fptr("some_3"),
+                    fptr("blackWhiteList"),
+                    fptr("someList1"),
+                    fstd("some_4"),
+                    fstd("some_5"),
+                    fstr("some_6"),
+                    fptr("some_7"),
+                    fptr("counties"),
+                    fstd("some_8"),
+                    fptr("currencies"),
+                    fptr("limits"),
+                    fstd("some_9"),
+                    fptr("date"),
+                    fstd("some_10"),
+                    fstd("some_11"),
+                    fptr("instrumentTypeFilters"),
+                    fptr("some_12"),
+                    fptr("some_13"),
+                    fptr("superRels"),
+                    fstd("some_14"),
+                    fstd("some_15"),
+                    fstd("some_16"),
+                    fstd("some_17"),
+                    fptr("LoginDTO"),
+                    fstd("some_19"),
+                    fptr("markets"),
+                    fptr("messages"),
+                    fstd("some_20"),
+                    fptr("servers"),
+                    fptr("acceptedMethods"),
+                    fptr("pspCcTypeRels"),
+                    fstd("some_21"),
+                    fptr("some_22"),
+                    fptr("states"),
+                    fptr("some_23"),
+                    fptr("trackingInfo"),
+                    fptr("verifications"),
+                    fstd("some_24"),
+                    fstd("some_25")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.Low", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
+            add("com.optionfair.client.model.TradeLimits", {
+                    flng("some_1"),
+                    flng("some_2"),
+                    flng("some_3")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.Touch", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.High", {
+                    fstr("some_1"),
+                    fdbl("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.NoTouch", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
-			
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.In", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.Low", {
+                    fstr("some_1"),
+                    fdbl("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.Out", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
-			
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.ui.pages.tradePage.spread.Probability", std::vector<GwtField>({
-				StringField("some_1"),
-				FloatField("some_2"),
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.Touch", {
+                    fstr("some_1"),
+                    fdbl("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.LoginDTO", std::vector<GwtField>({
-				PtrField("account")
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.NoTouch", {
+                    fstr("some_1"),
+                    fdbl("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.spread.SpreadCalculator", std::vector<GwtField>({
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.In", {
+                    fstr("some_1"),
+                    fdbl("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Account", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				StringField("some_2"),
-				StdField("some_3"),
-				StdField("some_4"),
-				LongField("some_5"),
-				StdField("some_6"),
-				StdField("some_7"),
-				StdField("some_8"),
-				StdField("some_9"),
-				StdField("some_10"),
-				LongField("some_11"),
-				LongField("some_12"),
-				PtrField("some_13"),
-				PtrField("some_14"),
-				PtrField("some_15"),
-				StdField("some_16"),
-				StdField("some_17"),
-				StdField("some_18"),
-				StdField("some_19"),
-				StdField("some_20"),
-				StdField("some_21"),
-				StringField("some_22"),
-				StringField("guid"),
-				StringField("name"),
-				StringField("how"),
-				StdField("some_23"),
-				StdField("some_24"),
-				StringField("email"),
-				StdField("some_25"),
-				StringField("login"),
-				StdField("some_26"),
-				StringField("fullName"),
-				LongField("some_27"),
-				StdField("some_28"),
-				LongField("some_29"),
-				StdField("some_30"),
-				StdField("some_31"),
-				StdField("some_32"),
-				StdField("some_33"),
-				StdField("some_34"),
-				StdField("some_35"),
-				StdField("some_36"),
-				StdField("some_37"),
-				StdField("some_38"),
-				StdField("some_39"),
-				PtrField("some_40"),
-				StringField("name"),
-				StdField("some_41"),
-				StdField("some_42"),
-				LongField("some_43"),
-				StdField("some_44"),
-				LongField("some_45"),
-				LongField("some_46"),
-				LongField("some_47"),
-				StdField("some_48"),
-				StdField("some_49"),
-				StdField("some_50"),
-				StdField("some_51"),
-				StdField("some_52"),
-				StdField("some_53"),
-				StdField("some_54"),
-				StdField("some_55"),
-				StdField("some_56"),
-				PtrField("some_57"),
-				LongField("some_58"),
-				StdField("some_59"),
-				StdField("some_60"),
-				StdField("some_61"),
-				StdField("some_62"),
-				StdField("some_63"),
-				StdField("some_64"),
-				LongField("some_65"),
-				StdField("some_66"),
-				StdField("some_67"),
-				PtrField("some_68"),
-				StringField("answer"),
-				StringField("questing"),
-				StdField("some_69"),
-				StdField("some_70"),
-				StdField("some_71"),
-				StdField("some_72"),
-				FloatField("some_73"),
-				PtrField("some_74"),
-				LongField("some_75"),
-				FloatField("some_76"),
-				FloatField("some_77"),
-				FloatField("some_78"),
-				FloatField("some_79"),
-				PtrField("some_80"),
-				StdField("some_81"),
-				StdField("some_82"),
-				FloatField("some_83"),
-				FloatField("some_84"),
-				StdField("some_85"),
-				StdField("some_86"),
-				StdField("some_87"),
-				StdField("some_88"),
-				StdField("some_89"),
-				LongField("some_90"),
-				StdField("some_91"),
-				StdField("some_92"),
-				LongField("some_93"),
-				StringField("some_94"),
-				StringField("some_95"),
-				StdField("some_96"),
-				StdField("some_97"),
-				StdField("some_98"),
-				StdField("some_99"),
-				FloatField("some_100"),
-				StdField("some_101"),
-				StdField("some_102"),
-				PtrField("some_103"),
-				StdField("some_104"),
-				StdField("some_105"),
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.Out", {
+                    fstr("some_1"),
+                    fdbl("some_2")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.TrackingInfo", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				LongField("some_2"),
-				LongField("some_3"),
-				StdField("some_4"),
-				StdField("some_5"),
-				StdField("some_6"),
-				StdField("some_7"),
-				StdField("some_8"),
-				StdField("some_9"),
-				LongField("some_10"),
-				PtrField("date"),
-			})));
+            add("com.optionfair.client.ui.pages.tradePage.spread.Probability", {
+                    fstr("some_1"),
+                    fdbl("some_2"),
+            });
 
-				
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.verification.FieldVerification", std::vector<GwtField>({
-				StdField("some_1"),
-				StdField("some_2"),
-				StdField("some_3"),
-				StdField("some_4"),
-				StdField("some_5"),
-				IntField("some_6"),
-				StdField("some_7"),
-				StringField("name"),
-				StdField("some_8"),
-				StringField("regex"),
-				StdField("some_9"),
-				StdField("some_10"),
-			})));
+            add("com.optionfair.client.model.LoginDTO", {
+                    fptr("account")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.TrackingInfo", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				LongField("some_2"),
-				LongField("some_3"),
-				StdField("some_4"),
-				StdField("some_5"),
-				StdField("some_6"),
-				StdField("some_7"),
-				StdField("some_8"),
-				StdField("some_9"),
-				LongField("some_10"),
-				PtrField("date"),
-			})));
+            add("com.optionfair.client.spread.SpreadCalculator", {
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.State", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("country"),
-				IntField("order"),
-				StringField("some_1"),
-				StringField("name"),
-			})));
+            add("com.optionfair.client.model.Account", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    fstr("some_2"),
+                    fstd("some_3"),
+                    fstd("some_4"),
+                    flng("some_5"),
+                    fstd("some_6"),
+                    fstd("some_7"),
+                    fstd("some_8"),
+                    fstd("some_9"),
+                    fstd("some_10"),
+                    flng("some_11"),
+                    flng("some_12"),
+                    fptr("some_13"),
+                    fptr("some_14"),
+                    fptr("some_15"),
+                    fstd("some_16"),
+                    fstd("some_17"),
+                    fstd("some_18"),
+                    fstd("some_19"),
+                    fstd("some_20"),
+                    fstd("some_21"),
+                    fstr("some_22"),
+                    fstr("guid"),
+                    fstr("name"),
+                    fstr("how"),
+                    fstd("some_23"),
+                    fstd("some_24"),
+                    fstr("email"),
+                    fstd("some_25"),
+                    fstr("login"),
+                    fstd("some_26"),
+                    fstr("fullName"),
+                    flng("some_27"),
+                    fstd("some_28"),
+                    flng("some_29"),
+                    fstd("some_30"),
+                    fstd("some_31"),
+                    fstd("some_32"),
+                    fstd("some_33"),
+                    fstd("some_34"),
+                    fstd("some_35"),
+                    fstd("some_36"),
+                    fstd("some_37"),
+                    fstd("some_38"),
+                    fstd("some_39"),
+                    fptr("some_40"),
+                    fstr("name2"),
+                    fstd("some_41"),
+                    fstd("some_42"),
+                    flng("some_43"),
+                    fstd("some_44"),
+                    flng("some_45"),
+                    flng("some_46"),
+                    flng("some_47"),
+                    fstd("some_48"),
+                    fstd("some_49"),
+                    fstd("some_50"),
+                    fstd("some_51"),
+                    fstd("some_52"),
+                    fstd("some_53"),
+                    fstd("some_54"),
+                    fstd("some_55"),
+                    fstd("some_56"),
+                    fptr("some_57"),
+                    flng("some_58"),
+                    fstd("some_59"),
+                    fstd("some_60"),
+                    fstd("some_61"),
+                    fstd("some_62"),
+                    fstd("some_63"),
+                    fstd("some_64"),
+                    flng("some_65"),
+                    fstd("some_66"),
+                    fstd("some_67"),
+                    fptr("some_68"),
+                    fstr("answer"),
+                    fstr("questing"),
+                    fstd("some_69"),
+                    fstd("some_70"),
+                    fstd("some_71"),
+                    fstd("some_72"),
+                    fdbl("some_73"),
+                    fptr("some_74"),
+                    flng("some_75"),
+                    fdbl("some_76"),
+                    fdbl("some_77"),
+                    fdbl("some_78"),
+                    fdbl("some_79"),
+                    fptr("some_80"),
+                    fstd("some_81"),
+                    fstd("some_82"),
+                    fdbl("some_83"),
+                    fdbl("some_84"),
+                    fstd("some_85"),
+                    fstd("some_86"),
+                    fstd("some_87"),
+                    fstd("some_88"),
+                    fstd("some_89"),
+                    flng("some_90"),
+                    fstd("some_91"),
+                    fstd("some_92"),
+                    flng("some_93"),
+                    fstr("some_94"),
+                    fstr("some_95"),
+                    fstd("some_96"),
+                    fstd("some_97"),
+                    fstd("some_98"),
+                    fstd("some_99"),
+                    fdbl("some_100"),
+                    fstd("some_101"),
+                    fstd("some_102"),
+                    fptr("some_103"),
+                    fstd("some_104"),
+                    fstd("some_105")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.PspCcTypeRel", std::vector<GwtField>({
-				StringField("serialuid"),
-				IntField("some_1"),
-				LongField("some_2"),
-				IntField("some_3"),
-			})));
+            add("com.optionfair.client.model.TrackingInfo", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    flng("some_2"),
+                    flng("some_3"),
+                    fstd("some_4"),
+                    fstd("some_5"),
+                    fstd("some_6"),
+                    fstd("some_7"),
+                    fstd("some_8"),
+                    fstd("some_9"),
+                    flng("some_10"),
+                    fptr("date")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.MTServer", std::vector<GwtField>({
-				StdField("some_1"),
-				StdField("some_2"),
-				StringField("name"),
-			})));
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.SubMarket", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				IntField("id"),
-				IntField("some_2"),
-				IntField("some_3"),
-				StringField("name"),
-				IntField("some_4"),
-			})));
+            add("com.optionfair.client.verification.FieldVerification", {
+                    fstd("some_1"),
+                    fstd("some_2"),
+                    fstd("some_3"),
+                    fstd("some_4"),
+                    fstd("some_5"),
+                    fint("some_6"),
+                    fstd("some_7"),
+                    fstr("name"),
+                    fstd("some_8"),
+                    fstr("regex"),
+                    fstd("some_9"),
+                    fstd("some_10")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Market", std::vector<GwtField>({
-				StringField("serialuid"),
-				IntField("some_1"),
-				IntField("some_2"),
-				StringField("name"),
-				PtrField("subMarkets"),
-				StdField("some_3"),
-				PtrField("parameters"),
-			})));
+            add("com.optionfair.client.model.TrackingInfo", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    flng("some_2"),
+                    flng("some_3"),
+                    fstd("some_4"),
+                    fstd("some_5"),
+                    fstd("some_6"),
+                    fstd("some_7"),
+                    fstd("some_8"),
+                    fstd("some_9"),
+                    flng("some_10"),
+                    fptr("date")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.InstrumentTypeFilter", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				StringField("interval"),
-				IntField("order"),
-				StdField("some_2"),
-				StringField("title"),
-			})));
+            add("com.optionfair.client.model.State", {
+                    fstr("serialuid"),
+                    fstd("country"),
+                    fint("order"),
+                    fstr("some_1"),
+                    fstr("name")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.InstrumentTypeInstrumentTypeSuperRel", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				IntField("id"),
-				StdField("some_2"),
-				StdField("some_3"),
-				IntField("order"),
-			})));
+            add("com.optionfair.client.model.PspCcTypeRel", {
+                    fstr("serialuid"),
+                    fint("some_1"),
+                    flng("some_2"),
+                    fint("some_3")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.CurrencyCountryLimit", std::vector<GwtField>({
-				StringField("serialuid"),
-				StdField("some_1"),
-				StdField("some_2"),
-				IntField("currencyId"),
-				IntField("order"),
-				StdField("some_3"),
-				LongField("some_4"),
-				LongField("some_5"),
-				LongField("some_6"),
-				LongField("some_7"),
-				LongField("some_8"),
-				LongField("some_9"),
-				LongField("some_10"),
-				LongField("some_11"),
-				LongField("some_12"),
-				LongField("some_13"),
-				LongField("some_14"),
-				LongField("some_15"),
-				LongField("some_16"),
-				LongField("some_17"),
-				LongField("some_18"),
-				LongField("some_19"),
-				LongField("some_20"),
-				LongField("some_21"),
-				LongField("some_22"),
-				LongField("some_23"),
-				LongField("some_24"),
-			})));
+            add("com.optionfair.client.model.MTServer", {
+                    fstd("some_1"),
+                    fstd("some_2"),
+                    fstr("name")
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Currency", std::vector<GwtField>({
-				StringField("serialuid"),
-				IntField("id"),
-				StringField("name"),
-				StringField("symbol"),
-				FloatField("some_1"),
-				IntField("countryId"),
-				StringField("abbr"),
-				StdField("some_3"),
-				LongField("some_4"),
-			})));
+            add("com.optionfair.client.model.SubMarket", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    fint("id"),
+                    fint("some_2"),
+                    fint("some_3"),
+                    fstr("name"),
+                    fint("some_4")
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Country", std::vector<GwtField>({
-                StringField("serialuid"),
-                StdField("some_1"),
-                StdField("language"),
-                IntField("some_2"),
-                IntField("some_3"),
-                StringField("short_2"),
-				StringField("short_3"),
-				StringField("fullName"),
-                IntField("some_4"),
-				StringField("some_5"),
-				StringField("some_6"),
-            })));
+            add("com.optionfair.client.model.Market", {
+                    fstr("serialuid"),
+                    fint("some_1"),
+                    fint("some_2"),
+                    fstr("name"),
+                    fptr("subMarkets"),
+                    fstd("some_3"),
+                    fptr("parameters")
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Asset", std::vector<GwtField>({
-                StringField("serialuid"),
-                FloatField("some_1"),
-                FloatField("some_2"),
-                FloatField("some_3"),
-                StdField("some_4"),
-                StdField("some_5"),
-                FloatField("some_6"),
-                StringField("some_7"),
-                StdField("some_8"),
-                FloatField("some_9"),
-                IntField("some_10"),
-                StdField("some_11"),
-                IntField("id"),
-                FloatField("some_13"),
-                IntField("some_14"),
-                StdField("some_15"),
-                IntField("some_16"),
-                FloatField("some_17"),
-                StdField("some_18"),
-                StdField("some_19"),
-                StdField("some_20"),
-                IntField("some_21"),
-                FloatField("some_22"),
-                IntField("some_23"),
-                FloatField("some_24"),
-                StdField("some_25"),
-                StdField("some_26"),
-                StdField("some_27"),
-                IntField("some_28"),
-                IntField("some_29"),
-                StdField("some_30"),
-				StringField("some_31"),
-				StringField("some_32"),
-                StringField("some_33"),
-                StdField("some_34"),
-                FloatField("some_35")
-            })));
+            add("com.optionfair.client.model.InstrumentTypeFilter", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    fstr("interval"),
+                    fint("order"),
+                    fstd("some_2"),
+                    fstr("title")
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.LutType", std::vector<GwtField>({
-                StringField("serialuid"),
-                IntField("id"),
-                StringField("name"),
-                PtrField("luts"),
-                StdField(),
-                PtrField("parameters")
-            })));
+            add("com.optionfair.client.model.InstrumentTypeInstrumentTypeSuperRel", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    fint("id"),
+                    fstd("some_2"),
+                    fstd("some_3"),
+                    fint("order")
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Lut", std::vector<GwtField>({
-                StringField("serialuid"),
-                IntField("id"),
-                StringField("name"),
-                IntField("lutTypeId")
-            })));
+            add("com.optionfair.client.model.CurrencyCountryLimit", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    fstd("some_2"),
+                    fint("currencyId"),
+                    fint("order"),
+                    fstd("some_3"),
+                    flng("some_4"),
+                    flng("some_5"),
+                    flng("some_6"),
+                    flng("some_7"),
+                    flng("some_8"),
+                    flng("some_9"),
+                    flng("some_10"),
+                    flng("some_11"),
+                    flng("some_12"),
+                    flng("some_13"),
+                    flng("some_14"),
+                    flng("some_15"),
+                    flng("some_16"),
+                    flng("some_17"),
+                    flng("some_18"),
+                    flng("some_19"),
+                    flng("some_20"),
+                    flng("some_21"),
+                    flng("some_22"),
+                    flng("some_23"),
+                    flng("some_24")
+            });
 
-            add(std::make_shared<GwtComplexType>("com.optionfair.client.model.PaymentMethod", std::vector<GwtField>({
-                StringField("serialuid"),
-                IntField("some_1"),
-                FloatField("some_2"),
-                IntField("id"),
-                IntField("some_3"),
-                StdField("some_4"),
-                IntField("some_5"),
-                StringField("some_6"),
-                StdField("some_7"),
-                StdField("some_8"),
-                IntField("some_9"),
-                StdField("some_10"),
-                IntField("some_11"),
-                StdField("some_12")
-            })));
+            add("com.optionfair.client.model.Currency", {
+                    fstr("serialuid"),
+                    fint("id"),
+                    fstr("name"),
+                    fstr("symbol"),
+                    fdbl("some_1"),
+                    fint("countryId"),
+                    fstr("abbr"),
+                    fstd("some_3"),
+                    flng("some_4")
+            });
 
-			add(std::make_shared<GwtComplexType>("com.optionfair.client.messages.MapMessageSource", std::vector<GwtField>({
-				PtrField("value")
-			}), 0));
-			
-			add(std::make_shared<GwtComplexType>("net.sf.gilead.pojo.gwt.collection.ListParameter", std::vector<GwtField>({
-                PtrField("value")
-            }),0));
+            add("com.optionfair.client.model.Country", {
+                    fstr("serialuid"),
+                    fstd("some_1"),
+                    fstd("language"),
+                    fint("some_2"),
+                    fint("some_3"),
+                    fstr("short_2"),
+                    fstr("short_3"),
+                    fstr("fullName"),
+                    fint("some_4"),
+                    fstr("some_5"),
+                    fstr("some_6")
+            });
 
-            add(std::make_shared<GwtComplexType>("net.sf.gilead.pojo.gwt.collection.MapParameter", std::vector<GwtField>({
-                PtrField("value")
-            }),0));
+            add("com.optionfair.client.model.Asset", {
+                    fstr("serialuid"),
+                    fdbl("some_1"),
+                    fdbl("some_2"),
+                    fdbl("some_3"),
+                    fstd("some_4"),
+                    fstd("some_5"),
+                    fdbl("some_6"),
+                    fstr("some_7"),
+                    fstd("some_8"),
+                    fdbl("some_9"),
+                    fint("some_10"),
+                    fstd("some_11"),
+                    fint("id"),
+                    fdbl("some_13"),
+                    fint("some_14"),
+                    fstd("some_15"),
+                    fint("some_16"),
+                    fdbl("some_17"),
+                    fstd("some_18"),
+                    fstd("some_19"),
+                    fstd("some_20"),
+                    fint("some_21"),
+                    fdbl("some_22"),
+                    fint("some_23"),
+                    fdbl("some_24"),
+                    fstd("some_25"),
+                    fstd("some_26"),
+                    fstd("some_27"),
+                    fint("some_28"),
+                    fint("some_29"),
+                    fstd("some_30"),
+                    fstr("some_31"),
+                    fstr("some_32"),
+                    fstr("some_33"),
+                    fstd("some_34"),
+                    fdbl("some_35")
+            });
 
-            add(std::make_shared<GwtComplexType>("net.sf.gilead.pojo.gwt.basic.IntegerParameter", std::vector<GwtField>({
-                PtrField("value")
-            }),0));
+            add("com.optionfair.client.model.LutType", {
+                    fstr("serialuid"),
+                    fint("id"),
+                    fstr("name"),
+                    fptr("luts"),
+                    fstd("some_1"),
+                    fptr("parameters")
+            });
 
-            add(std::make_shared<GwtComplexType>("net.sf.gilead.pojo.gwt.basic.StringParameter", std::vector<GwtField>({
-               StringField("value")
-            }),0));
+            add("com.optionfair.client.model.Lut", {
+                    fstr("serialuid"),
+                    fint("id"),
+                    fstr("name"),
+                    fint("lutTypeId")
+            });
 
-            add(std::make_shared<GwtComplexType>("net.sf.gilead.pojo.gwt.GwtSerializableId", std::vector<GwtField>({
-                StringField("entityName"),
-                PtrField("id"),
-                StringField("stringValue")
-            })));
+            add("com.optionfair.client.model.PaymentMethod", {
+                    fstr("serialuid"),
+                    fint("some_1"),
+                    fdbl("some_2"),
+                    fint("id"),
+                    fint("some_3"),
+                    fstd("some_4"),
+                    fint("some_5"),
+                    fstr("some_6"),
+                    fstd("some_7"),
+                    fstd("some_8"),
+                    fint("some_9"),
+                    fstd("some_10"),
+                    fint("some_11"),
+                    fstd("some_12")
+            });
+
+            add("com.optionfair.client.messages.MapMessageSource", {
+                    fptr("value")
+            }, "value");
+
+            add("net.sf.gilead.pojo.gwt.collection.ListParameter", {
+                    fptr("value")
+            }, "value");
+
+            add("net.sf.gilead.pojo.gwt.collection.MapParameter", {
+                    fptr("value")
+            }, "value");
+
+            add("net.sf.gilead.pojo.gwt.basic.IntegerParameter", {
+                    fptr("value")
+            }, "value");
+
+            add("net.sf.gilead.pojo.gwt.basic.StringParameter", {
+                    fstr("value")
+            }, "value");
+
+            add("net.sf.gilead.pojo.gwt.GwtSerializableId", {
+                    fstr("entityName"),
+                    fptr("id"),
+                    fstr("stringValue")
+            });
 
 
             add(std::make_shared<GwtListType>("java.util.ArrayList"));
-			add(std::make_shared<GwtListType>("java.util.LinkedList"));
-			add(std::make_shared<GwtListType>("java.util.HashSet"));
+            add(std::make_shared<GwtListType>("java.util.LinkedList"));
+            add(std::make_shared<GwtListType>("java.util.HashSet"));
             add(std::make_shared<GwtMapType>("java.util.HashMap", 0));
-			add(std::make_shared<GwtMapType>("java.util.LinkedHashMap", 1));
-			add(std::make_shared<GwtSimpleType>("java.lang.Integer", GwtValueType::Integer));
-			add(std::make_shared<GwtSimpleType>("com.optionfair.client.luts.Instrument", GwtValueType::Integer));
-			add(std::make_shared<GwtSimpleType>("java.lang.Long", GwtValueType::Long));
-			add(std::make_shared<GwtSimpleType>("java.lang.String", GwtValueType::String));
-			add(std::make_shared<GwtSimpleType>("java.util.Date", GwtValueType::Date));
+            add(std::make_shared<GwtMapType>("java.util.LinkedHashMap", 1));
+            add(std::make_shared<GwtSimpleType>("java.lang.Integer", fint("value")));
+            add(std::make_shared<GwtSimpleType>("com.optionfair.client.luts.Instrument", fint("value")));
+            add(std::make_shared<GwtSimpleType>("java.lang.Long", flng("value")));
+            add(std::make_shared<GwtSimpleType>("java.lang.String", fstr("value")));
+            add(std::make_shared<GwtSimpleType>("java.util.Date", fdte("value")));
         }
     }
 }

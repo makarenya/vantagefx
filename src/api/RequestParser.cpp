@@ -13,7 +13,8 @@ namespace vantagefx {
 
         template<typename Iterator>
         struct request_parser : public qi::grammar<Iterator, JsonVariantList()> {
-            request_parser() : request_parser::base_type(file) {
+            request_parser()
+                    : request_parser::base_type(file) {
                 file = +(item >> '|');
                 item = int_value | double_value | string_value;
                 int_value = qi::int_ >> !qi::alnum;

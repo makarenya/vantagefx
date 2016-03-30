@@ -6,6 +6,7 @@
 #define VANTAGEFX_GWTPARSER_H
 
 #include <map>
+#include <stack>
 #include "GwtResponseData.h"
 #include "GwtParseContext.h"
 
@@ -25,10 +26,15 @@ namespace vantagefx {
 
             std::shared_ptr<GwtObject> parse();
 
+            std::shared_ptr<GwtObject> currentObject() const;
         private:
             GwtBundle &_bundle;
             std::vector<std::shared_ptr<GwtObject>> _fetched;
+            std::shared_ptr<GwtObject> _currentObject;
         };
+
+        inline std::shared_ptr<GwtObject> GwtParser::currentObject() const { return _currentObject; }
+
     }
 }
 

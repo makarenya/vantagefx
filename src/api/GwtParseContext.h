@@ -22,8 +22,6 @@ namespace vantagefx {
 
             GwtParseContext &operator>>(double &value);
 
-            GwtParseContext &operator>>(bool &value);
-
             GwtParseContext &operator>>(int64_t &value);
 
             GwtParseContext &operator>>(boost::posix_time::ptime &value);
@@ -39,6 +37,8 @@ namespace vantagefx {
             int maxWord() const { return _maxWord; }
 
             std::string peekType() const;
+
+            void back() { _it++; }
 
             std::string word(int id);
 

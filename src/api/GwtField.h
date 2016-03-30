@@ -5,90 +5,63 @@
 #ifndef VANTAGEFX_GWTFIELD_H
 #define VANTAGEFX_GWTFIELD_H
 
+#include <string>
+#include <ostream>
+#include <memory>
+#include <vector>
 
-#include "GwtValue.h"
+class QDomElement;
 
 namespace vantagefx {
     namespace api {
 
+        enum class GwtPrintStyle {
+            Text,
+            Brief,
+            Xml
+        };
+
+        class GwtValue;
+
+        class GwtParser;
+
         class GwtField {
         public:
-            GwtField(GwtValueType type, std::string name);
+            GwtField(const std::string &name);
 
-            GwtValueType type() const;
+            virtual ~GwtField() { }
 
             std::string name() const;
 
-            void setName(std::string name);
+            void setName(const std::string &name);
+
+            virtual std::string type() const = 0;
+
+            virtual std::shared_ptr<GwtValue> parse(GwtParser &parser) = 0;
+
+            virtual void xml(std::shared_ptr<GwtValue> &value, QDomElement &parent) const;
+
+            virtual void print(std::shared_ptr<GwtValue> &value, std::ostream &stream, GwtPrintStyle style) const = 0;
+
+            virtual std::string factor() const = 0;
 
         private:
-            GwtValueType _type;
             std::string _name;
         };
 
-        inline void GwtField::setName(std::string name) {
-            _name = name;
-        }
+        std::shared_ptr<GwtField> flng(const std::string &name);
 
-        inline GwtValueType GwtField::type() const {
-            return _type;
-        }
+        std::shared_ptr<GwtField> fint(const std::string &name);
 
-        inline std::string GwtField::name() const {
-            return _name;
-        }
+        std::shared_ptr<GwtField> fstd(const std::string &name);
 
-        inline GwtField LongField(std::string name) {
-            return GwtField(GwtValueType::Long, name);
-        }
+        std::shared_ptr<GwtField> fdbl(const std::string &name);
 
-        inline GwtField LongField() {
-            return GwtField(GwtValueType::Long, "");
-        }
+        std::shared_ptr<GwtField> fdte(const std::string &name);
 
-        inline GwtField StdField(std::string name) {
-            return GwtField(GwtValueType::Std, name);
-        }
+        std::shared_ptr<GwtField> fstr(const std::string &name);
 
-        inline GwtField StdField() {
-            return GwtField(GwtValueType::Std, "");
-        }
-
-        inline GwtField IntField(std::string name) {
-            return GwtField(GwtValueType::Integer, name);
-        }
-
-        inline GwtField IntField() {
-            return GwtField(GwtValueType::Integer, "");
-        }
-
-        inline GwtField DateField(std::string name) {
-            return GwtField(GwtValueType::Date, name);
-        }
-
-        inline GwtField FloatField(std::string name) {
-            return GwtField(GwtValueType::Float, name);
-        }
-
-        inline GwtField FloatField() {
-            return GwtField(GwtValueType::Float, "");
-        }
-
-        inline GwtField StringField(std::string name) {
-            return GwtField(GwtValueType::String, name);
-        }
-
-        inline GwtField StringField() {
-            return GwtField(GwtValueType::String, "");
-        }
-
-        inline GwtField PtrField(std::string name) {
-            return GwtField(GwtValueType::Pointer, name);
-        }
-
-        inline GwtField PtrField() {
-            return GwtField(GwtValueType::Pointer, "");
-        }
+        std::shared_ptr<GwtField> fptr(const std::string &name);
     }
 }
 

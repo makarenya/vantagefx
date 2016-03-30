@@ -13,30 +13,30 @@ class PersonViewModel : public QObject {
 Q_OBJECT
     Q_PROPERTY(QString name
                        READ
-                       name
+                               name
                        WRITE
-                       setName
+                               setName
                        NOTIFY
                        nameChanged)
     Q_PROPERTY(QString surname
                        READ
-                       surname
+                               surname
                        WRITE
-                       setSurname
+                               setSurname
                        NOTIFY
                        surnameChanged)
     Q_PROPERTY(QString phone
                        READ
-                       phone
+                               phone
                        WRITE
-                       setPhone
+                               setPhone
                        NOTIFY
                        phoneChanged)
     Q_PROPERTY(int age
                        READ
-                       age
+                               age
                        WRITE
-                       setAge
+                               setAge
                        NOTIFY
                        ageChanged)
 

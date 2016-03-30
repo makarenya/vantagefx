@@ -8,39 +8,43 @@
 
 #include <iostream>
 #include <memory>
+#include <boost/variant.hpp>
 
 namespace vantagefx {
     namespace api {
-
-        enum class GwtValueType {
-            Long, // Длинное целое, без вариантов
-            Std, // Целое, которое может оказаться и строкой и булевым типом и целым
-            Date, // Дата и только
-            Integer, // Строго целое
-            Float, // Число с плавающей точкой
-            String, // Строка без вариантов
-            Pointer // Указатель.
-        };
 
         class GwtParser;
 
         class GwtValue;
 
+        class GwtObject;
+
         typedef std::shared_ptr<GwtValue> GwtValuePtr;
 
         class GwtValue {
         public:
-            virtual void print(std::ostream &stream) = 0;
+            template<typename T>
+            explicit GwtValue(T value, std::string str = "");
 
-            virtual GwtValueType type() = 0;
+            int intValue() const;
 
-            static GwtValuePtr parse(GwtParser &ctx, GwtValueType type);
+            double doubleValue() const;
 
-            virtual int value() = 0;
+            int64_t longValue() const;
 
-        protected:
-            virtual void parse(GwtParser &ctx) = 0;
+            std::shared_ptr<GwtObject> &objectValue();
+
+            const std::string &stringValue() const;
+
+        private:
+            boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>> _value;
+            std::string _string;
         };
+
+        template<typename T>
+        GwtValue::GwtValue(T value, std::string str)
+                : _value(value),
+                  _string(str) { }
     }
 }
 

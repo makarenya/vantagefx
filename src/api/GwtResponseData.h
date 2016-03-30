@@ -12,7 +12,7 @@
 namespace vantagefx {
     namespace api {
 
-        typedef boost::variant<int, double, bool, std::string> JsonVariant;
+        typedef boost::variant<int, double, std::string> JsonVariant;
         typedef std::vector<JsonVariant> JsonVariantList;
         typedef std::vector<std::string> StringList;
 

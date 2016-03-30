@@ -24,16 +24,21 @@ namespace vantagefx {
                 obj = GwtObjectPtr();
             }
             else if (typeId < 0) {
-                obj = _fetched[~typeId];
+                int key = ~typeId;
+                obj = _fetched[key];
             }
             else {
                 auto it = _bundle.type(typeName(typeId));
                 if (!it) {
                     throw ParseError("type " + typeName(typeId) + " not found");
                 }
-                obj = it->parse(*this);
+                obj = std::make_shared<GwtObject>(it);
+                _fetched.push_back(obj);
+                auto oldObject = _currentObject;
+                _currentObject = obj;
+                it->parse(*this, obj);
+                _currentObject = oldObject;
             }
-            _fetched.push_back(obj);
             return obj;
         }
     }

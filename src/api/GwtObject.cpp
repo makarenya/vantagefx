@@ -4,16 +4,29 @@
 
 #include "GwtObject.h"
 #include "GwtType.h"
+#include "ParseError.h"
+#include <QDomDocument>
+#include <QFile>
 
 namespace vantagefx {
     namespace api {
 
-        GwtObject::GwtObject(std::shared_ptr<GwtType> type) {
-            _type = type;
-        }
+        namespace fs = boost::filesystem;
+
+        GwtObject::GwtObject(std::shared_ptr<GwtType> type)
+                : _type(type) { }
 
         void GwtObject::print(std::ostream &stream, GwtPrintStyle style) {
             _type->print(*this, stream, style);
+        }
+
+        void GwtObject::xml(QDomElement &element) {
+            _type->xml(*this, element);
+        }
+
+        bool GwtObject::has(std::string name) {
+            auto it = _values.find(name);
+            return it != _values.end();
         }
 
         void GwtObject::addValue(std::string name, std::shared_ptr<GwtValue> value) {
@@ -26,6 +39,18 @@ namespace vantagefx {
 
         std::shared_ptr<GwtValue> GwtObject::value(const std::string &name) {
             return _values[name];
+        }
+
+        void GwtObject::save(fs::path file) {
+            QDomDocument document;
+            QDomElement body = document.createElement("request");
+            xml(body);
+            document.appendChild(body);
+
+            QFile fs(file.string().c_str());
+            fs.open(QIODevice::ReadWrite);
+            fs.write(document.toByteArray());
+            fs.close();
         }
     }
 }

@@ -26,11 +26,6 @@ namespace vantagefx {
             return *this;
         }
 
-        GwtParseContext &GwtParseContext::operator>>(bool &value) {
-            value = boost::get<bool>(*--_it);
-            return *this;
-        }
-
         inline uint64_t base64Value(char c) {
             if (c >= 'A' && c <= 'Z') {
                 return c - 'A';
@@ -101,7 +96,14 @@ namespace vantagefx {
         };
 
         std::string GwtParseContext::peekType() const {
-            return _it->type().name();
+            switch (_it->which()) {
+                case 0:
+                    return "int";
+                case 1:
+                    return "double";
+                default:
+                    return "string";
+            }
         }
 
         std::string GwtParseContext::word(int id) {
