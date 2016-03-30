@@ -1,7 +1,7 @@
 #include <boost/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include "ResponseParser.h"
+#include "GwtResponseParser.h"
 
 
 BOOST_FUSION_ADAPT_STRUCT(

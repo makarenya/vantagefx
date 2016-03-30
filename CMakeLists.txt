@@ -38,8 +38,8 @@ set(SOURCE_FILES
         src/api/GwtRpcResponse.cpp
         src/api/GwtRpcResponse.h
         src/api/GwtResponseData.h
-        src/api/ResponseParser.cpp
-        src/api/ResponseParser.h
+        src/api/GwtResponseParser.cpp
+        src/api/GwtResponseParser.h
         src/api/GwtResponseData.h
         src/api/RequestParser.cpp
         src/api/RequestParser.h
