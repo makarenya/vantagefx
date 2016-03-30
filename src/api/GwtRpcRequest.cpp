@@ -45,7 +45,7 @@ namespace vantagefx {
                 else if (type == "J") {
                     auto val = get<std::string>(*item++);
                     int64_t result = 0;
-                    for(auto c: val) {
+                    for (auto c: val) {
                         result *= 64;
                         if (c >= 'A' && c <= 'Z') {
                             result += c - 'A';
@@ -75,12 +75,11 @@ namespace vantagefx {
             }
         }
 
-        std::ostream &operator<<(std::ostream &stream, const vantagefx::api::GwtRpcRequest &request)
-        {
+        std::ostream &operator<<(std::ostream &stream, const vantagefx::api::GwtRpcRequest &request) {
             stream << request._url << " " << request._serviceName << "::" << request._methodName << "(";
             auto types = request._parameterTypes;
             auto values = request._parameterValues;
-            for(auto i = 0; i < types.size(); i++) {
+            for (auto i = 0; i < types.size(); i++) {
                 if (i != 0) stream << ", ";
                 if (types[i] == "Z") stream << "bool ";
                 else if (types[i] == "B") stream << "byte: " << values[i];

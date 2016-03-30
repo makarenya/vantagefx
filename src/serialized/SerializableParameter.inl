@@ -20,10 +20,10 @@ namespace vantagefx {
 
             static void check(std::string name) {
                 if (name != GwtReflectedType<IntegerParameter>::className()
-                       && name != GwtReflectedType<StringParameter>::className()
-                       && name != GwtReflectedType<ListParameter>::className()
-                       && name != GwtReflectedType<MapParameter>::className()
-                       && name != GwtReflectedType<GwtSerializableId>::className())
+                    && name != GwtReflectedType<StringParameter>::className()
+                    && name != GwtReflectedType<ListParameter>::className()
+                    && name != GwtReflectedType<MapParameter>::className()
+                    && name != GwtReflectedType<GwtSerializableId>::className())
                     throw UnexpectedType(name, className());
             }
 
@@ -60,10 +60,8 @@ namespace vantagefx {
         };
     }
 }
-namespace std
-{
-	inline ostream& operator<<(ostream& stream, const vantagefx::serialized::SerializableParameter& item)
-	{
-		return item.write(stream);
-	}
+namespace std {
+    inline ostream &operator<<(ostream &stream, const vantagefx::serialized::SerializableParameter &item) {
+        return item.write(stream);
+    }
 }

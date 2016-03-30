@@ -21,15 +21,18 @@ namespace vantagefx {
             }
 
             void append(std::shared_ptr<GwtType> type);
+
             std::shared_ptr<GwtType> type(std::string name);
+
             void printTables(std::string directory);
+
         private:
             std::map<std::string, std::shared_ptr<GwtType>> _types;
         };
 
         class GwtVantageFxBundle : public GwtBundle {
-		public:
-			GwtVantageFxBundle();
+        public:
+            GwtVantageFxBundle();
         };
     }
 }

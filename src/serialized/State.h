@@ -21,17 +21,17 @@ namespace vantagefx {
     }
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::State>
-        {
+        struct GwtReflectedType<serialized::State> {
             static std::string className() { return "com.optionfair.client.model.State"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::State &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::State &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::State &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::State &item);
 }
 
 

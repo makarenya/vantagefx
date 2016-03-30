@@ -3,46 +3,40 @@
 //
 
 #include "PersonViewModel.h"
-PersonViewModel::PersonViewModel(PersonModel personModel)
-{
+
+PersonViewModel::PersonViewModel(PersonModel personModel) {
     _personModel = personModel;
 }
 
-void PersonViewModel::setName(const QString &name)
-{
+void PersonViewModel::setName(const QString &name) {
     if (_personModel.name() == name) return;
     _personModel.setName(name);
     emit nameChanged(name);
 }
 
-void PersonViewModel::setSurname(const QString &surname)
-{
+void PersonViewModel::setSurname(const QString &surname) {
     if (_personModel.surname() == surname) return;
     _personModel.setSurname(surname);
     emit surnameChanged(surname);
 }
 
-void PersonViewModel::setPhone(const QString &phone)
-{
+void PersonViewModel::setPhone(const QString &phone) {
     if (_personModel.phone() == phone) return;
     _personModel.setPhone(phone);
     emit phoneChanged(phone);
 }
 
-void PersonViewModel::setAge(const int &age)
-{
+void PersonViewModel::setAge(const int &age) {
     if (_personModel.age() == age) return;
     _personModel.setAge(age);
     emit ageChanged(age);
 }
 
-PersonListModel::~PersonListModel()
-{
+PersonListModel::~PersonListModel() {
     _list.clear();
 }
 
-QHash<int, QByteArray> PersonListModel::roleNames() const
-{
+QHash<int, QByteArray> PersonListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[Qt::DisplayRole] = "display";
     roles[NameRole] = "name";
@@ -52,13 +46,11 @@ QHash<int, QByteArray> PersonListModel::roleNames() const
     return roles;
 }
 
-int PersonListModel::rowCount(const QModelIndex &parent) const
-{
+int PersonListModel::rowCount(const QModelIndex &parent) const {
     return _list.count();
 }
 
-QVariant PersonListModel::data(const QModelIndex &index, int role) const
-{
+QVariant PersonListModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return QVariant();
 
@@ -66,7 +58,7 @@ QVariant PersonListModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     auto person = _list[index.row()];
-    switch(role) {
+    switch (role) {
         case Qt::DisplayRole:
             return person.name() + " " + person.surname();
         case NameRole:
@@ -82,8 +74,7 @@ QVariant PersonListModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void PersonListModel::push_back(const PersonModel &person)
-{
+void PersonListModel::push_back(const PersonModel &person) {
     beginInsertRows(QModelIndex(), _list.count(), _list.count());
     _list.push_back(person);
     endInsertRows();

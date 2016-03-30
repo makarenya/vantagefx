@@ -17,17 +17,17 @@ namespace vantagefx {
     }
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::MapMessageSource>
-        {
+        struct GwtReflectedType<serialized::MapMessageSource> {
             static std::string className() { return "com.optionfair.client.messages.MapMessageSource"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::MapMessageSource &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::MapMessageSource &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::MapMessageSource &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::MapMessageSource &item);
 }
 
 

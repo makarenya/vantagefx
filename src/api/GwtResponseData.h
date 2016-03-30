@@ -10,26 +10,26 @@
 #include <boost/variant.hpp>
 
 namespace vantagefx {
-	namespace api {
+    namespace api {
 
-		typedef boost::variant<int, double, bool, std::string> JsonVariant;
-		typedef std::vector<JsonVariant> JsonVariantList;
-		typedef std::vector<std::string> StringList;
+        typedef boost::variant<int, double, bool, std::string> JsonVariant;
+        typedef std::vector<JsonVariant> JsonVariantList;
+        typedef std::vector<std::string> StringList;
 
-		struct GwtResponseData {
-			int version = 0;
-			int flags = 0;
-			StringList strings;
-			JsonVariantList data;
-		};
+        struct GwtResponseData {
+            int version = 0;
+            int flags = 0;
+            StringList strings;
+            JsonVariantList data;
+        };
 
-		enum GwtFlags {
-			None = 0,
-			ElideTtypeNames = 1,
-			RpcTokenIcluded = 2
-		};
+        enum GwtFlags {
+            None = 0,
+            ElideTtypeNames = 1,
+            RpcTokenIcluded = 2
+        };
 
-	}
+    }
 }
 
 

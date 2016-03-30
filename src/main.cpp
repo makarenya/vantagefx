@@ -20,49 +20,44 @@ using namespace vantagefx::api;
 using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
 
-void processFile(fs::path filename)
-{
-	std::cout << "processing " << filename << std::endl;
-	fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
-	auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
-	auto data = ParseResponse(content);
-	if (data.version == 7) {
-		GwtVantageFxBundle bundle;
-		GwtParser parser(data.strings, data.data, bundle);
-		try
-		{
+void processFile(fs::path filename) {
+    std::cout << "processing " << filename << std::endl;
+    fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
+    auto content = std::string(std::istream_iterator<char>(file_stream), std::istream_iterator<char>());
+    auto data = ParseResponse(content);
+    if (data.version == 7) {
+        GwtVantageFxBundle bundle;
+        GwtParser parser(data.strings, data.data, bundle);
+        try {
             auto dir = filename.parent_path() / filename.stem();
             fs::create_directories(dir);
-			auto result = parser.parse();
+            auto result = parser.parse();
 
-			fs::ofstream fs(filename.parent_path() / (filename.stem().string() + ".xml"));
-			bundle.printTables(dir.string());
-			result->print(fs, GwtPrintStyle::Xml);
-			parser.print(std::cout, 100);
-		}
-		catch (std::exception &ex)
-		{
-			std::cout << ex.what() << std::endl;
-			parser.print(std::cout, 20);
-		}
-	}
+            fs::ofstream fs(filename.parent_path() / (filename.stem().string() + ".xml"));
+            bundle.printTables(dir.string());
+            result->print(fs, GwtPrintStyle::Xml);
+            parser.print(std::cout, 100);
+        }
+        catch (std::exception &ex) {
+            std::cout << ex.what() << std::endl;
+            parser.print(std::cout, 20);
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
 
-	if (argc == 2)
-	{
+    if (argc == 2) {
         processFile(argv[1]);
-	}
-	else
-	{
+    }
+    else {
         fs::path current = DATA_DIR;// fs::current_path() / "data";
-        for(fs::path path: fs::directory_iterator(current)) {
+        for (fs::path path: fs::directory_iterator(current)) {
             std::cout << path << ":   " << path.extension();
             if (path.extension() == ".bin")
                 processFile(path);
         }
-	}
+    }
     return 0;
 
     //auto data = api::ParseRequest("7|0|5|https://binaryoptions.vantagefx.com/app/Basic/|46123D47AC2C515447AEF3C2580787E2|com.optionfair.client.common.services.TradingService|getAssetIntradayTicks|J|1|2|3|4|3|5|5|5|b|VOYMBnE|VOYPdVk|");

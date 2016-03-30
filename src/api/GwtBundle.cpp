@@ -66,7 +66,7 @@ namespace vantagefx {
 			
 			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.Option", std::vector<GwtField>({
 				StringField("serialuid"),
-				IntField("assetId"), // Для какой пары текущий опцион
+				IntField("assetId"), // Р”Р»СЏ РєР°РєРѕР№ РїР°СЂС‹ С‚РµРєСѓС‰РёР№ РѕРїС†РёРѕРЅ
 				StdField("some_2"),
 				StdField("some_3"),
 				StdField("some_4"),
@@ -103,9 +103,9 @@ namespace vantagefx {
 
 			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.AssetUpdate", std::vector<GwtField>({
 				StringField("serialuid"),
-				IntField("assetStatusId"), // статус лота (нужен Production)
-				IntField("assetId"), // Идентификатор лота
-				FloatField("targetPrice"), // Текущая цена
+				IntField("assetStatusId"), // СЃС‚Р°С‚СѓСЃ Р»РѕС‚Р° (РЅСѓР¶РµРЅ Production)
+				IntField("assetId"), // РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р»РѕС‚Р°
+				FloatField("targetPrice"), // РўРµРєСѓС‰Р°СЏ С†РµРЅР°
 			})));
 			
 			add(std::make_shared<GwtComplexType>("com.optionfair.client.model.OptionUpdateChangeStrike", std::vector<GwtField>({

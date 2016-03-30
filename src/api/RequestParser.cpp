@@ -12,10 +12,8 @@ namespace vantagefx {
         namespace qi = boost::spirit::qi;
 
         template<typename Iterator>
-        struct request_parser : public qi::grammar<Iterator, JsonVariantList()>
-        {
-            request_parser() : request_parser::base_type(file)
-            {
+        struct request_parser : public qi::grammar<Iterator, JsonVariantList()> {
+            request_parser() : request_parser::base_type(file) {
                 file = +(item >> '|');
                 item = int_value | double_value | string_value;
                 int_value = qi::int_ >> !qi::alnum;
@@ -32,8 +30,7 @@ namespace vantagefx {
             qi::symbols<const char, const char> escape_char;
         };
 
-        JsonVariantList ParseRequest(std::string request)
-        {
+        JsonVariantList ParseRequest(std::string request) {
             auto it = request.cbegin();
             auto end = request.cend();
             request_parser<std::string::const_iterator> parser;

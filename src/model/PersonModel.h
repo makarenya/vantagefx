@@ -7,8 +7,7 @@
 
 #include <QtCore>
 
-class PersonModel
-{
+class PersonModel {
 private:
     QString _name;
     QString _surname;
@@ -17,14 +16,23 @@ private:
 
 public:
     PersonModel();
+
     virtual ~PersonModel() { }
+
     QString name() const { return _name; }
+
     PersonModel &setName(const QString &name);
+
     QString surname() const { return _surname; }
+
     PersonModel &setSurname(const QString &surname);
+
     QString phone() const { return _phone; }
+
     PersonModel &setPhone(const QString &phone);
+
     int age() const { return _age; }
+
     PersonModel &setAge(int age);
 };
 

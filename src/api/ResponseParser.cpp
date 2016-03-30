@@ -5,11 +5,11 @@
 
 
 BOOST_FUSION_ADAPT_STRUCT(
-    vantagefx::api::GwtResponseData,
-    (vantagefx::api::JsonVariantList, data)
-    (vantagefx::api::StringList, strings)
-    (int, flags)
-    (int, version)
+        vantagefx::api::GwtResponseData,
+        (vantagefx::api::JsonVariantList, data)
+                (vantagefx::api::StringList, strings)
+                (int, flags)
+                (int, version)
 );
 
 

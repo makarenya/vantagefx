@@ -13,23 +13,28 @@ namespace vantagefx {
     namespace api {
 
         class GwtType;
+
         class GwtParser;
+
         class GwtValue;
 
 
-		enum class GwtPrintStyle
-		{
-			Text, // Просто текст значения
-			Brief, // Краткий брифинг
-			Xml // Полный xml
-		};
-		
-		class GwtObject {
+        enum class GwtPrintStyle {
+            Text, // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            Brief, // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            Xml // пїЅпїЅпїЅпїЅпїЅпїЅ xml
+        };
+
+        class GwtObject {
         public:
             explicit GwtObject(std::shared_ptr<GwtType> type);
+
             void print(std::ostream &stream, GwtPrintStyle style);
+
             std::map<std::string, std::shared_ptr<GwtValue>> values() const;
+
             std::shared_ptr<GwtValue> value(const std::string &name);
+
             void addValue(std::string name, std::shared_ptr<GwtValue> value);
 
         private:

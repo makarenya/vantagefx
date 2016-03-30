@@ -41,7 +41,6 @@ namespace std {
                << "<some8>" << item.some8 << "</some8>"
                << "<regex>" << item.regex << "</regex>"
                << "<some9>" << item.some9 << "</some9>"
-               << "<some10>" << item.some10 << "</some10>"
-                ;
+               << "<some10>" << item.some10 << "</some10>";
     }
 }

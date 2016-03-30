@@ -9,31 +9,31 @@
 
 
 namespace vantagefx {
-	namespace serialized {
+    namespace serialized {
 
-		struct InstrumentTypeFilter {
-			std::string serialuid;
-			int some1;
-			std::string interval;
-			int order;
-			int some2;
-			std::string title;
-		};
-	}
+        struct InstrumentTypeFilter {
+            std::string serialuid;
+            int some1;
+            std::string interval;
+            int order;
+            int some2;
+            std::string title;
+        };
+    }
 
-	namespace api {
-		template<>
-		struct GwtReflectedType<serialized::InstrumentTypeFilter>
-		{
-			static std::string className() { return "com.optionfair.client.model.InstrumentTypeFilter"; }
-			static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
-		};
+    namespace api {
+        template<>
+        struct GwtReflectedType<serialized::InstrumentTypeFilter> {
+            static std::string className() { return "com.optionfair.client.model.InstrumentTypeFilter"; }
 
-		GwtParseContext & operator>>(GwtParseContext &ctx, serialized::InstrumentTypeFilter &result);
-	}
+            static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
+        };
+
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::InstrumentTypeFilter &result);
+    }
 }
 namespace std {
-	ostream & operator<<(ostream& stream, const vantagefx::serialized::InstrumentTypeFilter &item);
+    ostream &operator<<(ostream &stream, const vantagefx::serialized::InstrumentTypeFilter &item);
 }
 
 

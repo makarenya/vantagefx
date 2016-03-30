@@ -15,14 +15,14 @@ namespace vantagefx {
         struct SerializableParameter {
             virtual ~SerializableParameter() { }
 
-	        virtual std::ostream &write(std::ostream &stream) const = 0;
+            virtual std::ostream &write(std::ostream &stream) const = 0;
         };
 
         typedef std::shared_ptr<SerializableParameter> SerializableParameterPtr;
     }
 }
 namespace std {
-	std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::SerializableParameter &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::SerializableParameter &item);
 }
 
 #endif //QT_SECOND_SERIALIZABLEPARAMETER_H

@@ -20,18 +20,18 @@ namespace vantagefx {
     }
 
     namespace api {
-		template<>
-		struct GwtReflectedType<serialized::Lut>
-		{
-			static std::string className() { return "com.optionfair.client.model.Lut"; }
+        template<>
+        struct GwtReflectedType<serialized::Lut> {
+            static std::string className() { return "com.optionfair.client.model.Lut"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
-		};
-		
-		GwtParseContext & operator>>(GwtParseContext &ctx, serialized::Lut &result);
+        };
+
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::Lut &result);
     }
 }
 namespace std {
-    ostream & operator<<(ostream& stream, const vantagefx::serialized::Lut &item);
+    ostream &operator<<(ostream &stream, const vantagefx::serialized::Lut &item);
 }
 
 

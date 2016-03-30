@@ -13,17 +13,22 @@
 namespace vantagefx {
     namespace api {
 
-        class GwtRpcResponse
-        {
+        class GwtRpcResponse {
         public:
-            GwtRpcResponse() {}
+            GwtRpcResponse() { }
+
             GwtRpcResponse(int version, int flags, JsonVariantList data, StringList stringTable);
 
             int version() const { return _version; }
+
             GwtFlags flags() const { return _flags; }
+
             std::string url() const { return _url; }
+
             std::string strongName() const { return _strongName; }
+
             std::string serviceName() const { return _serviceName; }
+
             std::string methodName() const { return _methodName; }
 
         private:

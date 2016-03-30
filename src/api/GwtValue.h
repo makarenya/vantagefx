@@ -23,15 +23,21 @@ namespace vantagefx {
         };
 
         class GwtParser;
+
         class GwtValue;
+
         typedef std::shared_ptr<GwtValue> GwtValuePtr;
 
         class GwtValue {
         public:
             virtual void print(std::ostream &stream) = 0;
+
             virtual GwtValueType type() = 0;
+
             static GwtValuePtr parse(GwtParser &ctx, GwtValueType type);
+
             virtual int value() = 0;
+
         protected:
             virtual void parse(GwtParser &ctx) = 0;
         };

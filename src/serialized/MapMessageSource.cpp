@@ -9,22 +9,19 @@ using namespace vantagefx::serialized;
 namespace vantagefx {
     namespace api {
 
-        GwtParseContext &operator>>(GwtParseContext &ctx, MapMessageSource &result)
-        {
+        GwtParseContext &operator>>(GwtParseContext &ctx, MapMessageSource &result) {
             ctx >> checked(result.map);
             ctx >> result.some;
-			return ctx;
+            return ctx;
         }
     }
 }
 namespace std {
 
-    std::ostream& operator<<(std::ostream& stream, const MapMessageSource &item)
-    {
+    std::ostream &operator<<(std::ostream &stream, const MapMessageSource &item) {
         return stream
                << "<map>" << item.map << "</map>"
-               << "<some>" << item.some << "</some>"
-                ;
+               << "<some>" << item.some << "</some>";
 
     }
 }

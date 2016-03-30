@@ -19,17 +19,17 @@ namespace vantagefx {
     }
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::PspCcTypeRel>
-        {
+        struct GwtReflectedType<serialized::PspCcTypeRel> {
             static std::string className() { return "com.optionfair.client.model.PspCcTypeRel"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::PspCcTypeRel &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::PspCcTypeRel &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::PspCcTypeRel &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::PspCcTypeRel &item);
 }
 
 

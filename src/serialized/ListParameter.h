@@ -13,19 +13,20 @@ namespace vantagefx {
 
         struct ListParameter : SerializableParameter {
             std::vector<SerializableParameterPtr> value;
-			std::ostream &write(std::ostream &stream) const override;
-		};
+
+            std::ostream &write(std::ostream &stream) const override;
+        };
     }
 
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::ListParameter>
-        {
+        struct GwtReflectedType<serialized::ListParameter> {
             static std::string className() { return "net.sf.gilead.pojo.gwt.collection.ListParameter"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::ListParameter &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::ListParameter &result);
     }
 }
 

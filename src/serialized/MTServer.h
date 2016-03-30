@@ -9,27 +9,27 @@
 
 
 namespace vantagefx {
-	namespace serialized {
+    namespace serialized {
 
-		struct MTServer {
-			int some1;
-			int some2;
-			std::string name;
-		};
-	}
+        struct MTServer {
+            int some1;
+            int some2;
+            std::string name;
+        };
+    }
     namespace api {
-		template<>
-		struct GwtReflectedType<serialized::MTServer>
-		{
-			static std::string className() { return "com.optionfair.client.model.MTServer"; }
-			static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
-		};
+        template<>
+        struct GwtReflectedType<serialized::MTServer> {
+            static std::string className() { return "com.optionfair.client.model.MTServer"; }
 
-		GwtParseContext & operator>>(GwtParseContext &ctx, serialized::MTServer &result);
+            static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
+        };
+
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::MTServer &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::MTServer &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::MTServer &item);
 }
 
 #endif //VANTAGEFX_MTSERVER_H

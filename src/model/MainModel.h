@@ -7,14 +7,13 @@
 
 #include <QtCore>
 
-class MainModel
-{
+class MainModel {
 private:
     QString _sourceValue;
     QString _destinationValue;
 
 public:
-    virtual ~MainModel() {}
+    virtual ~MainModel() { }
 
     QString sourceValue() const { return _sourceValue; }
 

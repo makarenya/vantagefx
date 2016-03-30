@@ -28,17 +28,17 @@ namespace vantagefx {
     }
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::TrackingInfo>
-        {
+        struct GwtReflectedType<serialized::TrackingInfo> {
             static std::string className() { return "com.optionfair.client.model.TrackingInfo"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::TrackingInfo &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::TrackingInfo &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::TrackingInfo &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::TrackingInfo &item);
 }
 
 

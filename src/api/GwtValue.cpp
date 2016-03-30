@@ -12,28 +12,40 @@ namespace vantagefx {
         class LongValue : public GwtValue {
         public:
             void parse(GwtParser &ctx) override;
+
             void print(std::ostream &stream) override;
+
             GwtValueType type() override;
+
             int value() override;
+
         private:
             int64_t _value;
         };
 
         class DateValue : public GwtValue {
         public:
-			void parse(GwtParser &ctx) override;
-			void print(std::ostream &stream) override;
+            void parse(GwtParser &ctx) override;
+
+            void print(std::ostream &stream) override;
+
             GwtValueType type() override;
-			int value() override;
-		private:
+
+            int value() override;
+
+        private:
             int64_t _value;
         };
 
         class StdValue : public GwtValue {
             void parse(GwtParser &ctx) override;
+
             void print(std::ostream &stream) override;
+
             GwtValueType type() override;
+
             int value() override;
+
         private:
             int _value;
             std::string _string;
@@ -41,27 +53,39 @@ namespace vantagefx {
 
         class IntValue : public GwtValue {
             void parse(GwtParser &ctx) override;
+
             void print(std::ostream &stream) override;
+
             GwtValueType type() override;
+
             int value() override;
+
         private:
             int _value;
         };
 
         class FloatValue : public GwtValue {
             void parse(GwtParser &ctx) override;
+
             void print(std::ostream &stream) override;
+
             GwtValueType type() override;
+
             int value() override;
+
         private:
             double _value;
         };
 
         class StringValue : public GwtValue {
             void parse(GwtParser &ctx) override;
+
             void print(std::ostream &stream) override;
+
             GwtValueType type() override;
+
             int value() override;
+
         private:
             int _value;
             std::string _string;
@@ -69,9 +93,13 @@ namespace vantagefx {
 
         class PointerValue : public GwtValue {
             void parse(GwtParser &ctx) override;
+
             void print(std::ostream &stream) override;
+
             GwtValueType type() override;
+
             int value() override;
+
         private:
             std::shared_ptr<GwtObject> _object;
         };
@@ -89,7 +117,7 @@ namespace vantagefx {
             using std::static_pointer_cast;
             using std::make_shared;
             GwtValuePtr ptr;
-            switch(type) {
+            switch (type) {
                 case GwtValueType::Long:
                     ptr = static_pointer_cast<GwtValue>(make_shared<LongValue>());
                     break;
@@ -142,11 +170,11 @@ namespace vantagefx {
             return static_cast<int>(_value);
         }
 
-	    void DateValue::parse(GwtParser& ctx) {
-			ctx >> _value;
-		}
+        void DateValue::parse(GwtParser &ctx) {
+            ctx >> _value;
+        }
 
-	    void DateValue::print(std::ostream &stream) {
+        void DateValue::print(std::ostream &stream) {
             using boost::posix_time::ptime;
             using boost::posix_time::milliseconds;
             namespace gregorian = boost::gregorian;
@@ -159,17 +187,17 @@ namespace vantagefx {
             return GwtValueType::Date;
         }
 
-	    int DateValue::value() {
-			return static_cast<int>(_value);
-	    }
+        int DateValue::value() {
+            return static_cast<int>(_value);
+        }
 
-	    void StdValue::parse(GwtParser &ctx) {
+        void StdValue::parse(GwtParser &ctx) {
             ctx >> _value;
-            _string  = ctx.str(_value);
+            _string = ctx.str(_value);
         }
 
         void StdValue::print(std::ostream &stream) {
-			if (_value <= 1) stream << _value;
+            if (_value <= 1) stream << _value;
             else stream << _value << " [" << formatXml(_string) << "]";
         }
 
@@ -182,7 +210,7 @@ namespace vantagefx {
         }
 
         void IntValue::parse(GwtParser &ctx) {
-            *static_cast<GwtParseContext*>(&ctx) >> _value;
+            *static_cast<GwtParseContext *>(&ctx) >> _value;
         }
 
         void IntValue::print(std::ostream &stream) {
@@ -199,7 +227,7 @@ namespace vantagefx {
 
 
         void FloatValue::parse(GwtParser &ctx) {
-            *static_cast<GwtParseContext*>(&ctx) >> _value;
+            *static_cast<GwtParseContext *>(&ctx) >> _value;
         }
 
         void FloatValue::print(std::ostream &stream) {
@@ -211,7 +239,7 @@ namespace vantagefx {
         }
 
         int FloatValue::value() {
-            return (int)_value;
+            return (int) _value;
         }
 
         void StringValue::parse(GwtParser &ctx) {
@@ -236,9 +264,9 @@ namespace vantagefx {
         }
 
         void PointerValue::print(std::ostream &stream) {
-			if (_object) {
-				_object->print(stream, GwtPrintStyle::Brief);
-			}
+            if (_object) {
+                _object->print(stream, GwtPrintStyle::Brief);
+            }
         }
 
         GwtValueType PointerValue::type() {

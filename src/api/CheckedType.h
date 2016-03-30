@@ -6,15 +6,17 @@
 #define QT_SECOND_CHECKEDTYPE_H
 
 namespace vantagefx {
-	namespace api {
+    namespace api {
 
-		template<typename T>
-		struct CheckedType {
-			explicit CheckedType(T& value) : _value(value) { }
+        template<typename T>
+        struct CheckedType {
+            explicit CheckedType(T &value) : _value(value) { }
+
             T &value() const { return _value; }
+
         private:
-			T& _value;
-		};
+            T &_value;
+        };
 
         template<typename T>
         CheckedType<T> checked(T &value) { return CheckedType<T>(value); }

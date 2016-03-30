@@ -9,8 +9,7 @@ using namespace vantagefx::serialized;
 namespace vantagefx {
     namespace api {
 
-        GwtParseContext &operator>>(GwtParseContext &ctx, State &result)
-        {
+        GwtParseContext &operator>>(GwtParseContext &ctx, State &result) {
             ctx >> result.serialuid;
             ctx >> result.country;
             ctx >> result.order;
@@ -22,15 +21,13 @@ namespace vantagefx {
 }
 namespace std {
 
-    std::ostream& operator<<(std::ostream& stream, const State &item)
-    {
+    std::ostream &operator<<(std::ostream &stream, const State &item) {
         return stream
                << "<serialuid>" << item.serialuid << "</serialuid>"
                << "<country>" << item.country << "</country>"
                << "<order>" << item.order << "</order>"
                << "<some>" << item.some << "</some>"
-               << "<name>" << item.name << "</name>"
-                ;
+               << "<name>" << item.name << "</name>";
 
     }
 }

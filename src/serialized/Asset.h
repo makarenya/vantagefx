@@ -12,13 +12,16 @@ namespace vantagefx {
     namespace serialized {
 
         struct Asset {
-            std::string id;// [rO0ABXcEAAAAAA==]
+            std::string id;
+            // [rO0ABXcEAAAAAA==]
             double value; // 1
             double some1; //0.009
             double some2; //0.04395
             int some3; //1
-            std::string some5;//121 [Out]
-            double some6;//1.0005
+            std::string some5;
+            //121 [Out]
+            double some6;
+            //1.0005
             std::string name; //536 [Euro-Dollar]
             int some7; //1
             double some8; //15
@@ -53,17 +56,17 @@ namespace vantagefx {
 
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::Asset>
-        {
+        struct GwtReflectedType<serialized::Asset> {
             static std::string className() { return "com.optionfair.client.model.Asset"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::Asset &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::Asset &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::Asset &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::Asset &item);
 }
 
 

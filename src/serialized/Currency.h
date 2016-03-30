@@ -29,6 +29,7 @@ namespace vantagefx {
         template<>
         struct GwtReflectedType<serialized::Currency> {
             static std::string className() { return "com.optionfair.client.model.Currency"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
@@ -36,7 +37,7 @@ namespace vantagefx {
     }
 }
 namespace std {
-	ostream & operator<<(ostream& stream, const vantagefx::serialized::Currency &item);
+    ostream &operator<<(ostream &stream, const vantagefx::serialized::Currency &item);
 }
 
 

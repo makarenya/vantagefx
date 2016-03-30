@@ -12,7 +12,8 @@ namespace vantagefx {
     namespace api {
         class GwtRpcRequest {
         public:
-	        explicit GwtRpcRequest(JsonVariantList items);
+            explicit GwtRpcRequest(JsonVariantList items);
+
         private:
             int _version;
             int _flags;

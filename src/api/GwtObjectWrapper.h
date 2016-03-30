@@ -21,11 +21,11 @@ namespace vantagefx {
             virtual std::string name() const = 0;
         };
 
-        typedef std::shared_ptr <IGwtObjectWrapper> GwtObjectWrapperPtr;
+        typedef std::shared_ptr<IGwtObjectWrapper> GwtObjectWrapperPtr;
 
         template<typename T>
         struct GwtObjectWrapper : IGwtObjectWrapper, boost::noncopyable {
-	        explicit GwtObjectWrapper(const std::nullptr_t &) {
+            explicit GwtObjectWrapper(const std::nullptr_t &) {
                 _value = std::shared_ptr<std::nullptr_t>();
             }
 
@@ -45,6 +45,7 @@ namespace vantagefx {
             }
 
             std::string name() const override { return _name; }
+
             std::shared_ptr<T> value() const { return _value; }
 
         private:
@@ -53,24 +54,24 @@ namespace vantagefx {
         };
 
         inline GwtObjectWrapperPtr wrap(const std::nullptr_t &) {
-			using std::static_pointer_cast;
-			using std::make_shared;
-			using std::nullptr_t;
-			return static_pointer_cast<IGwtObjectWrapper>(make_shared<GwtObjectWrapper<nullptr_t>>(nullptr));
+            using std::static_pointer_cast;
+            using std::make_shared;
+            using std::nullptr_t;
+            return static_pointer_cast<IGwtObjectWrapper>(make_shared<GwtObjectWrapper<nullptr_t>>(nullptr));
         }
 
         template<typename T>
         GwtObjectWrapperPtr wrap(const T &value, std::string name) {
-			using std::static_pointer_cast;
-			using std::make_shared;
+            using std::static_pointer_cast;
+            using std::make_shared;
             return static_pointer_cast<IGwtObjectWrapper>(std::make_shared<GwtObjectWrapper<T>>(value, name));
         }
 
         template<typename T>
         GwtObjectWrapperPtr wrap(const std::shared_ptr<T> &v, std::string name) {
-			using std::static_pointer_cast;
-			using std::make_shared;
-			return static_pointer_cast<IGwtObjectWrapper>(make_shared<GwtObjectWrapper<T>>(v, name));
+            using std::static_pointer_cast;
+            using std::make_shared;
+            return static_pointer_cast<IGwtObjectWrapper>(make_shared<GwtObjectWrapper<T>>(v, name));
         }
 
     }

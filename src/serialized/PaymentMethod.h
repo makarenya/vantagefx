@@ -24,24 +24,24 @@ namespace vantagefx {
             int some5;
             int some6;
             int otherValue;
-			int some7;
+            int some7;
             std::string otherName;
         };
     }
 
     namespace api {
-		template<>
-		struct GwtReflectedType<serialized::PaymentMethod>
-		{
-			static std::string className() { return "com.optionfair.client.model.PaymentMethod"; }
-			static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
-		};
+        template<>
+        struct GwtReflectedType<serialized::PaymentMethod> {
+            static std::string className() { return "com.optionfair.client.model.PaymentMethod"; }
 
-		GwtParseContext & operator>>(GwtParseContext &ctx, serialized::PaymentMethod &result);
+            static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
+        };
+
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::PaymentMethod &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::PaymentMethod &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::PaymentMethod &item);
 }
 
 

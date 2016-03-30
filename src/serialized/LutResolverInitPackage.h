@@ -25,65 +25,65 @@ namespace vantagefx {
     namespace serialized {
 
         struct LutResolverInitPackage {
-            std::map<int,int> someMap1;
+            std::map<int, int> someMap1;
             std::vector<LutType> lutTypes;
             std::vector<PaymentMethod> paymentMethods;
-			std::vector<Asset> assets;
-			std::map<int,int> someMap2;
-			std::map<int,int> someMap3;
-			std::vector<std::string> blackWhiteList;
-			std::vector<int> someList1;
-			std::string admin;
-			int some1;
-			std::string pawwsord;
-			std::vector<int> someList2;
-			std::vector<Country> counties;
-			std::string some2;
-			std::vector<Currency> currencies;
-			std::vector<CurrencyCountryLimit> limits;
-			int some3;
-			boost::posix_time::ptime date;
-			int some4;
-			int some5;
-			std::vector<InstrumentTypeFilter> instrumentTypeFilters;
-			std::map<int, std::vector<int>> someMap4;
-			std::map<int, std::set<int>> someMap5;
-			std::vector<InstrumentTypeSuperRel> superRels;
-			int some6;
-			int some7;
-			int some8;
-			int some9;
-			int some10;
-			int some11;
-			std::vector<Market> markets;
-			MapMessageSource messages;
-			std::map<std::string, MTServer> servers;
-			std::vector<PaymentMethod> acceptedMethods;
+            std::vector<Asset> assets;
+            std::map<int, int> someMap2;
+            std::map<int, int> someMap3;
+            std::vector<std::string> blackWhiteList;
+            std::vector<int> someList1;
+            std::string admin;
+            int some1;
+            std::string pawwsord;
+            std::vector<int> someList2;
+            std::vector<Country> counties;
+            std::string some2;
+            std::vector<Currency> currencies;
+            std::vector<CurrencyCountryLimit> limits;
+            int some3;
+            boost::posix_time::ptime date;
+            int some4;
+            int some5;
+            std::vector<InstrumentTypeFilter> instrumentTypeFilters;
+            std::map<int, std::vector<int>> someMap4;
+            std::map<int, std::set<int>> someMap5;
+            std::vector<InstrumentTypeSuperRel> superRels;
+            int some6;
+            int some7;
+            int some8;
+            int some9;
+            int some10;
+            int some11;
+            std::vector<Market> markets;
+            MapMessageSource messages;
+            std::map<std::string, MTServer> servers;
+            std::vector<PaymentMethod> acceptedMethods;
             std::vector<PspCcTypeRel> pspCcTypeRels;
             int some12;
             std::vector<int> someArray;
             std::vector<State> states;
-			std::vector<int> someArray2;
-			TrackingInfo trackingInfo;
+            std::vector<int> someArray2;
+            TrackingInfo trackingInfo;
             std::map<std::string, std::map<std::string, FieldVerification>> verifications;
-			int some13;
-			int some14;
-		};
+            int some13;
+            int some14;
+        };
     }
 
     namespace api {
         template<>
-        struct GwtReflectedType<serialized::LutResolverInitPackage>
-        {
+        struct GwtReflectedType<serialized::LutResolverInitPackage> {
             static std::string className() { return "com.optionfair.client.model.LutResolverInitPackage"; }
+
             static void check(std::string name) { if (name != className()) throw UnexpectedType(name, className()); }
         };
 
-        GwtParseContext & operator>>(GwtParseContext &ctx, serialized::LutResolverInitPackage &result);
+        GwtParseContext &operator>>(GwtParseContext &ctx, serialized::LutResolverInitPackage &result);
     }
 }
 namespace std {
-    std::ostream & operator<<(std::ostream& stream, const vantagefx::serialized::LutResolverInitPackage &item);
+    std::ostream &operator<<(std::ostream &stream, const vantagefx::serialized::LutResolverInitPackage &item);
 }
 
 

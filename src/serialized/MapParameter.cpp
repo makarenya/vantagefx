@@ -9,16 +9,14 @@ using namespace vantagefx::serialized;
 namespace vantagefx {
     namespace api {
 
-        GwtParseContext &operator>>(GwtParseContext &ctx, MapParameter &result)
-        {
+        GwtParseContext &operator>>(GwtParseContext &ctx, MapParameter &result) {
             return ctx >> checked(result.value);
         }
     }
-	namespace serialized {
+    namespace serialized {
 
-		std::ostream& MapParameter::write(std::ostream& stream) const
-		{
-			return stream << "<map>" << value << "</map>";
-		}
-	}
+        std::ostream &MapParameter::write(std::ostream &stream) const {
+            return stream << "<map>" << value << "</map>";
+        }
+    }
 }

@@ -16,7 +16,9 @@ namespace vantagefx {
             GwtField(GwtValueType type, std::string name);
 
             GwtValueType type() const;
+
             std::string name() const;
+
             void setName(std::string name);
 
         private:
@@ -36,56 +38,55 @@ namespace vantagefx {
             return _name;
         }
 
-        inline GwtField LongField(std::string name)
-        {
+        inline GwtField LongField(std::string name) {
             return GwtField(GwtValueType::Long, name);
         }
-        inline GwtField LongField()
-        {
+
+        inline GwtField LongField() {
             return GwtField(GwtValueType::Long, "");
         }
-        inline GwtField StdField(std::string name)
-        {
+
+        inline GwtField StdField(std::string name) {
             return GwtField(GwtValueType::Std, name);
         }
-        inline GwtField StdField()
-        {
+
+        inline GwtField StdField() {
             return GwtField(GwtValueType::Std, "");
         }
-        inline GwtField IntField(std::string name)
-        {
+
+        inline GwtField IntField(std::string name) {
             return GwtField(GwtValueType::Integer, name);
         }
-        inline GwtField IntField()
-        {
+
+        inline GwtField IntField() {
             return GwtField(GwtValueType::Integer, "");
         }
-        inline GwtField DateField(std::string name)
-        {
+
+        inline GwtField DateField(std::string name) {
             return GwtField(GwtValueType::Date, name);
         }
-        inline GwtField FloatField(std::string name)
-        {
+
+        inline GwtField FloatField(std::string name) {
             return GwtField(GwtValueType::Float, name);
         }
-        inline GwtField FloatField()
-        {
+
+        inline GwtField FloatField() {
             return GwtField(GwtValueType::Float, "");
         }
-        inline GwtField StringField(std::string name)
-        {
+
+        inline GwtField StringField(std::string name) {
             return GwtField(GwtValueType::String, name);
         }
-        inline GwtField StringField()
-        {
+
+        inline GwtField StringField() {
             return GwtField(GwtValueType::String, "");
         }
-        inline GwtField PtrField(std::string name)
-        {
+
+        inline GwtField PtrField(std::string name) {
             return GwtField(GwtValueType::Pointer, name);
         }
-        inline GwtField PtrField()
-        {
+
+        inline GwtField PtrField() {
             return GwtField(GwtValueType::Pointer, "");
         }
     }

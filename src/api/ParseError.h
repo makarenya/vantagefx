@@ -13,7 +13,7 @@ struct ParseError : std::runtime_error {
 
 struct UnexpectedType : ParseError {
     explicit UnexpectedType(std::string found, std::string expected)
-    : ParseError("unexpected type " + found + ", expecting: " + expected) { }
+            : ParseError("unexpected type " + found + ", expecting: " + expected) { }
 };
 
 
