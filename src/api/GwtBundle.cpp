@@ -65,6 +65,13 @@ namespace vantagefx {
                     fstd("some_2")
             });
 
+            add("com.optionfair.client.model.FeedTickUpdate", {
+                    fdbl("some_1"),
+                    fptr("date"),
+                    fstd("some_2"),
+                    fstd("some_3")
+            });
+
             add("com.optionfair.client.model.Option", {
                     fstr("serialuid"),
                     fint("assetId"), // Для какой пары текущий опцион
