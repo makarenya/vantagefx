@@ -43,12 +43,12 @@ namespace vantagefx {
 
         void GwtObject::save(fs::path file) {
             QDomDocument document;
-            QDomElement body = document.createElement("request");
+	        auto body = document.createElement("request");
             xml(body);
             document.appendChild(body);
 
             QFile fs(file.string().c_str());
-            fs.open(QIODevice::ReadWrite);
+            fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
             fs.write(document.toByteArray());
             fs.close();
         }
