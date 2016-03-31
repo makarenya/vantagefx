@@ -41,8 +41,6 @@ namespace vantagefx {
             template<typename T>
             void add(std::string name, T value);
 
-            void save(boost::filesystem::path file);
-
         private:
             std::shared_ptr<GwtType> _type;
             std::map<std::string, std::shared_ptr<GwtValue>> _values;

@@ -26,23 +26,23 @@ using namespace vantagefx::api;
 using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
 
-void processResponse(fs::path dir, std::string name, std::string content) {
+void processResponse(fs::path dir, std::string name, std::string content, GwtVantageFxBundle &bundle)
+{
     auto data = ParseResponse(content);
-    fs::create_directory(dir / "tables");
     fs::create_directory(dir / "results");
     if (data.version == 7) {
-        GwtVantageFxBundle bundle;
         GwtParser parser(data.strings, data.data, bundle);
         try {
-
-            auto tables = dir / "tables" / name;
-            auto report = dir / "results" / (name + "_response.xml");
-
-            fs::create_directory(tables);
-
+            fs::path report = dir / "results" / (name + "_response.xml");
             auto result = parser.parse();
-            bundle.printTables(tables);
-            result->save(report);
+            QDomDocument document;
+            auto body = document.createElement("request");
+            result->xml(body);
+            document.appendChild(body);
+            QFile fs(report.string().c_str());
+            fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
+            fs.write(document.toByteArray());
+            fs.close();
             parser.print(std::cout, 100);
         }
         catch (std::exception &ex) {
@@ -52,25 +52,53 @@ void processResponse(fs::path dir, std::string name, std::string content) {
     }
 }
 
-void processRequest(fs::path dir, std::string name, std::string content) {
-    auto data = ParseRequest(content);
-	fs::create_directory(dir / "results");
-	if (data.version == 7) {
-		GwtVantageFxBundle bundle;
-		GwtParser parser(data.strings, data.data, bundle);
+void processEntry(fs::path dir, std::string name, FiddlerLogEntry entry, GwtVantageFxBundle &bundle)
+{
+    fs::create_directory(dir / "results");
+    fs::path report = dir / "results" / (name + ".xml");
+    QDomDocument document;
+    auto body = document.createElement("entry");
+    body.setAttribute("method", entry.method().c_str());
+    body.setAttribute("url", entry.url().c_str());
+    body.setAttribute("code", entry.code().c_str());
+
+    auto data = ParseRequest(entry.request());
+    if (data.version == 7) {
+        GwtParser parser(data.strings, data.data, bundle);
         GwtTypePtr type = std::make_shared<GwtRequestType>();
-		try {
-			auto report = dir / "results" / (name + "_request.xml");
-			auto result = std::make_shared<GwtObject>(type);
+        try {
+            GwtObjectPtr result = std::make_shared<GwtObject>(type);
             type->parse(parser, result);
-			result->save(report);
-			parser.print(std::cout, 100);
-		}
-		catch (std::exception &ex) {
-			std::cout << ex.what() << std::endl;
-			parser.print(std::cout, 20);
-		}
-	}
+            auto request = document.createElement("request");
+            result->xml(request);
+            body.appendChild(request);
+            parser.print(std::cout, 100);
+        }
+        catch (std::exception &ex) {
+            std::cout << ex.what() << std::endl;
+            parser.print(std::cout, 20);
+        }
+    }
+    data = ParseResponse(entry.response());
+    if (data.version == 7) {
+        GwtParser parser(data.strings, data.data, bundle);
+        try {
+            auto result = parser.parse();
+            auto response = document.createElement("response");
+            result->xml(response);
+            body.appendChild(response);
+            parser.print(std::cout, 100);
+        }
+        catch (std::exception &ex) {
+            std::cout << ex.what() << std::endl;
+            parser.print(std::cout, 20);
+        }
+    }
+    document.appendChild(body);
+    QFile fs(report.string().c_str());
+    fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    fs.write(document.toByteArray());
+    fs.close();
 }
 
 std::vector<FiddlerLogEntry> parseEntries(fs::path filename)
@@ -97,6 +125,7 @@ std::vector<FiddlerLogEntry> parseEntries(fs::path filename)
 int main(int argc, char *argv[]) 
 {
 	auto filename = fs::path(DATA_DIR) / "log_and_work" / "17_Full.txt";
+    GwtVantageFxBundle bundle;
 	if (argc == 2) {
 		if (!fs::is_regular_file(argv[1])) {
 			std::cout << "file " << argv[1] << " not found" << std::endl;
@@ -107,7 +136,7 @@ int main(int argc, char *argv[])
     if (filename.extension() == ".bin") {
         fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
 	    auto content = std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>());
-        processResponse(filename.parent_path(), filename.stem().string(), content);
+        processResponse(filename.parent_path(), filename.stem().string(), content, bundle);
     }
     else {
         auto entries = parseEntries(filename);
@@ -118,8 +147,7 @@ int main(int argc, char *argv[])
             boost::split(paths, entry.url(), boost::is_any_of("/"));
             auto name = boost::lexical_cast<std::string>(i) + "_" + paths[paths.size() - 1];
             std::cout << "processing " << name << std::endl;
-            processResponse(filename.parent_path(), name, entry.response());
-			processRequest(filename.parent_path(), name, entry.request());
+            processEntry(filename.parent_path(), name, entry, bundle);
         }
     }
 	return 0;
