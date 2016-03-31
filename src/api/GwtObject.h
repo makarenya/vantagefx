@@ -40,9 +40,13 @@ namespace vantagefx {
 
             bool has(std::string name);
 
+			std::string primary() const;
+
 			void find(const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const;
 
 			std::shared_ptr<GwtValue> get(const std::string &path);
+
+			bool operator==(const GwtObject &other) const;
 
             template<typename T>
             void add(std::string name, T value);

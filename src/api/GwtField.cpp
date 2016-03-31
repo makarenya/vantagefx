@@ -14,7 +14,7 @@ namespace vantagefx {
 
         class GwtIntField : public GwtField {
         public:
-            GwtIntField(const std::string &name);
+	        explicit GwtIntField(const std::string &name);
 
             std::string factor() const override;
 
@@ -32,7 +32,7 @@ namespace vantagefx {
 
         class LongField : public GwtIntField {
         public:
-            LongField(const std::string &name);
+	        explicit LongField(const std::string &name);
 
             GwtValuePtr parse(GwtParser &parser) override;
 
@@ -46,14 +46,16 @@ namespace vantagefx {
 
             int64_t last() const { return _last; }
 
-        private:
+			bool equal(const GwtValue &value, const GwtValue &other) const override;
+		
+		private:
             std::vector<int64_t> _values;
             int64_t _last = INT64_MIN;
         };
 
         class IntField : public GwtIntField {
         public:
-            IntField(const std::string &name);
+	        explicit IntField(const std::string &name);
 
             GwtValuePtr parse(GwtParser &parser) override;
 
@@ -67,25 +69,29 @@ namespace vantagefx {
 
             int last() const { return _last; }
 
-        private:
+			bool equal(const GwtValue &value, const GwtValue &other) const override;
+		
+		private:
             std::vector<int> _values;
             int _last = INT_MIN;
         };
 
         class StdField : public IntField {
         public:
-            StdField(const std::string &name);
+	        explicit StdField(const std::string &name);
 
             GwtValuePtr parse(GwtParser &parser) override;
 
             void print(GwtValuePtr &, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "std"; }
-        };
+
+			bool equal(const GwtValue &value, const GwtValue &other) const override;
+		};
 
         class DateField : public LongField {
         public:
-            DateField(std::string name);
+	        explicit DateField(std::string name);
 
             void print(GwtValuePtr &, std::ostream &stream, GwtPrintStyle style) const override;
 
@@ -94,7 +100,7 @@ namespace vantagefx {
 
         class FloatField : public GwtIntField {
         public:
-            FloatField(const std::string &name);
+	        explicit FloatField(const std::string &name);
 
             GwtValuePtr parse(GwtParser &parser) override;
 
@@ -108,14 +114,16 @@ namespace vantagefx {
 
             double last() const { return _last; }
 
-        private:
+			bool equal(const GwtValue &value, const GwtValue &other) const override;
+		
+		private:
             std::vector<double> _values;
             double _last = INT_MIN;
         };
 
         class StringField : public GwtIntField {
         public:
-            StringField(const std::string &name);
+	        explicit StringField(const std::string &name);
 
             GwtValuePtr parse(GwtParser &parser) override;
 
@@ -129,14 +137,16 @@ namespace vantagefx {
 
             std::string last() const { return _last; }
 
-        private:
+			bool equal(const GwtValue &value, const GwtValue &other) const override;
+
+		private:
             std::vector<std::string> _values;
             std::string _last;
         };
 
         class PtrField : public GwtIntField {
         public:
-            PtrField(const std::string &name);
+	        explicit PtrField(const std::string &name);
 
             GwtValuePtr parse(GwtParser &parser) override;
 
@@ -149,6 +159,8 @@ namespace vantagefx {
 			void find(std::shared_ptr<GwtValue> &value, const GwtValue &search, std::vector<std::string> &found, std::string prefix) const override;
 
 			std::shared_ptr<GwtValue> get(std::shared_ptr<GwtValue> &value, const std::string &path) override;
+
+			bool equal(const GwtValue &value, const GwtValue &other) const override;
 		};
 
         std::shared_ptr<GwtField> flng(const std::string &name) {
@@ -204,7 +216,7 @@ namespace vantagefx {
 
 	    void GwtField::find(std::shared_ptr<GwtValue>& value, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
         {
-			if (*value == search) 
+			if (equal(*value, search) )
 				found.push_back(prefix);
         }
 
@@ -266,7 +278,13 @@ namespace vantagefx {
                 stream << ptr->longValue();
         }
 
-        StdField::StdField(const std::string &name)
+	    bool IntField::equal(const GwtValue& value, const GwtValue& other) const
+        {
+			int o = other.toInt();
+			return value.intValue() == other.toInt() && value.intValue() != 0;
+		}
+
+	    StdField::StdField(const std::string &name)
                 : IntField(name) { }
 
         GwtValuePtr StdField::parse(GwtParser &parser) {
@@ -287,7 +305,12 @@ namespace vantagefx {
             else stream << value << " [" << ptr->stringValue() << "]";
         }
 
-        IntField::IntField(const std::string &name)
+	    bool LongField::equal(const GwtValue& value, const GwtValue& other) const
+        {
+			return value.longValue() == other.toLong() && value.longValue() != 0;
+		}
+
+	    IntField::IntField(const std::string &name)
                 : GwtIntField(name) { }
 
         GwtValuePtr IntField::parse(GwtParser &parser) {
@@ -301,7 +324,13 @@ namespace vantagefx {
             stream << ptr->intValue();
         }
 
-        DateField::DateField(std::string name)
+	    bool StdField::equal(const GwtValue& value, const GwtValue& other) const
+        {
+			if (value.intValue() == other.toInt() && value.intValue() != 0) return true;
+			return value.stringValue() == other.toString() && !value.stringValue().empty();
+        }
+
+	    DateField::DateField(std::string name)
                 : LongField(name) { }
 
         void DateField::print(GwtValuePtr &ptr, std::ostream &stream, GwtPrintStyle style) const {
@@ -327,7 +356,12 @@ namespace vantagefx {
             stream << ptr->doubleValue();
         }
 
-        StringField::StringField(const std::string &name)
+	    bool FloatField::equal(const GwtValue& value, const GwtValue& other) const
+        {
+			return value.doubleValue() == other.toDouble() && value.doubleValue() != 0.0;
+        }
+
+	    StringField::StringField(const std::string &name)
                 : GwtIntField(name) { }
 
         GwtValuePtr StringField::parse(GwtParser &parser) {
@@ -342,7 +376,12 @@ namespace vantagefx {
             stream << ptr->stringValue();
         }
 
-        PtrField::PtrField(const std::string &name)
+	    bool StringField::equal(const GwtValue& value, const GwtValue& other) const
+        {
+			return value.stringValue() == other.toString() && !value.stringValue().empty();
+        }
+
+	    PtrField::PtrField(const std::string &name)
                 : GwtIntField(name) { }
 
         GwtValuePtr PtrField::parse(GwtParser &parser) {
@@ -373,6 +412,11 @@ namespace vantagefx {
 			auto object = value->objectValue();
 			if (object) return object->get(path);
 			throw std::runtime_error("null object");
+        }
+
+	    bool PtrField::equal(const GwtValue& value, const GwtValue& other) const
+        {
+			return false;
         }
     }
 }

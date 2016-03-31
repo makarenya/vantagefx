@@ -39,6 +39,8 @@ namespace vantagefx {
 
             virtual bool empty() const { return true; }
 
+			virtual std::string primary() const { return ""; }
+
             const std::string &name() const { return _name; }
 
 			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const = 0;
@@ -68,6 +70,8 @@ namespace vantagefx {
 			std::shared_ptr<GwtField> field(std::string name);
 
             virtual bool empty() const override { return _created.size() == 0; }
+
+			virtual std::string primary() const;
 
 			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const override;
 			

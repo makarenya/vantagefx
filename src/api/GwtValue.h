@@ -36,9 +36,15 @@ namespace vantagefx {
 
             const std::string &stringValue() const;
 
-			bool operator==(const GwtValue &second) const;
+			int toInt() const;
 
-        private:
+			double toDouble() const;
+
+			int64_t toLong() const;
+
+			std::string toString() const;
+
+		private:
             boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>> _value;
             std::string _string;
         };

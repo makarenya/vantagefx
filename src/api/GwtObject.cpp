@@ -29,6 +29,12 @@ namespace vantagefx {
             return it != _values.end();
         }
 
+	    std::string GwtObject::primary() const
+        {
+			if (_type->primary().empty()) return std::string();
+			return value(_type->primary())->stringValue();
+        }
+
 	    void GwtObject::find(const GwtValue &value, std::vector<std::string> &found, std::string prefix) const
 	    {
 			return _type->find(*this, value, found, prefix);
@@ -38,6 +44,11 @@ namespace vantagefx {
         {
 			return _type->get(*this, path);
         }
+
+	    bool GwtObject::operator==(const GwtObject& other) const
+	    {
+			return _values == other._values;
+		}
 
 	    void GwtObject::addValue(std::string name, std::shared_ptr<GwtValue> value) {
             _values[name] = value;

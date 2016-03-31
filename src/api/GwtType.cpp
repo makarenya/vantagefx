@@ -48,7 +48,7 @@ namespace vantagefx {
                 }
                 result->addValue(fieldName, value);
             }
-            _created.push_back(result);
+			_created.push_back(result);
         }
 
 	    std::shared_ptr<GwtField> GwtComplexType::field(std::string name)
@@ -57,6 +57,11 @@ namespace vantagefx {
 				if (fld->name() == name) return fld;
 		    }
 			return std::shared_ptr<GwtField>();
+	    }
+
+	    std::string GwtComplexType::primary() const
+	    {
+			return _primary;
 	    }
 
 	    void GwtComplexType::find(const GwtObject& object, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
@@ -146,6 +151,7 @@ namespace vantagefx {
 				auto name = boost::lexical_cast<std::string>(i);
 				auto value = object.value(name);
 				auto obj = value->objectValue();
+				if (!obj->primary().empty()) name = obj->type()->primary() + "=" + obj->primary();
 				if (obj) obj->find(search, found, prefix + "[" + name + "]/");
 			}
 		}
@@ -157,11 +163,29 @@ namespace vantagefx {
 			if (index.length() < 3 || index[0] != '[' || index[index.length() - 1] != ']')
 				throw std::runtime_error("bad path");
 			auto fld = std::string(path.begin() + 1, pos - 1);
-			auto value = object.value(fld);
-			auto childPath = std::string();
+			auto eq = std::find(fld.begin(), fld.end(), '=');
+			GwtValuePtr value;
+			if (eq != fld.end()) {
+				auto searchPath = std::string(fld.begin(), eq);
+				auto searchValue = std::string(eq + 1, fld.end());
+				auto length = object.value("length");
+				for (auto i = 0; i < length->intValue(); i++) {
+					auto name = boost::lexical_cast<std::string>(i);
+					auto val = object.value(name);
+					auto obj = val->objectValue();
+					if (obj && obj->get(searchPath)->toString() == searchValue) {
+						value = val;
+						break;
+					}
+				}
+			}
+			else {
+				value = object.value(fld);
+			}
+			auto childPath = std::string(pos + 1, path.end());
 			if (childPath.empty()) return value;
-			auto obj = value->objectValue();
-			if (obj) return obj->get(childPath);
+			auto current = value->objectValue();
+			if (current) return current->get(childPath);
 			throw std::runtime_error("null object");
 		}
 

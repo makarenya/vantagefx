@@ -52,7 +52,7 @@ void processResponse(fs::path dir, std::string name, std::string content, GwtVan
     }
 }
 
-void processEntry(fs::path dir, std::string name, FiddlerLogEntry entry, GwtVantageFxBundle &bundle)
+GwtObjectPtr processEntry(fs::path dir, std::string name, FiddlerLogEntry entry, GwtVantageFxBundle &bundle)
 {
     fs::create_directory(dir / "results");
     fs::path report = dir / "results" / (name + ".xml");
@@ -79,13 +79,22 @@ void processEntry(fs::path dir, std::string name, FiddlerLogEntry entry, GwtVant
             parser.print(std::cout, 20);
         }
     }
+	GwtObjectPtr result;
     data = ParseResponse(entry.response());
     if (data.version == 7) {
         GwtParser parser(data.strings, data.data, bundle);
         try {
-            auto result = parser.parse();
+            result = parser.parse();
             auto response = document.createElement("response");
             result->xml(response);
+			
+			/*
+			GwtValue search(50);
+			std::vector<std::string> found;
+			result->find(search, found);
+			auto value = result->get("verifications/[Account]");
+			*/
+
             body.appendChild(response);
             parser.print(std::cout, 100);
         }
@@ -99,6 +108,7 @@ void processEntry(fs::path dir, std::string name, FiddlerLogEntry entry, GwtVant
     fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
     fs.write(document.toByteArray());
     fs.close();
+	return result;
 }
 
 std::vector<FiddlerLogEntry> parseEntries(fs::path filename)
@@ -140,15 +150,56 @@ int main(int argc, char *argv[])
     }
     else {
         auto entries = parseEntries(filename);
+
+		auto data = ParseResponse(entries[1].response());
+		auto parser = GwtParser(data.strings, data.data, bundle);
+		auto object = parser.parse();
+
+		auto r = object->get("lutTypes/[name=InstrumentTypeSuper]/luts/[name=ShortTerm]/id")->toInt();
+
+		//std::vector<int> ids = { 173, 174, 175, 310 };
+		std::vector<int> ids = { 240, 241, 242, 312 };
+
+		std::vector<std::string> variants;
+		std::vector<std::string> old;
+		auto first = true;
+		for(auto id: ids) {
+			GwtValue search(id);
+			std::vector<std::string> found;
+			object->find(search, found);
+			variants.clear();
+			for(auto item: found) {
+				std::vector<std::string> parts;
+				boost::split(parts, item, boost::is_any_of("/"));
+				for (auto i = 0; i < parts.size(); i++) {
+					std::string value = "";
+					for (auto j = 0; j < parts.size(); j++) {
+						if (!value.empty()) value += "/";
+						value += (i == j) ? "*" : parts[j];
+					}
+					if (first || std::find(old.begin(), old.end(), value) != old.end()) {
+						if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
+							variants.push_back(value);
+						}
+					}
+				}
+			}
+			std::swap(variants, old);
+			first = false;
+		}
+
         auto i = 0;
+		std::vector<GwtObjectPtr> created;
         for(auto entry: entries) {
-            i++;
             std::vector<std::string> paths;
             boost::split(paths, entry.url(), boost::is_any_of("/"));
             auto name = boost::lexical_cast<std::string>(i) + "_" + paths[paths.size() - 1];
             std::cout << "processing " << name << std::endl;
-            processEntry(filename.parent_path(), name, entry, bundle);
-        }
+            created.push_back(processEntry(filename.parent_path(), name, entry, bundle));
+			i++;
+		}
+		fs::create_directory(filename.parent_path() / "tables");
+		bundle.printTables(filename.parent_path() / "tables");
     }
 	return 0;
 
