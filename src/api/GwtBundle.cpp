@@ -147,7 +147,7 @@ namespace vantagefx {
                     fstd("some_10"),
                     fstd("some_11"),
                     fptr("instrumentTypeFilters"),
-                    fptr("some_12"),
+                    fptr("instrumentTypeSuperToInstrumentTypes"),
                     fptr("some_13"),
                     fptr("superRels"),
                     fstd("some_14"),
@@ -433,10 +433,10 @@ namespace vantagefx {
 
             add("com.optionfair.client.model.InstrumentTypeInstrumentTypeSuperRel", {
                     fstr("serialuid"),
-                    fstd("some_1"),
+                    fint("some_1"),
                     fint("id"),
-                    fstd("some_2"),
-                    fstd("some_3"),
+                    fint("instrumentTypeId"),
+                    fint("some_3"),
                     fint("order")
             });
 
@@ -542,7 +542,7 @@ namespace vantagefx {
                     fptr("luts"),
                     fstd("some_1"),
                     fptr("parameters")
-            });
+            }, "name");
 
             add("com.optionfair.client.model.Lut", {
                     fstr("serialuid"),
