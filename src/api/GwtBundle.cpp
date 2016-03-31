@@ -82,7 +82,7 @@ namespace vantagefx {
                     fptr("closeDate"),
                     fstd("some_7"),
                     fstd("some_8"),
-                    flng("some_9"),
+                    flng("id"),
                     fdbl("some_10"),
                     fstd("some_11"),
                     fstd("some_12"),
@@ -117,12 +117,12 @@ namespace vantagefx {
             });
 
             add("com.optionfair.client.model.OptionUpdateChangeStrike", {
-                    fdbl("some_1"),
+                    fdbl("targetPrice"),
                     fdbl("some_2"),
                     flng("some_3"),
                     fdbl("some_4"),
                     fdbl("some_5"),
-                    fstd("some_6"),
+                    fint("some_6"),
             });
 
             add("com.optionfair.client.model.LutResolverInitPackage", {
