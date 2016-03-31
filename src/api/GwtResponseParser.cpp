@@ -50,7 +50,7 @@ namespace vantagefx {
                 json_string = '\'' >> *(char_ - '\'') >> '\'';
                 int_rule = int_ >> !double_;
 
-                json_item = int_rule | double_ | bool_ | json_string;
+                json_item = int_rule | double_ | json_string;
                 data_list = +(json_item >> ',');
                 response = "//OK[" >> data_list >> '[' >> string_list >> ']' >> ',' >> int_ >> ',' >> int_ >> ']';
             }
