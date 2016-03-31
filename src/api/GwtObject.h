@@ -30,7 +30,7 @@ namespace vantagefx {
 
             std::map<std::string, std::shared_ptr<GwtValue>> values() const;
 
-            std::shared_ptr<GwtValue> value(const std::string &name);
+            std::shared_ptr<GwtValue> &value(const std::string &name);
 
             void addValue(std::string name, std::shared_ptr<GwtValue> value);
 

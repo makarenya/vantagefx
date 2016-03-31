@@ -28,10 +28,10 @@ namespace vantagefx {
 	        std::string responseHeader(std::string name);
 
 	        void setMethod(std::string method);
-			std::string method() const { return _method; }
+			std::string const &method() const { return _method; }
 
 			void setUrl(std::string url);
-			std::string url() const { return _url; }
+			std::string const &url() const { return _url; }
 
 	        void setRequestMajor(int value);
 			int requestMajor() const { return _requestMajor; }
@@ -46,16 +46,16 @@ namespace vantagefx {
 			int responseMinor() const { return _responseMinor; }
 
 	        void setRequest(std::string value);
-			std::string request() const { return _request; }
+			std::string const &request() const { return _request; }
 
 	        void setResponse(std::string value);
-			std::string response() const { return _response; }
+			std::string const &response() const { return _response; }
 
 	        void setCode(std::string value);
-			std::string code() const { return _code; }
+			std::string const &code() const { return _code; }
 
 	        void setCodeDescription(std::string value);
-			std::string codeDescription() const { return _codeDescription; }
+			std::string const &codeDescription() const { return _codeDescription; }
 
         private:
             std::string _method;

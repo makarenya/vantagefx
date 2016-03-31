@@ -37,7 +37,7 @@ namespace vantagefx {
             return _values;
         }
 
-        std::shared_ptr<GwtValue> GwtObject::value(const std::string &name) {
+        std::shared_ptr<GwtValue> &GwtObject::value(const std::string &name) {
             return _values[name];
         }
 
