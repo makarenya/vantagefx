@@ -285,7 +285,7 @@ namespace vantagefx {
                     fstr("fullName"),
                     flng("some_20"),
                     fstd("some_21"),
-                    flng("some_22"),
+                    flng("accountId"),
                     fstd("some_23"),
                     fstd("some_24"),
                     fstd("some_25"),
