@@ -53,6 +53,11 @@ namespace vantagefx {
             addValue(name, std::make_shared<GwtValue>(value, ""));
         }
 
+        template<>
+        inline void GwtObject::add(std::string name, std::string value) {
+            addValue(name, std::make_shared<GwtValue>(0, value));
+        }
+
         inline std::shared_ptr<GwtType> GwtObject::type() { return _type; }
 
         typedef std::shared_ptr<GwtObject> GwtObjectPtr;

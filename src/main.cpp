@@ -5,7 +5,6 @@
 #include "model/MainModel.h"
 #include "model/PersonModel.h"
 #include "viewmodel/MainViewModel.h"
-#include "api/ResponseParser.h"
 #include <iostream>
 #include <fstream>
 #include <src/api/GwtRpcRequest.h>
@@ -19,14 +18,15 @@
 #include <boost/algorithm/string.hpp>
 #include <src/api/FiddlerLogEntry.h>
 #include <src/api/FiddlerLogParser.h>
+#include <src/api/GwtRequestParser.h>
+#include <src/api/GwtResponseParser.h>
 
 
 using namespace vantagefx::api;
 using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
 
-void processFile(fs::path dir, std::string name, std::string content) {
-    std::cout << "processing " << name << std::endl;
+void processResponse(fs::path dir, std::string name, std::string content) {
     auto data = ParseResponse(content);
     fs::create_directory(dir / "tables");
     fs::create_directory(dir / "results");
@@ -36,7 +36,7 @@ void processFile(fs::path dir, std::string name, std::string content) {
         try {
 
             auto tables = dir / "tables" / name;
-            auto report = dir / "results" / (name + ".xml");
+            auto report = dir / "results" / (name + "_response.xml");
 
             fs::create_directory(tables);
 
@@ -50,6 +50,27 @@ void processFile(fs::path dir, std::string name, std::string content) {
             parser.print(std::cout, 20);
         }
     }
+}
+
+void processRequest(fs::path dir, std::string name, std::string content) {
+    auto data = ParseRequest(content);
+	fs::create_directory(dir / "results");
+	if (data.version == 7) {
+		GwtVantageFxBundle bundle;
+		GwtParser parser(data.strings, data.data, bundle);
+        GwtTypePtr type = std::make_shared<GwtRequestType>();
+		try {
+			auto report = dir / "results" / (name + "_request.xml");
+			auto result = std::make_shared<GwtObject>(type);
+            type->parse(parser, result);
+			result->save(report);
+			parser.print(std::cout, 100);
+		}
+		catch (std::exception &ex) {
+			std::cout << ex.what() << std::endl;
+			parser.print(std::cout, 20);
+		}
+	}
 }
 
 std::vector<FiddlerLogEntry> parseEntries(fs::path filename)
@@ -86,7 +107,7 @@ int main(int argc, char *argv[])
     if (filename.extension() == ".bin") {
         fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
 	    auto content = std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>());
-        processFile(filename.parent_path(), filename.stem().string(), content);
+        processResponse(filename.parent_path(), filename.stem().string(), content);
     }
     else {
         auto entries = parseEntries(filename);
@@ -96,7 +117,9 @@ int main(int argc, char *argv[])
             std::vector<std::string> paths;
             boost::split(paths, entry.url(), boost::is_any_of("/"));
             auto name = boost::lexical_cast<std::string>(i) + "_" + paths[paths.size() - 1];
-            processFile(filename.parent_path(), name, entry.response());
+            std::cout << "processing " << name << std::endl;
+            processResponse(filename.parent_path(), name, entry.response());
+			processRequest(filename.parent_path(), name, entry.request());
         }
     }
 	return 0;

@@ -96,6 +96,19 @@ namespace vantagefx {
             int _skip;
         };
 
+		class GwtRequestType : public GwtType {
+		public:
+			GwtRequestType();
+
+			void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
+
+			void xml(GwtObject &object, QDomElement &parent) override;
+
+			void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
+		private:
+			std::vector<std::shared_ptr<GwtField>> _fields;
+		};
+
         class GwtSimpleType : public GwtType {
         public:
             GwtSimpleType(std::string name, std::shared_ptr<GwtField> type);

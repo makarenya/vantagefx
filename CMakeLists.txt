@@ -41,8 +41,6 @@ set(SOURCE_FILES
         src/api/GwtResponseParser.cpp
         src/api/GwtResponseParser.h
         src/api/GwtResponseData.h
-        src/api/RequestParser.cpp
-        src/api/RequestParser.h
         src/api/GwtRpcRequest.cpp
         src/api/GwtRpcRequest.h
         src/api/GwtParseContext.cpp
@@ -63,7 +61,13 @@ set(SOURCE_FILES
         src/api/GwtValue.h
         src/api/GwtBundle.cpp
         src/api/GwtBundle.h
-        src/api/FiddlerLogEntry.cpp src/api/FiddlerLogEntry.h src/api/FiddlerLogParser.cpp src/api/FiddlerLogParser.h)
+        src/api/FiddlerLogEntry.cpp
+        src/api/FiddlerLogEntry.h
+        src/api/FiddlerLogParser.cpp
+        src/api/FiddlerLogParser.h
+        src/api/GwtRequestParser.cpp
+        src/api/GwtRequestParser.h
+        )
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

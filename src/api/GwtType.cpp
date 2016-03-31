@@ -148,7 +148,110 @@ namespace vantagefx {
             }
         }
 
-        void GwtMapType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
+	    GwtRequestType::GwtRequestType()
+			: GwtType("request")
+	    {
+            _fields = {
+                fint("int"),
+                fdbl("float"),
+                flng("long"),
+                fstr("string"),
+                fptr("pointer")
+            };
+        }
+
+		void GwtRequestType::parse(GwtParser& parser, std::shared_ptr<GwtObject>& result)
+        {
+			std::string unit;
+			std::string hash;
+			std::string iface;
+			std::string method;
+			int props;
+			parser >> unit;
+			parser >> hash;
+			parser >> iface;
+			parser >> method;
+			parser >> props;
+			result->add("unit", unit);
+			result->add("hash", hash);
+			result->add("interface", iface);
+			result->add("method", method);
+            result->add("length", props);
+			std::vector<std::string> types;
+			for (auto i = 0; i < props; i++) {
+				int typeId;
+				parser >> typeId;
+				types.push_back(parser.typeName(typeId));
+			}
+            int i = 0;
+			for(std::string &type: types) {
+                std::string name = boost::lexical_cast<std::string>(i++);
+				if (type == "Z" || type == "B" || type == "C" || type == "S" || type == "I") {
+                    int value;
+                    parser >> value;
+                    result->add("value_" + name, value);
+                    result->add("type_" + name, 0);
+                }
+                else if (type == "F" || type == "D") {
+                    double value;
+                    parser >> value;
+                    result->add("value_" + name, value);
+                    result->add("type_" + name, 1);
+                }
+                else if (type == "J") {
+                    int64_t value;
+                    parser >> value;
+                    result->add("value_" + name, value);
+                    result->add("type_" + name, 2);
+                }
+                else if (type == "java.lang.String") {
+                    std::string value;
+                    parser >> value;
+                    result->add("value_" + name, value);
+                    result->add("type_" + name, 3);
+                }
+                else {
+                    result->add("value_" + name, parser.parse());
+                    result->add("type_" + name, 4);
+                }
+			}
+        }
+
+		void GwtRequestType::print(GwtObject& object, std::ostream& stream, GwtPrintStyle style)
+        {
+			stream << object.value("unit")->stringValue();
+        }
+
+	    void GwtRequestType::xml(GwtObject& object, QDomElement& parent)
+	    {
+            auto doc = parent.ownerDocument();
+            auto unit = doc.createElement("unit");
+            _fields[3]->xml(object.value("unit"), unit);
+            parent.appendChild(unit);
+
+            auto hash = doc.createElement("hash");
+            _fields[3]->xml(object.value("hash"), hash);
+            parent.appendChild(hash);
+
+            auto iface = doc.createElement("interface");
+            _fields[3]->xml(object.value("interface"), iface);
+            parent.appendChild(iface);
+
+            auto method = doc.createElement("method");
+            _fields[3]->xml(object.value("method"), method);
+            parent.appendChild(method);
+
+            auto count = object.value("length")->intValue();
+            for(auto i = 0; i < count; i++) {
+                std::string name = boost::lexical_cast<std::string>(i);
+                auto param = doc.createElement("param");
+                auto type = object.value("type_" + name)->intValue();
+                _fields[type]->xml(object.value("value_" + name), param);
+                parent.appendChild(param);
+            }
+        }
+
+	    void GwtMapType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
             stream << "map[" << object.values().size() << "]";
         }
 
