@@ -32,11 +32,17 @@ namespace vantagefx {
 
             std::shared_ptr<GwtValue> &value(const std::string &name);
 
+			const std::shared_ptr<GwtValue> &value(const std::string &name) const;
+
             void addValue(std::string name, std::shared_ptr<GwtValue> value);
 
             std::shared_ptr<GwtType> type();
 
             bool has(std::string name);
+
+			void find(const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const;
+
+			std::shared_ptr<GwtValue> get(const std::string &path);
 
             template<typename T>
             void add(std::string name, T value);

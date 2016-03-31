@@ -41,6 +41,10 @@ namespace vantagefx {
 
             const std::string &name() const { return _name; }
 
+			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const = 0;
+
+			virtual std::shared_ptr<GwtValue> get(GwtObject &object, const std::string &path) = 0;
+
         private:
             std::string _name;
         };
@@ -61,9 +65,15 @@ namespace vantagefx {
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
 
+			std::shared_ptr<GwtField> field(std::string name);
+
             virtual bool empty() const override { return _created.size() == 0; }
 
-        private:
+			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const override;
+			
+			virtual std::shared_ptr<GwtValue> get(GwtObject &object, const std::string &path) override;
+
+		private:
             std::vector<std::weak_ptr<GwtObject>> _created;
             std::vector<std::shared_ptr<GwtField>> _fields;
             std::string _primary;
@@ -79,7 +89,11 @@ namespace vantagefx {
             void xml(GwtObject &object, QDomElement &parent) override;
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
-        };
+		
+			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const override;
+
+			virtual std::shared_ptr<GwtValue> get(GwtObject &object, const std::string &path) override;
+		};
 
         class GwtMapType : public GwtType {
         public:
@@ -92,7 +106,11 @@ namespace vantagefx {
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
 
-        private:
+			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const override;
+
+			virtual std::shared_ptr<GwtValue> get(GwtObject &object, const std::string &path) override;
+
+		private:
             int _skip;
         };
 
@@ -105,6 +123,11 @@ namespace vantagefx {
 			void xml(GwtObject &object, QDomElement &parent) override;
 
 			void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
+
+			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const override;
+
+			virtual std::shared_ptr<GwtValue> get(GwtObject &object, const std::string &path) override;
+
 		private:
 			std::vector<std::shared_ptr<GwtField>> _fields;
 		};
@@ -119,7 +142,11 @@ namespace vantagefx {
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
 
-        private:
+			virtual void find(const GwtObject &object, const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const override;
+
+			virtual std::shared_ptr<GwtValue> get(GwtObject &object, const std::string &path) override;
+
+		private:
             std::shared_ptr<GwtField> _field;
         };
 

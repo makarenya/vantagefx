@@ -3,6 +3,7 @@
 //
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include "GwtType.h"
 #include "GwtParser.h"
 #include <QDomDocument>
@@ -10,7 +11,7 @@
 namespace vantagefx {
     namespace api {
 
-        GwtComplexType::GwtComplexType(const std::string &name,
+	    GwtComplexType::GwtComplexType(const std::string &name,
                                        const std::string &primary,
                                        std::initializer_list<std::shared_ptr<GwtField>> fields)
                 : GwtType(name),
@@ -50,7 +51,34 @@ namespace vantagefx {
             _created.push_back(result);
         }
 
-        void GwtComplexType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
+	    std::shared_ptr<GwtField> GwtComplexType::field(std::string name)
+	    {
+		    for(auto fld: _fields) {
+				if (fld->name() == name) return fld;
+		    }
+			return std::shared_ptr<GwtField>();
+	    }
+
+	    void GwtComplexType::find(const GwtObject& object, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
+        {
+			for (auto field : _fields) {
+				auto value = object.value(field->name());
+				field->find(value, search, found, prefix + field->name());
+			}
+        }
+
+	    GwtValuePtr GwtComplexType::get(GwtObject& object, const std::string& path)
+	    {
+			auto pos = std::find(path.begin(), path.end(), '/');
+			auto fld = field(std::string(path.begin(), pos));
+			if (!fld) throw std::runtime_error("bad path");
+			auto value = object.value(fld->name());
+			auto childPath = std::string();
+			if (pos != path.end()) childPath = std::string(++pos, path.end());
+			return fld->get(value, childPath);
+	    }
+
+	    void GwtComplexType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
             if (_primary.empty()) {
                 stream << "complex";
             }
@@ -110,7 +138,34 @@ namespace vantagefx {
             }
         }
 
-        void GwtListType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
+	    void GwtListType::find(const GwtObject& object, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
+	    {
+			auto length = object.value("length");
+
+			for (auto i = 0; i < length->intValue(); i++) {
+				auto name = boost::lexical_cast<std::string>(i);
+				auto value = object.value(name);
+				auto obj = value->objectValue();
+				if (obj) obj->find(search, found, prefix + "[" + name + "]/");
+			}
+		}
+
+	    std::shared_ptr<GwtValue> GwtListType::get(GwtObject& object, const std::string& path)
+	    {
+			auto pos = std::find(path.begin(), path.end(), '/');
+			auto index = std::string(path.begin(), pos);
+			if (index.length() < 3 || index[0] != '[' || index[index.length() - 1] != ']')
+				throw std::runtime_error("bad path");
+			auto fld = std::string(path.begin() + 1, pos - 1);
+			auto value = object.value(fld);
+			auto childPath = std::string();
+			if (childPath.empty()) return value;
+			auto obj = value->objectValue();
+			if (obj) return obj->get(childPath);
+			throw std::runtime_error("null object");
+		}
+
+	    void GwtListType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
             auto length = object.value("length");
             stream << "list[" << length->intValue() << "]";
         }
@@ -125,7 +180,8 @@ namespace vantagefx {
                 auto item = doc.createElement("item");
                 auto name = boost::lexical_cast<std::string>(i);
 	            auto value = object.value(name);
-                value->objectValue()->xml(item);
+				auto obj = value->objectValue();
+                if (obj) obj->xml(item);
 				parent.appendChild(item);
             }
         }
@@ -148,7 +204,30 @@ namespace vantagefx {
             }
         }
 
-	    GwtRequestType::GwtRequestType()
+		void GwtMapType::find(const GwtObject& object, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
+		{
+			for (auto pair : object.values()) {
+				auto obj = pair.second->objectValue();
+				if (obj) obj->find(search, found, prefix + "[" + pair.first + "]/");
+			}
+		}
+
+		std::shared_ptr<GwtValue> GwtMapType::get(GwtObject& object, const std::string& path)
+		{
+			auto pos = std::find(path.begin(), path.end(), '/');
+			auto index = std::string(path.begin(), pos);
+			if (index.length() < 3 || index[0] != '[' || index[index.length() - 1] != ']')
+				throw std::runtime_error("bad path");
+			auto fld = std::string(path.begin() + 1, pos - 1);
+			auto value = object.value(fld);
+			auto childPath = std::string();
+			if (childPath.empty()) return value;
+			auto obj = value->objectValue();
+			if (obj) return obj->get(childPath);
+			throw std::runtime_error("null object");
+		}
+		
+		GwtRequestType::GwtRequestType()
 			: GwtType("request")
 	    {
             _fields = {
@@ -217,6 +296,15 @@ namespace vantagefx {
 			}
         }
 
+		void GwtRequestType::find(const GwtObject& object, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
+		{
+		}
+
+		std::shared_ptr<GwtValue> GwtRequestType::get(GwtObject& object, const std::string& path)
+		{
+			throw std::runtime_error("incomplete object");
+		}
+
 		void GwtRequestType::print(GwtObject& object, std::ostream& stream, GwtPrintStyle style)
         {
 			stream << object.value("unit")->stringValue();
@@ -276,7 +364,19 @@ namespace vantagefx {
             result->addValue("value", _field->parse(parser));
         }
 
-        void GwtSimpleType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
+		void GwtSimpleType::find(const GwtObject& object, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
+		{
+			auto value = object.value("value");
+			_field->find(value, search, found, prefix);
+		}
+
+		std::shared_ptr<GwtValue> GwtSimpleType::get(GwtObject& object, const std::string& path)
+		{
+			auto value = object.value("value");
+			return _field->get(value, path);
+		}
+
+		void GwtSimpleType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
 	        auto value = object.value("value");
             _field->print(value, stream, style);
         }
@@ -288,6 +388,3 @@ namespace vantagefx {
         }
     }
 }
-
-
-

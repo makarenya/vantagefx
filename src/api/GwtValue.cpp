@@ -28,5 +28,10 @@ namespace vantagefx {
         const std::string &GwtValue::stringValue() const {
             return _string;
         }
+
+	    bool GwtValue::operator==(const GwtValue& second) const
+	    {
+			return _value == second._value;
+		}
     }
 }

@@ -145,7 +145,11 @@ namespace vantagefx {
             void print(GwtValuePtr &, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "ptr"; }
-        };
+
+			void find(std::shared_ptr<GwtValue> &value, const GwtValue &search, std::vector<std::string> &found, std::string prefix) const override;
+
+			std::shared_ptr<GwtValue> get(std::shared_ptr<GwtValue> &value, const std::string &path) override;
+		};
 
         std::shared_ptr<GwtField> flng(const std::string &name) {
             return std::make_shared<LongField>(name);
@@ -198,7 +202,19 @@ namespace vantagefx {
             parent.appendChild(text);
         }
 
-        void GwtField::setName(const std::string &name) {
+	    void GwtField::find(std::shared_ptr<GwtValue>& value, const GwtValue& search, std::vector<std::string>& found, std::string prefix) const
+        {
+			if (*value == search) 
+				found.push_back(prefix);
+        }
+
+	    std::shared_ptr<GwtValue> GwtField::get(std::shared_ptr<GwtValue>& value, const std::string& path)
+        {
+			if (path.empty()) return value;
+			throw std::runtime_error("bad path");
+        }
+
+	    void GwtField::setName(const std::string &name) {
             _name = name;
         }
 
@@ -343,6 +359,20 @@ namespace vantagefx {
             auto object = ptr->objectValue();
             if (!object) return;
             object->print(stream, style);
+        }
+
+	    void PtrField::find(std::shared_ptr<GwtValue>& value, const GwtValue& search, std::vector<std::string> &found, std::string prefix) const
+        {
+			auto object = value->objectValue();
+			if (object) object->find(search, found, prefix + "/");
+        }
+
+	    std::shared_ptr<GwtValue> PtrField::get(std::shared_ptr<GwtValue>& value, const std::string& path)
+        {
+			if (path.empty()) return value;
+			auto object = value->objectValue();
+			if (object) return object->get(path);
+			throw std::runtime_error("null object");
         }
     }
 }
