@@ -126,7 +126,7 @@ namespace vantagefx {
             });
 
             add("com.optionfair.client.model.LutResolverInitPackage", {
-                    fptr("paymentMethodTypes"),
+                    fptr("pspToPspType"),
                     fptr("lutTypes"),
                     fptr("paymentMethods"),
                     fptr("assets"),
@@ -148,7 +148,7 @@ namespace vantagefx {
                     fstd("some_11"),
                     fptr("instrumentTypeFilters"),
                     fptr("instrumentTypeSuperToInstrumentTypes"),
-                    fptr("some_13"),
+                    fptr("instrumentTypeToInstrument"),
                     fptr("superRels"),
                     fstd("some_14"),
                     fstd("some_15"),
@@ -391,9 +391,9 @@ namespace vantagefx {
 
             add("com.optionfair.client.model.PspCcTypeRel", {
                     fstr("serialuid"),
-                    fint("some_1"),
-                    flng("some_2"),
-                    fint("some_3")
+                    fint("creditCardTypeId"),
+                    flng("id"),
+                    fint("paymentMethodTypeId")
             });
 
             add("com.optionfair.client.model.MTServer", {
@@ -436,7 +436,7 @@ namespace vantagefx {
                     fint("some_1"),
                     fint("id"),
                     fint("instrumentTypeId"),
-                    fint("some_3"),
+                    fint("instrumentTypeSuperId"),
                     fint("order")
             });
 
@@ -553,7 +553,7 @@ namespace vantagefx {
 
             add("com.optionfair.client.model.PaymentMethod", {
                     fstr("serialuid"),
-                    fint("some_1"),
+                    fint("commissionType"),
                     fdbl("some_2"),
                     fint("id"),
                     fint("some_3"),
@@ -563,7 +563,7 @@ namespace vantagefx {
                     fstd("some_7"),
                     fstd("some_8"),
                     fint("some_9"),
-                    fstd("some_10"),
+                    fstd("regulationId"),
                     fint("some_11"),
                     fstd("some_12")
             });
