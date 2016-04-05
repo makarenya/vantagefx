@@ -24,7 +24,7 @@ namespace vantagefx {
                 obj = GwtObjectPtr();
             }
             else if (typeId < 0) {
-                int key = ~typeId;
+	            auto key = ~typeId;
                 obj = _fetched[key];
             }
             else {
