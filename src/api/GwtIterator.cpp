@@ -34,9 +34,8 @@ namespace vantagefx {
 
 			auto val = object->value(it->name());
 			if (++it == end) return std::make_shared<GwtSingleIterator>(val, path);
+			if (!val || !val->toObject()) return std::make_shared<GwtIterator>();
 			auto obj = val->toObject();
-			if (!obj) return std::make_shared<GwtIterator>();
-
 			return createIterator(obj, it, end, path);
 		}
 
