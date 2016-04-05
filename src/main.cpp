@@ -20,6 +20,7 @@
 #include <src/api/FiddlerLogParser.h>
 #include <src/api/GwtRequestParser.h>
 #include <src/api/GwtResponseParser.h>
+#include <src/api/GwtIterator.h>
 
 
 using namespace vantagefx::api;
@@ -155,20 +156,23 @@ int main(int argc, char *argv[])
 		auto parser = GwtParser(data.strings, data.data, bundle);
 		auto object = parser.parse();
 
-		auto r = object->get("lutTypes/[name=InstrumentTypeSuper]/luts/[name=ShortTerm]/id")->toInt();
-
 		//std::vector<int> ids = { 173, 174, 175, 310 };
 		std::vector<int> ids = { 240, 241, 242, 312 };
 
 		std::vector<std::string> variants;
 		std::vector<std::string> old;
 		auto first = true;
-		for(auto id: ids) {
+		for (auto id : ids) {
 			GwtValue search(id);
 			std::vector<std::string> found;
-			object->find(search, found);
+			for(auto pair: GwtQuery(object, "**/" + boost::lexical_cast<std::string>(id))) {
+				found.push_back(pair.first);
+			}
+			for (auto pair : GwtQuery(object, "**/[.=" + boost::lexical_cast<std::string>(id) + "]")) {
+				found.push_back(pair.first);
+			}
 			variants.clear();
-			for(auto item: found) {
+			for (auto item : found) {
 				std::vector<std::string> parts;
 				boost::split(parts, item, boost::is_any_of("/"));
 				for (auto i = 0; i < parts.size(); i++) {
@@ -207,7 +211,7 @@ int main(int argc, char *argv[])
     //std::cout << api::GwtRpcRequest(data);
 
 
-
+/*
     QApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
@@ -244,17 +248,16 @@ int main(int argc, char *argv[])
     mainViewModel.addPerson(inga);
     mainViewModel.addPerson(catherine);
 
-    /*
     QList<QObject*> phonebook;
     phonebook.push_back(new PersonViewModel(alexey));
     phonebook.push_back(new PersonViewModel(vasya));
     phonebook.push_back(new PersonViewModel(inga));
     phonebook.push_back(new PersonViewModel(catherine));
-    */
 
     engine.rootContext()->setContextProperty("root", &mainViewModel);
     //engine.rootContext()->setContextProperty("phonebook", QVariant::fromValue(phonebook));
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
+    */
 }

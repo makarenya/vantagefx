@@ -9,7 +9,9 @@
 #include <memory>
 #include <map>
 #include "GwtField.h"
+#include "GwtPathExpression.h"
 #include <boost/filesystem.hpp>
+#include <iterator>
 
 namespace vantagefx {
     namespace api {
@@ -20,6 +22,8 @@ namespace vantagefx {
 
         class GwtValue;
 
+        class GwtIterator;
+
         class GwtObject {
         public:
             explicit GwtObject(std::shared_ptr<GwtType> type);
@@ -28,7 +32,7 @@ namespace vantagefx {
 
             void xml(QDomElement &element);
 
-            std::map<std::string, std::shared_ptr<GwtValue>> values() const;
+            std::map<std::string, std::shared_ptr<GwtValue>> &values();
 
             std::shared_ptr<GwtValue> &value(const std::string &name);
 
@@ -36,15 +40,11 @@ namespace vantagefx {
 
             void addValue(std::string name, std::shared_ptr<GwtValue> value);
 
-            std::shared_ptr<GwtType> type();
+            std::shared_ptr<GwtType> type() const;
 
             bool has(std::string name);
 
 			std::string primary() const;
-
-			void find(const GwtValue &value, std::vector<std::string> &found, std::string prefix = "") const;
-
-			std::shared_ptr<GwtValue> get(const std::string &path);
 
 			bool operator==(const GwtObject &other) const;
 
@@ -58,7 +58,7 @@ namespace vantagefx {
 
         template<typename T>
         void GwtObject::add(std::string name, T value) {
-            addValue(name, std::make_shared<GwtValue>(value, ""));
+            addValue(name, std::make_shared<GwtValue>(value));
         }
 
         template<>
@@ -66,7 +66,8 @@ namespace vantagefx {
             addValue(name, std::make_shared<GwtValue>(0, value));
         }
 
-        inline std::shared_ptr<GwtType> GwtObject::type() { return _type; }
+        inline std::shared_ptr<GwtType> GwtObject::type() const
+        { return _type; }
 
         typedef std::shared_ptr<GwtObject> GwtObjectPtr;
     }

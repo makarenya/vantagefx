@@ -67,6 +67,10 @@ set(SOURCE_FILES
         src/api/FiddlerLogParser.h
         src/api/GwtRequestParser.cpp
         src/api/GwtRequestParser.h
+        src/api/GwtIterator.cpp
+        src/api/GwtIterator.h
+        src/api/GwtPathExpression.cpp
+        src/api/GwtPathExpression.h
         )
 
 

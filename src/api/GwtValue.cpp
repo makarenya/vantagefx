@@ -95,7 +95,27 @@ namespace vantagefx {
 			}
 		};
 
-		int GwtValue::intValue() const 
+		struct object_visitor : boost::static_visitor<GwtObjectPtr>
+		{
+			GwtObjectPtr operator()(int value) const
+			{
+				return GwtObjectPtr();
+			}
+			GwtObjectPtr operator()(double value) const
+			{
+				return GwtObjectPtr();
+			}
+			GwtObjectPtr operator()(int64_t value) const
+			{
+				return GwtObjectPtr();
+			}
+			GwtObjectPtr operator()(GwtObjectPtr value) const
+			{
+				return value;
+			}
+		};
+
+		int GwtValue::intValue() const
 		{
 			return boost::get<int>(_value);
         }
@@ -157,5 +177,33 @@ namespace vantagefx {
 			string_visitor visitor;
 			return boost::apply_visitor(visitor, _value);
 		}
+
+		GwtObjectPtr GwtValue::toObject()
+		{
+			object_visitor visitor;
+			return boost::apply_visitor(visitor, _value);
+		}
+
+		GwtValue::GwtValue(int value, std::string string)
+			: _value(value),
+			  _string(string) { }
+
+        GwtValue::GwtValue(int value)
+            : _value(value) { }
+
+        GwtValue::GwtValue(int64_t value)
+            : _value(value) { }
+
+        GwtValue::GwtValue(double value)
+            : _value(value) { }
+
+        GwtValue::GwtValue(std::string value)
+            : _string(value) { }
+
+        GwtValue::GwtValue(std::shared_ptr<GwtObject> value)
+            : _value(value) { }
+
+        GwtValue::GwtValue()
+            : _value() { }
     }
 }

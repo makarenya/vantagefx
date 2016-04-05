@@ -23,8 +23,20 @@ namespace vantagefx {
 
         class GwtValue {
         public:
-            template<typename T>
-            explicit GwtValue(T value, std::string str = "");
+
+            GwtValue();
+
+            GwtValue(int value);
+
+            GwtValue(int64_t value);
+
+            GwtValue(double value);
+
+            GwtValue(std::string value);
+
+            GwtValue(std::shared_ptr<GwtObject> value);
+
+			GwtValue(int value, std::string string);
 
             int intValue() const;
 
@@ -44,15 +56,12 @@ namespace vantagefx {
 
 			std::string toString() const;
 
+			std::shared_ptr<GwtObject> toObject();
+
 		private:
             boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>> _value;
             std::string _string;
         };
-
-        template<typename T>
-        GwtValue::GwtValue(T value, std::string str)
-                : _value(value),
-                  _string(str) { }
     }
 }
 

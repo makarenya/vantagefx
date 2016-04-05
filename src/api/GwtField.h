@@ -41,11 +41,7 @@ namespace vantagefx {
 
             virtual void xml(std::shared_ptr<GwtValue> &value, QDomElement &parent) const;
 
-			virtual void find(std::shared_ptr<GwtValue> &value, const GwtValue &search, std::vector<std::string> &found, std::string prefix = "") const;
-
 			virtual bool equal(const GwtValue &value, const GwtValue &other) const = 0;
-
-			virtual std::shared_ptr<GwtValue> get(std::shared_ptr<GwtValue> &value, const std::string &path);
 
             virtual void print(std::shared_ptr<GwtValue> &value, std::ostream &stream, GwtPrintStyle style) const = 0;
 
