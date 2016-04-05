@@ -133,9 +133,47 @@ std::vector<FiddlerLogEntry> parseEntries(fs::path filename)
     return result;
 }
 
+std::vector<std::string> usedBy(GwtObjectPtr object, std::vector<std::string> ids)
+{
+	std::vector<std::string> variants;
+	std::vector<std::string> old;
+	auto first = true;
+	for (auto id : ids) {
+		GwtValue search(id);
+		std::vector<std::string> found;
+		for (auto pair : GwtQuery(object, "**/" + id)) {
+			found.push_back(pair.first);
+		}
+		for (auto pair : GwtQuery(object, "**/[.=" + id + "]")) {
+			found.push_back(pair.first);
+		}
+		variants.clear();
+		for (auto item : found) {
+			std::vector<std::string> parts;
+			boost::split(parts, item, boost::is_any_of("/"));
+			for (auto i = 0; i < parts.size(); i++) {
+				std::string value = "";
+				for (auto j = 0; j < parts.size(); j++) {
+					if (!value.empty()) value += "/";
+					value += (i == j) ? "*" : parts[j];
+				}
+				if (first || std::find(old.begin(), old.end(), value) != old.end()) {
+					if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
+						variants.push_back(value);
+					}
+				}
+			}
+		}
+		std::swap(variants, old);
+		first = false;
+	}
+	return variants;
+}
+
 int main(int argc, char *argv[]) 
 {
-	auto filename = fs::path(DATA_DIR) / "log_and_work" / "17_Full.txt";
+	auto filename = fs::path(DATA_DIR) / "work" / "47_Full.txt";
+
     GwtVantageFxBundle bundle;
 	if (argc == 2) {
 		if (!fs::is_regular_file(argv[1])) {
@@ -144,6 +182,38 @@ int main(int argc, char *argv[])
 		}
 		filename = argv[1];
 	}
+	if (argc == 3 && std::string(argv[1]) == "find") {
+		auto entries = parseEntries(filename);
+        GwtResponseData data;
+		data = ParseResponse(entries[1].response());
+        auto table = GwtParser(data.strings, data.data, bundle).parse();
+        data = ParseResponse(entries[3].response());
+        auto refresh = GwtParser(data.strings, data.data, bundle).parse();
+
+		std::vector<std::string> ids;
+		std::string query = argv[2];
+		for (auto id : GwtQuery(refresh, query)) {
+			ids.push_back(id.second.toString());
+		}
+
+		std::sort(ids.begin(), ids.end());
+		std::string last = "";
+		for (auto it = ids.begin(); it != ids.end();) {
+			if (*it == last) {
+				it = ids.erase(it);
+			}
+			else {
+				last = *it++;
+			}
+		}
+
+		auto keys = usedBy(table, ids);
+
+		for (auto key : keys) {
+			std::cout << key << std::endl;
+		}
+		return 0;
+	}
     if (filename.extension() == ".bin") {
         fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
 	    auto content = std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>());
@@ -151,47 +221,6 @@ int main(int argc, char *argv[])
     }
     else {
         auto entries = parseEntries(filename);
-
-		auto data = ParseResponse(entries[1].response());
-		auto parser = GwtParser(data.strings, data.data, bundle);
-		auto object = parser.parse();
-
-		//std::vector<int> ids = { 173, 174, 175, 310 };
-		std::vector<int> ids = { 240, 241, 242, 312 };
-
-		std::vector<std::string> variants;
-		std::vector<std::string> old;
-		auto first = true;
-		for (auto id : ids) {
-			GwtValue search(id);
-			std::vector<std::string> found;
-			for(auto pair: GwtQuery(object, "**/" + boost::lexical_cast<std::string>(id))) {
-				found.push_back(pair.first);
-			}
-			for (auto pair : GwtQuery(object, "**/[.=" + boost::lexical_cast<std::string>(id) + "]")) {
-				found.push_back(pair.first);
-			}
-			variants.clear();
-			for (auto item : found) {
-				std::vector<std::string> parts;
-				boost::split(parts, item, boost::is_any_of("/"));
-				for (auto i = 0; i < parts.size(); i++) {
-					std::string value = "";
-					for (auto j = 0; j < parts.size(); j++) {
-						if (!value.empty()) value += "/";
-						value += (i == j) ? "*" : parts[j];
-					}
-					if (first || std::find(old.begin(), old.end(), value) != old.end()) {
-						if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
-							variants.push_back(value);
-						}
-					}
-				}
-			}
-			std::swap(variants, old);
-			first = false;
-		}
-
         auto i = 0;
 		std::vector<GwtObjectPtr> created;
         for(auto entry: entries) {
