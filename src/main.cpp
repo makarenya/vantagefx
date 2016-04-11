@@ -21,6 +21,10 @@
 #include <src/api/GwtRequestParser.h>
 #include <src/api/GwtResponseParser.h>
 #include <src/api/GwtIterator.h>
+#include "src/http/HttpRequest.h"
+#include "http/HttpContext.h"
+#include <thread>
+#include <regex>
 
 
 using namespace vantagefx::api;
@@ -170,9 +174,67 @@ std::vector<std::string> usedBy(GwtObjectPtr object, std::vector<std::string> id
 	return variants;
 }
 
+
 int main(int argc, char *argv[]) 
 {
+	using namespace vantagefx::http;
+
+	asio::io_service io_service;
+	auto ctx = ssl::context(boost::asio::ssl::context::sslv23);
+	ctx.load_verify_file(std::string(DATA_DIR) + "ca.cer");
+
+	HttpContext session(io_service, ctx);
+
+	std::string url = "https://binaryoptions.vantagefx.com/app/index.html";
+
+	std::map<std::string, std::string> keys;
+
+	session.get(url, [&keys](HttpRequestPtr request)
+	{
+		auto &response = request->response();
+		auto rx = std::regex("var\\s+(\\w+)\\s*=\\s*'([^']+)'\\s*;");
+		std::smatch m;
+		auto it = response.body().begin();
+		while (std::regex_search(it, response.body().end(), m, rx)) {
+			auto key = std::string(m[1].first, m[1].second);
+			auto value = std::string(m[2].first, m[2].second);
+			keys[key] = value;
+			it = m[0].second;
+		}
+	});
+
+	while (keys.size() == 0) {
+		io_service.poll();
+	}
+
 	auto filename = fs::path(DATA_DIR) / "work" / "47_Full.txt";
+
+	auto cookie = std::make_shared<HttpRequest>("https://binaryoptions.vantagefx.com/app/services/cookie", "POST");
+	cookie->addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/app/Basic/");
+	cookie->addHeader("X-GWT-Permutation", "97A60A56BD971D60069316AF35BCDFB9");
+	cookie->addHeader("Origin", "https://binaryoptions.vantagefx.com");
+	cookie->addHeader("Content-Type", "text/x-gwt-rpc; charset=UTF-8");
+
+	auto data = "7|0|6|https://binaryoptions.vantagefx.com/app/Basic/|F37CB27F20251B873A47EC6A32F293C7|"
+		"com.optionfair.client.cookies.CookieSaver|saveCookie|java.lang.String/2004016611|" +
+		keys["serverCookie"] + "|1|2|3|4|1|5|6|";
+
+	cookie->setContent(data);
+
+	std::string dd = "";
+
+	cookie->setHandler([&dd](HttpRequestPtr request)
+	{
+		auto &response = request->response();
+		dd = response.body();
+	});
+
+	session.send(cookie);
+
+	while(dd.empty()) {
+		io_service.poll();
+	}
+
 
     GwtVantageFxBundle bundle;
 	if (argc == 2) {
@@ -187,7 +249,7 @@ int main(int argc, char *argv[])
         GwtResponseData data;
 		data = ParseResponse(entries[1].response());
         auto table = GwtParser(data.strings, data.data, bundle).parse();
-        data = ParseResponse(entries[3].response());
+        data = ParseResponse(entries[16].response());
         auto refresh = GwtParser(data.strings, data.data, bundle).parse();
 
 		std::vector<std::string> ids;
@@ -207,6 +269,12 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		std::cout << "found id:" << std::endl;
+		for (auto key : ids) {
+			std::cout << key << std::endl;
+		}
+
+		std::cout << std::endl << "paths:" << std::endl;
 		auto keys = usedBy(table, ids);
 
 		for (auto key : keys) {
@@ -214,7 +282,27 @@ int main(int argc, char *argv[])
 		}
 		return 0;
 	}
-    if (filename.extension() == ".bin") {
+	if (argc > 3 && std::string(argv[1]) == "values") {
+		auto entries = parseEntries(filename);
+		GwtResponseData data;
+		data = ParseResponse(entries[1].response());
+		auto table = GwtParser(data.strings, data.data, bundle).parse();
+
+		std::vector<std::string> ids;
+		for (auto i = 2; i < argc; i++)
+		{
+			ids.push_back(argv[i]);
+		}
+
+		std::cout << std::endl << "paths:" << std::endl;
+		auto keys = usedBy(table, ids);
+
+		for (auto key : keys) {
+			std::cout << key << std::endl;
+		}
+		return 0;
+	}
+	if (filename.extension() == ".bin") {
         fs::ifstream file_stream(filename, std::ios::in | std::ios::binary);
 	    auto content = std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>());
         processResponse(filename.parent_path(), filename.stem().string(), content, bundle);

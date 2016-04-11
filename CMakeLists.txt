@@ -23,7 +23,8 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5Qml REQUIRED)
 find_package(Qt5Xml REQUIRED)
-find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem system)
+find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem regex atomic system)
+find_package(OpenSSL 1.0.2 REQUIRED)
 
 set(SOURCE_FILES
         src/main.cpp
@@ -71,10 +72,24 @@ set(SOURCE_FILES
         src/api/GwtIterator.h
         src/api/GwtPathExpression.cpp
         src/api/GwtPathExpression.h
+        src/http/HttpContext.cpp
+        src/http/HttpContext.h
+        src/http/HttpRequest.cpp
+        src/http/HttpRequest.h
+        src/http/HttpResponse.cpp
+        src/http/HttpResponse.h
+        src/http/HttpResponseParser.cpp
+        src/http/HttpResponseParser.h
+        src/http/HttpConnection.cpp
+        src/http/HttpConnection.h
         )
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
 add_executable(vantagefx ${SOURCE_FILES} ${RESOURCES})
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES})
+target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
+if(WIN32)
+    target_link_libraries(vantagefx wsock32 ws2_32)
+    add_definitions(-D_WIN32_WINNT=0x0501)
+endif()
