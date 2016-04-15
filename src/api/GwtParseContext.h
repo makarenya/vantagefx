@@ -6,7 +6,6 @@
 #include <boost/shared_ptr.hpp>
 #include "GwtRpcRequest.h"
 #include "GwtReflectedType.h"
-#include "GwtObjectWrapper.h"
 
 namespace vantagefx {
     namespace api {
@@ -25,12 +24,6 @@ namespace vantagefx {
             GwtParseContext &operator>>(int64_t &value);
 
             GwtParseContext &operator>>(boost::posix_time::ptime &value);
-
-            template<typename T>
-            GwtParseContext &operator>>(const CheckedType<T> &tc);
-
-            template<typename T>
-            GwtParseContext &operator>>(const CheckedType<std::shared_ptr<T>> &tc);
 
             bool eof() const { return _end == _it; }
 
@@ -51,92 +44,11 @@ namespace vantagefx {
             int count() const;
 
         private:
-            std::vector<std::shared_ptr<IGwtObjectWrapper>> _created;
             StringList _strings;
             const_iterator _it;
             const_iterator _end;
             int _maxWord = 1;
         };
-
-        template<typename T>
-        inline GwtParseContext &GwtParseContext::operator>>(const CheckedType<T> &tc) {
-            int typeId;
-            *this >> typeId;
-            if (typeId > 0) {
-                GwtReflectedType<T>::check(typeName(typeId));
-                *this >> tc.value();
-                _created.push_back(wrap(tc.value(), typeName(typeId)));
-            }
-            else {
-                auto wrapper = _created[~typeId];
-                GwtReflectedType<T>::check(wrapper->name());
-                auto typeWrapper = static_cast<GwtObjectWrapper<T> *>(wrapper.get());
-                tc.value() = *typeWrapper->value();
-                _created.push_back(wrapper);
-            }
-            return *this;
-        };
-
-        template<typename T>
-        inline GwtParseContext &GwtParseContext::operator>>(const CheckedType<std::shared_ptr<T>> &tc) {
-            int typeId;
-            *this >> typeId;
-            if (typeId == 0) {
-                tc.value() = nullptr;
-                _created.push_back(wrap(nullptr));
-            }
-            else if (typeId > 0) {
-                GwtReflectedType<T>::check(typeName(typeId));
-                std::shared_ptr<T> item = GwtReflectedType<T>::create(typeId, *this);
-                tc.value() = item;
-                _created.push_back(wrap(item, typeName(typeId)));
-            }
-            else {
-                auto wrapper = _created[~typeId];
-                GwtReflectedType<T>::check(wrapper->name());
-                auto typeWrapper = static_cast<GwtObjectWrapper<T> *>(wrapper.get());
-                tc.value() = typeWrapper->value();
-                _created.push_back(wrapper);
-            }
-            return *this;
-        };
-
-        template<typename Key, typename Value>
-        GwtParseContext &operator>>(GwtParseContext &ctx, std::map<Key, Value> &result) {
-            int size;
-            ctx >> size;
-            for (auto i = 0; i < size; i++) {
-                Key key = Key();
-                Value value = Value();
-                ctx >> checked(key) >> checked(value);
-                result[key] = value;
-            }
-            return ctx;
-        }
-
-        template<typename Item>
-        GwtParseContext &operator>>(GwtParseContext &ctx, std::vector<Item> &result) {
-            int size;
-            ctx >> size;
-            for (auto i = 0; i < size; i++) {
-                Item item;
-                ctx >> checked(item);
-                result.push_back(item);
-            }
-            return ctx;
-        }
-
-        template<typename Item>
-        GwtParseContext &operator>>(GwtParseContext &ctx, std::set<Item> &result) {
-            int size;
-            ctx >> size;
-            for (auto i = 0; i < size; i++) {
-                Item item;
-                ctx >> checked(item);
-                result.insert(item);
-            }
-            return ctx;
-        }
     }
 }
 

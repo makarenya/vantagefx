@@ -48,8 +48,6 @@ set(SOURCE_FILES
         src/api/GwtParseContext.h
         src/api/GwtReflectedType.h
         src/api/ParseError.h
-        src/api/GwtObjectWrapper.h
-        src/api/CheckedType.h
         src/api/GwtType.cpp
         src/api/GwtType.h
         src/api/GwtField.cpp
