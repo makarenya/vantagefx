@@ -6,7 +6,7 @@
 
 namespace vantagefx {
 
-    GwtHttpRequest::GwtHttpRequest(std::string uri)
+    GwtHttpRequest::GwtHttpRequest(const std::string &uri)
             : http::HttpRequest("https://binaryoptions.vantagefx.com/app/services/" + uri, "POST")
 	{
         addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/app/Basic/");
@@ -15,7 +15,7 @@ namespace vantagefx {
         addHeader("Content-Type", "text/x-gwt-rpc; charset=UTF-8");
     }
 
-    GwtCookieRequest::GwtCookieRequest(std::string serverCookie)
+    GwtCookieRequest::GwtCookieRequest(const std::string &serverCookie)
             : GwtHttpRequest("cookie") 
 	{
 		std::string body = "7|0|6|https://binaryoptions.vantagefx.com/app/Basic/|C4BF0ED8850B9A3E37D530BBD81A4817|";

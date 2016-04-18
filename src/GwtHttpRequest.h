@@ -12,12 +12,12 @@ namespace vantagefx {
 
     class GwtHttpRequest : public http::HttpRequest {
     public:
-        GwtHttpRequest(std::string uri);
+	    explicit GwtHttpRequest(const std::string &uri);
     };
 
     class GwtCookieRequest : public GwtHttpRequest {
     public:
-        GwtCookieRequest(std::string serverCookie);
+	    explicit GwtCookieRequest(const std::string &serverCookie);
     };
 
     class GwtLutRequest : public GwtHttpRequest {
