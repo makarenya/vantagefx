@@ -7,13 +7,12 @@
 #include <src/api/GwtType.h>
 #include <src/api/GwtBundle.h>
 #include "src/serialized/LutResolverInitPackage.h"
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 #include <src/api/GwtResponseParser.h>
 #include <src/api/GwtIterator.h>
 #include "src/http/HttpRequest.h"
 #include "src/analyzer/GwtAnalyzer.h"
+#include "GwtHttpRequest.h"
 #include "http/HttpContext.h"
 #include <thread>
 #include <regex>
@@ -64,11 +63,7 @@ int main(int argc, char *argv[])
 
 	auto filename = fs::path(DATA_DIR) / "work" / "47_Full.txt";
 
-	HttpRequest cookie("https://binaryoptions.vantagefx.com/app/services/cookie", "POST");
-	cookie.addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/app/Basic/");
-	cookie.addHeader("X-GWT-Permutation", "97A60A56BD971D60069316AF35BCDFB9");
-	cookie.addHeader("Origin", "https://binaryoptions.vantagefx.com");
-	cookie.addHeader("Content-Type", "text/x-gwt-rpc; charset=UTF-8");
+	vantagefx::GwtHttpRequest cookie("services/cookie");
 
 	auto data = "7|0|6|https://binaryoptions.vantagefx.com/app/Basic/|F37CB27F20251B873A47EC6A32F293C7|"
 		"com.optionfair.client.cookies.CookieSaver|saveCookie|java.lang.String/2004016611|" +
