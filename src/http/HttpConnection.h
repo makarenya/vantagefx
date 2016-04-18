@@ -28,7 +28,11 @@ namespace vantagefx {
 
             virtual ~Connection() { }
 
-            virtual void send(HttpRequest &&request, ReadyHandler &&handler) = 0;
+            virtual void send(HttpRequest &&request, ReadyHandler &&handler);
+
+            virtual void open() = 0;
+
+            virtual void send() = 0;
 
             virtual void close() = 0;
 
@@ -42,11 +46,9 @@ namespace vantagefx {
 
 			int port() const;
 
-	        bool isHandled(HttpRequest &req);
+	        bool isHandled(HttpRequest &request);
 
         protected:
-
-            void setRequest(HttpRequest &&request);
 
             asio::mutable_buffers_1 buffer();
 
@@ -56,24 +58,30 @@ namespace vantagefx {
 
             bool processReceive(size_t bytes, bool proxy = false);
 
-            HttpResponse getResponse();
+            bool handleError(const error_code &ec);
 
-            void setConnected();
+            void connect();
 
-	        const std::string &proxyConnect() const;
+			bool disconnect();
+
+	        const std::string &proxyGreeting() const;
 
         private:
 			std::string _scheme;
 			std::string _host;
 			int _port;
+            std::string _proxy;
+            int _proxyPort;
             HttpContext &_context;
             HttpRequest _request;
 			HttpResponse _response;
             HttpResponseParser _parser;
-            std::array<char, 4096> _buffer;
+            std::array<char, 65536> _buffer;
 			ip::tcp::resolver _resolver;
-			bool _connected;
-			std::string _proxyConnect;
+			std::atomic_bool _connected;
+            bool _busy;
+			std::string _proxyGreeting;
+            ReadyHandler _handler;
         };
 
         /*
@@ -94,11 +102,9 @@ namespace vantagefx {
 	        SslConnection(HttpContext &context, const std::string &host, int port = 433);
 			~SslConnection();
 
-			void send(HttpRequest &&request, ReadyHandler &&handler) override;
+            void open() override;
 
-            void open();
-
-            void send();
+            void send() override;
 
             void close() override;
 
@@ -119,12 +125,8 @@ namespace vantagefx {
             void dataReceived(const error_code &ec, size_t bytesTransferred);
 
         private:
-			std::string _proxy;
-			std::string _connectString;
-            std::atomic_bool _connected;
             ssl::stream<ip::tcp::socket> _socket;
             ip::tcp::resolver _resolver;
-			ReadyHandler _handler;
         };
     }
 }

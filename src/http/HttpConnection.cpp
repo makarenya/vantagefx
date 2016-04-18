@@ -20,15 +20,14 @@ namespace vantagefx {
         namespace pl = asio::placeholders;
 
         Connection::Connection(HttpContext &context, const std::string &scheme, const std::string &host, int port)
-            : _scheme(scheme),
+            : _host(host),
+              _port(port),
+              _scheme(scheme),
 			  _context(context),
 			  _resolver(context.service()),
 			  _connected(false)
         {
 			std::string proxyAddress;
-			std::string proxyBypass;
-			std::string autoConfigUrl;
-			auto autoDetectProxy = false;
 
 			WINHTTP_CURRENT_USER_IE_PROXY_CONFIG proxy;
 			if (WinHttpGetIEProxyConfigForCurrentUser(&proxy)) {
@@ -37,14 +36,11 @@ namespace vantagefx {
 					GlobalFree(proxy.lpszProxy);
 				}
 				if (proxy.lpszProxyBypass) {
-					proxyBypass = boost::locale::conv::utf_to_utf<char>(proxy.lpszProxyBypass);
 					GlobalFree(proxy.lpszProxyBypass);
 				}
 				if (proxy.lpszAutoConfigUrl) {
-					autoConfigUrl = boost::locale::conv::utf_to_utf<char>(proxy.lpszAutoConfigUrl);
 					GlobalFree(proxy.lpszProxyBypass);
 				}
-				autoDetectProxy = proxy.fAutoDetect > 0;
 			}
 			enum State
 			{
@@ -81,16 +77,12 @@ namespace vantagefx {
 				auto it = list.find(scheme);
 				if (it != list.end()) schemeAddress = it->second;
 			}
-			if (schemeAddress.empty()) {
-				_host = host;
-				_port = port;
-			}
-			else {
+			if (!schemeAddress.empty()) {
 				Url proxyUrl(schemeAddress);
-				_host = proxyUrl.host();
-				_port = proxyUrl.port();
+				_proxy = proxyUrl.host();
+				_proxyPort = proxyUrl.port();
 				auto url = host + ":" + boost::lexical_cast<std::string>(port);
-				_proxyConnect = "CONNECT " + url + " HTTP/1.1\r\n"+
+				_proxyGreeting = "CONNECT " + url + " HTTP/1.1\r\n"+
 					"Host: " + url + "\r\n" +
 					"Connection: Keep-Alive\r\n" +
 					"User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36\r\n" +
@@ -98,25 +90,30 @@ namespace vantagefx {
 			}
         }
 
+        void Connection::send(HttpRequest &&request, ReadyHandler &&handler)
+        {
+            _busy = true;
+            _request = std::move(request);
+            _handler = std::move(handler);
 
-	    void Connection::closeConnection()
+            if (_connected) send();
+            else open();
+        }
+
+
+        void Connection::closeConnection()
         {
 			_context.closeConnection(shared_from_this());
         }
 
 	    bool Connection::active()
         {
-            return _connected && _request.url().uri().empty();
+            return _connected && !_busy;
         }
 
 	    std::string Connection::scheme() const
 	    {
 			return _scheme;
-        }
-
-	    void Connection::setRequest(HttpRequest &&request)
-		{
-            _request = std::move(request);
         }
 
         asio::mutable_buffers_1 Connection::buffer()
@@ -126,7 +123,6 @@ namespace vantagefx {
 
         bool Connection::processReceive(size_t bytes, bool proxy)
 		{
-			auto self = shared_from_this();
             for (auto i = 0; i < bytes; i++) {
                 if (_parser.advance(_buffer[i], _response) == Complete) {
                     _parser.reset();
@@ -139,6 +135,8 @@ namespace vantagefx {
 							_context.setCookie(cookie);
 						}
 						if (_request.close()) closeConnection();
+                        _handler(std::move(_response), error_code());
+                        _busy = false;
 					}
                     return true;
                 }
@@ -146,20 +144,29 @@ namespace vantagefx {
             return false;
         }
 
-        HttpResponse Connection::getResponse()
+        bool Connection::handleError(const error_code &ec)
         {
-            return std::move(_response);
+            if (ec) {
+                _handler(std::move(_response), ec);
+                return true;
+            }
+            return false;
         }
 
 
-        void Connection::setConnected()
+        void Connection::connect()
         {
             _connected = true;
         }
 
-	    const std::string &Connection::proxyConnect() const
+		bool Connection::disconnect()
+		{
+			return _connected.exchange(false);
+		}
+
+        const std::string &Connection::proxyGreeting() const
         {
-	        return _proxyConnect;
+	        return _proxyGreeting;
         }
 
 	    std::string const & Connection::host() const
@@ -174,8 +181,8 @@ namespace vantagefx {
 
 	    bool Connection::isHandled(HttpRequest &req)
         {
-			return active() && req.url().scheme() == _scheme && req.url().host() == _host &&
-				(req.url().port() == _port || (req.url().port() == 0 && _port == 443));
+			return active() && req.url().scheme() == scheme() && req.url().host() == host() &&
+				(req.url().port() == port() || (req.url().port() == 0 && port() == 443));
         }
 
 	    std::vector<boost::asio::const_buffer> Connection::requestBuffers()
@@ -187,7 +194,10 @@ namespace vantagefx {
 
 	    ip::tcp::resolver::query Connection::endpoints() const
 	    {
-			return ip::tcp::resolver::query(_host, boost::lexical_cast<std::string>(_port));
+            if (_proxy.empty())
+			    return ip::tcp::resolver::query(_host, boost::lexical_cast<std::string>(_port));
+            else
+                return ip::tcp::resolver::query(_proxy, boost::lexical_cast<std::string>(_proxyPort));
 		}
 
 	    /*
@@ -203,7 +213,6 @@ namespace vantagefx {
 
         SslConnection::SslConnection(HttpContext &context, const std::string &host, int port)
                 : Connection(context, "https", host, port == 0 ? 443 : port),
-                  _connected(false),
                   _socket(context.service(), context.ssl()),
                   _resolver(context.service())
         {}
@@ -231,11 +240,8 @@ namespace vantagefx {
         void SslConnection::handleResolve(const error_code &ec, ip::tcp::resolver::iterator iterator)
 		{
 			auto self = shared_from_this();
-			if (ec) {
-				_handler(getResponse(), ec);
-				return;
-			}
-			
+            if (handleError(ec)) return;
+
 			asio::async_connect(_socket.lowest_layer(), iterator, boost::bind(
                     &SslConnection::handleConnect, this, pl::error));
         }
@@ -252,13 +258,10 @@ namespace vantagefx {
         void SslConnection::handleConnect(const error_code &ec) 
 		{
 			auto self = shared_from_this();
-			if (ec) {
-				_handler(getResponse(), ec);
-				return;
-            }
+            if (handleError(ec)) return;
 
-			if (!proxyConnect().empty()) {
-				asio::async_write(_socket.next_layer(), asio::buffer(proxyConnect()), boost::bind(
+			if (!proxyGreeting().empty()) {
+				asio::async_write(_socket.next_layer(), asio::buffer(proxyGreeting()), boost::bind(
 					&SslConnection::handleProxyWrite, this, pl::error));
 			}
 			else {
@@ -270,10 +273,7 @@ namespace vantagefx {
 	    void SslConnection::handleProxyWrite(const error_code &ec)
         {
 			auto self = shared_from_this();
-			if (ec) {
-				_handler(getResponse(), ec);
-				return;
-			}
+            if (handleError(ec)) return;
 
 			_socket.next_layer().async_read_some(buffer(), boost::bind(
 				&SslConnection::handleProxyRead, this, pl::error, pl::bytes_transferred));
@@ -282,10 +282,7 @@ namespace vantagefx {
 	    void SslConnection::handleProxyRead(const error_code &ec, size_t bytesTransferred)
         {
 			auto self = shared_from_this();
-			if (ec) {
-				_handler(getResponse(), ec);
-				return;
-			}
+            if (handleError(ec)) return;
 
             if (processReceive(bytesTransferred, true)) {
                 _socket.async_handshake(ssl::stream_base::client, boost::bind(
@@ -300,12 +297,9 @@ namespace vantagefx {
 	    void SslConnection::handleHandshake(const error_code &ec) 
 		{
 			auto self = shared_from_this();
-			if (ec) {
-				_handler(getResponse(), ec);
-				return;
-            }
+            if (handleError(ec)) return;
 
-            _connected = true;
+            connect();
             send();
         }
 
@@ -315,17 +309,8 @@ namespace vantagefx {
                     &SslConnection::handleWrite, this, pl::error));
         }
 
-        void SslConnection::send(HttpRequest &&request, ReadyHandler &&handler)
-		{
-            setRequest(std::move(request));
-			_handler = std::move(handler);
-
-            if (_connected) send();
-            else open();
-        }
-
         void SslConnection::close() {
-			if(_connected.exchange(false)) {
+			if(disconnect()) {
 				_socket.lowest_layer().shutdown(ip::tcp::socket::shutdown_receive);
 			}
         }
@@ -333,10 +318,7 @@ namespace vantagefx {
 		void SslConnection::handleWrite(const error_code &ec)
 		{
 			auto self = shared_from_this();
-			if (ec) {
-				_handler(getResponse(), ec);
-				return;
-            }
+            if (handleError(ec)) return;
 
             _socket.async_read_some(buffer(), boost::bind(
                     &SslConnection::dataReceived, this, pl::error, pl::bytes_transferred));
@@ -345,20 +327,16 @@ namespace vantagefx {
 		void SslConnection::dataReceived(const error_code &ec, size_t bytesTransferred)
 		{
 			auto self = shared_from_this();
-
 			if (ec) {
 				if (ec.category() == asio::error::get_ssl_category() &&
 					ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)) {
 					_socket.lowest_layer().close();
 				}
-				_handler(getResponse(), ec);
+                handleError(ec);
 				return;
             }
 
-            if (processReceive(bytesTransferred)) {
-				_handler(getResponse(), ec);
-                return;
-            }
+            if (processReceive(bytesTransferred)) return;
 
             _socket.async_read_some(buffer(), boost::bind(
                     &SslConnection::dataReceived, this, pl::error, pl::bytes_transferred));
