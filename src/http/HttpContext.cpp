@@ -108,45 +108,55 @@ namespace vantagefx {
 
 	    void HttpContext::closeConnection(ConnectionPtr connection)
         {
-			connection->close();
-			auto it = std::find_if(_connections.begin(), _connections.end(), [&connection](const ConnectionPtr &item)
-			{
-				return item == connection;
-			});
-			_connections.erase(it);
+            _connections.erase(connection);
+            connection->close();
 		}
 
-	    void HttpContext::send(HttpRequestPtr req) {
+        void HttpContext::send(HttpRequest &&request, ReadyHandler &&handler) {
             ConnectionPtr connection;
-			auto &host = req->url().host;
-	        auto port = req->url().port;
 
-            if (req->url().scheme == Https) {
-                for (auto cn :_connections) {
-                    if (cn->active() && cn->scheme() == Https && cn->host() == host) {
-                        connection = cn;
-                        connection->send(req);
-                        return;
-                    }
-                }
-                connection = std::make_shared<SslConnection>(*this, host, port);
-                connection->open([this, connection, req](const error_code &ec) {
-					if (ec) {
-						connection->closeConnection();
-						req->setError(ec);
-					}
-                    else connection->send(req);
-                });
-                _connections.push_back(connection);
+			auto found = std::find_if(_connections.begin(), _connections.end(), [&request](ConnectionPtr cn) {
+				return cn->isHandled(request);
+			});
+			if (found == _connections.end()) {
+                connection = std::make_shared<SslConnection>(std::ref(*this), request.url().host(), request.url().port());
+				_connections.insert(connection);
+			}
+            else {
+                connection = *found;
             }
-        }
+			
+            connection->send(std::move(request), std::move(handler));
+		}
 
-	    void HttpContext::get(std::string url, std::function<void(HttpRequestPtr request)> handler)
+		struct SendHandler
         {
-			auto request = std::make_shared<HttpRequest>(url);
-			request->setHandler(handler);
-			send(request);
-        }
+			explicit SendHandler(std::promise<HttpResponse> &&promise)
+			{
+				_promise = std::make_shared<std::promise<HttpResponse>>(std::move(promise));
+			}
+
+			void operator()(HttpResponse response, const error_code &ec) const
+			{
+				if (ec)
+					_promise->set_exception(std::make_exception_ptr(boost::system::system_error(ec)));
+				else
+					_promise->set_value(std::move(response));
+			}
+			SendHandler(SendHandler &&rhs) { _promise = std::move(rhs._promise); }
+		private:
+			SendHandler(SendHandler &rhs) { _promise = rhs._promise; }
+			std::shared_ptr<std::promise<HttpResponse>> _promise;
+        };
+
+	    std::future<HttpResponse> HttpContext::send(HttpRequest &&request)
+        {
+			std::promise<HttpResponse> promise;
+			auto future = promise.get_future();
+			send(std::move(request), SendHandler(std::move(promise)));
+			return future;
+		}
+
 
 	    boost::asio::io_service & HttpContext::service() const
         {

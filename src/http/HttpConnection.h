@@ -6,61 +6,74 @@
 #define VANTAGEFX_HTTPCONNECTION_H
 
 #include <memory>
+#include <future>
 #include "HttpResponse.h"
 #include "HttpRequest.h"
+#include "HttpResponseParser.h"
 
 
 namespace vantagefx {
     namespace http {
         class HttpContext;
         class HttpRequest;
-		class Connection;
 
-		typedef std::shared_ptr<Connection> ConnectionPtr;
+		typedef std::function<void(HttpResponse &&, const error_code &)> ReadyHandler;
 
 		typedef std::function<void(const error_code &ec)> ConnectedHandler;
 
         class Connection : public std::enable_shared_from_this<Connection>
         {
         public:
-	        explicit Connection(HttpContext &context, std::string host, int port);
+	        explicit Connection(HttpContext &context, const std::string &scheme, const std::string &host, int port);
+
             virtual ~Connection() { }
-			virtual void open(ConnectedHandler handler) = 0;
-            virtual void send(HttpRequestPtr request) = 0;
+
+            virtual void send(HttpRequest &&request, ReadyHandler &&handler) = 0;
+
             virtual void close() = 0;
+
 			void closeConnection();
+
             virtual bool active();
-			virtual Scheme scheme() const = 0;
+
+			std::string scheme() const;
+
 			std::string const &host() const;
+
 			int port() const;
+
+	        bool isHandled(HttpRequest &req);
 
         protected:
 
-            void setRequest(HttpRequestPtr &request);
-
-            void setResponse(HttpResponse &response);
-
-            void setError(const error_code &ec);
+            void setRequest(HttpRequest &&request);
 
             asio::mutable_buffers_1 buffer();
 
-            std::vector<boost::asio::const_buffer> requestBuffers() const;
+            std::vector<boost::asio::const_buffer> requestBuffers();
 
-			ip::tcp::resolver::iterator endpoints();
+			ip::tcp::resolver::query endpoints() const;
 
-            bool processReceive(size_t bytes);
+            bool processReceive(size_t bytes, bool proxy = false);
+
+            HttpResponse getResponse();
 
             void setConnected();
 
+	        const std::string &proxyConnect() const;
+
         private:
+			std::string _scheme;
 			std::string _host;
 			int _port;
             HttpContext &_context;
-            HttpRequestPtr _request;
+            HttpRequest _request;
+			HttpResponse _response;
             HttpResponseParser _parser;
             std::array<char, 4096> _buffer;
 			ip::tcp::resolver _resolver;
 			bool _connected;
+			std::string _proxyConnect;
         };
 
         /*
@@ -78,26 +91,40 @@ namespace vantagefx {
         class SslConnection : public Connection
         {
         public:
-	        SslConnection(HttpContext &context, std::string host, int port = 433);
+	        SslConnection(HttpContext &context, const std::string &host, int port = 433);
+			~SslConnection();
 
-			void open(ConnectedHandler handler) override;
+			void send(HttpRequest &&request, ReadyHandler &&handler) override;
 
-            void send(HttpRequestPtr request) override;
+            void open();
+
+            void send();
 
             void close() override;
 
-			Scheme scheme() const override;
-			
 			bool verifyCertificate(bool preverified, ssl::verify_context &context);
 
-            void handleConnect(std::function<void(const error_code &ec)> handler);
+            void handleResolve(const error_code &ec, ip::tcp::resolver::iterator it);
 
-            void handleWrite(size_t bytesTransferred);
+            void handleConnect(const error_code &ec);
 
-            void dataReceived(size_t bytesTransferred);
+			void handleProxyWrite(const error_code &ec);
+
+			void handleProxyRead(const error_code &ec, size_t bytesTransferred);
+
+			void handleHandshake(const error_code &ec);
+
+            void handleWrite(const error_code &ec);
+
+            void dataReceived(const error_code &ec, size_t bytesTransferred);
 
         private:
+			std::string _proxy;
+			std::string _connectString;
+            std::atomic_bool _connected;
             ssl::stream<ip::tcp::socket> _socket;
+            ip::tcp::resolver _resolver;
+			ReadyHandler _handler;
         };
     }
 }

@@ -5,7 +5,8 @@
 #include "FiddlerLogEntry.h"
 
 namespace vantagefx {
-    namespace api {
+    namespace analyzer {
+
 	    std::string FiddlerLogEntry::requestHeader(std::string name)
 	    {
 		    for (auto pair: _requestHeaders) {

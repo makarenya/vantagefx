@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 namespace vantagefx {
-    namespace api {
+    namespace analyzer {
 
         class FiddlerLogParser {
         public:

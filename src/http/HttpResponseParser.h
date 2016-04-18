@@ -40,12 +40,10 @@ namespace vantagefx {
         {
         public:
             HttpResponseParser();
-            ParserState advance(char c);
-            HttpResponse &response();
+            ParserState advance(char c, HttpResponse &response);
 	        void reset();
         private:
             HttpResponseState _state;
-            HttpResponse _response;
             std::string _key;
             std::string _value;
             size_t _length;

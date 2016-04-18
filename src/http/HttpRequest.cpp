@@ -2,34 +2,12 @@
 // Created by alexx on 08.04.2016.
 //
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4503)
-#pragma warning(push)
-#pragma warning(disable: 4348) // possible loss of data
-#endif
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/fusion/adapted.hpp>
 #include "HttpRequest.h"
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-
-
-BOOST_FUSION_ADAPT_STRUCT(
-	vantagefx::http::Url,
-	(vantagefx::http::Scheme, scheme)
-	(std::string, host)
-	(int, port)
-	(std::string, path)
-	(std::string, hash)
-)
 
 namespace vantagefx {
     namespace http {
@@ -51,66 +29,43 @@ namespace vantagefx {
 			const std::string keepAlive = "Keep-Alive";
 		}
 
-        namespace parser {
-            namespace qi = boost::spirit::qi;
-
-			template<typename Iterator>
-            struct UrlParser : qi::grammar<Iterator, Url()> {
-	            UrlParser();
-
-	            qi::rule<Iterator, Url()> entry;
-                qi::rule<Iterator, std::string()> string;
-				qi::rule<Iterator, std::string()> domain;
-				qi::rule<Iterator, char()> escaped;
-                qi::symbols<const char, Scheme> scheme;
-            };
-
-	        template <typename Iterator>
-	        UrlParser<Iterator>::UrlParser()
-				: UrlParser::base_type(entry)
-	        {
-		        entry = scheme >> "://" >> domain >> -(qi::lit(':') >> qi::int_) >> -(qi::char_('/') >> string) >>
-			        -(qi::char_('#') >> string);
-				string = +(escaped | qi::alnum | qi::char_("$_.+!*'(),/-"));
-		        domain = +(escaped | qi::alnum | qi::char_("$_.+!*'(),-"));
-		        escaped = qi::lit('%') >> qi::int_;
-		        scheme.add("https", Https)("http", Http);
-	        }
-
-	        Url parse(std::string url)
-            {
-                Url result;
-                UrlParser<std::string::iterator> p;
-                qi::parse(url.begin(), url.end(), p, result);
-				result.uri = url;
-                return result;
-            }
-		}
-
-		std::string Url::serverUrl() const
-		{
-			if (port == 0) return schemeName() + host;
-			return schemeName() + host + ":" + boost::lexical_cast<std::string>(port);
-		}
-
-		std::string Url::schemeName() const
-		{
-			switch(scheme) {
-				case Https: return "https://";
-				default: return "http://";
-			}
-		}
+	    HttpRequest::HttpRequest()
+				: _method(),
+				  _url(),
+				  _close(false)
+		{}
 
 		HttpRequest::HttpRequest(std::string url, std::string method)
                 : _method(method),
-			      _url(parser::parse(url)),
+			      _url(url),
 			      _close(false)
         {}
+
+	    HttpRequest::HttpRequest(HttpRequest &&rhs)
+	    {
+		    _method = std::move(rhs._method);
+		    _url = std::move(rhs._url);
+		    _headers = std::move(rhs._headers);
+		    _content = std::move(rhs._content);
+		    _close = rhs._close;
+	    }
+
+	    HttpRequest & HttpRequest::operator=(HttpRequest &&rhs)
+	    {
+		    if (&rhs != this) {
+			    _method = std::move(rhs._method);
+			    _url = std::move(rhs._url);
+			    _headers = std::move(rhs._headers);
+			    _content = std::move(rhs._content);
+			    _close = rhs._close;
+		    }
+		    return *this;
+	    }
 
 	    void HttpRequest::updateHeaders(std::string cookie)
 		{
 			if (!hasHeader(strings::host)) {
-				addHeader(strings::host, _url.host);
+				addHeader(strings::host, _url.host());
 			}
 			if (!hasHeader(strings::accept)) {
 				addHeader(strings::accept, strings::acceptValue);
@@ -134,7 +89,7 @@ namespace vantagefx {
 			std::vector<asio::const_buffer> buffers;
 			buffers.push_back(asio::buffer(_method));
 			buffers.push_back(asio::buffer(strings::space));
-			buffers.push_back(asio::buffer(_url.uri));
+			buffers.push_back(asio::buffer(_url.uri()));
 			buffers.push_back(asio::buffer(strings::space));
 			buffers.push_back(asio::buffer(strings::http));
 			buffers.push_back(asio::buffer(strings::crlf));
@@ -163,11 +118,6 @@ namespace vantagefx {
 	    std::string const & HttpRequest::method() const
         {
 			return _method;
-        }
-
-	    HttpResponse const & HttpRequest::response() const
-        {
-			return _response;
         }
 
 	    void HttpRequest::setUrl(const Url &url)
@@ -205,11 +155,6 @@ namespace vantagefx {
 			return _close;
 		}
 
-	    void HttpRequest::setHandler(std::function<void(std::shared_ptr<HttpRequest> request)> handler)
-		{
-			_handler = handler;
-		}
-
 	    std::string HttpRequest::header(std::string key) const
         {
 	        for(auto pair: _headers) {
@@ -225,19 +170,5 @@ namespace vantagefx {
 			}
 			return false;
 		}
-
-        void HttpRequest::setResponse(HttpResponse &response) {
-            _response = response;
-			_handler(shared_from_this());
-		}
-
-        void HttpRequest::setError(const error_code &ec) {
-            _error = ec;
-			_handler(shared_from_this());
-        }
-
-        error_code const &HttpRequest::error() const {
-            return _error;
-        }
     }
 }

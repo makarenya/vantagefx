@@ -23,7 +23,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5Qml REQUIRED)
 find_package(Qt5Xml REQUIRED)
-find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem regex atomic system)
+find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem regex atomic system locale)
 find_package(OpenSSL 1.0.2 REQUIRED)
 
 set(SOURCE_FILES
@@ -60,10 +60,6 @@ set(SOURCE_FILES
         src/api/GwtValue.h
         src/api/GwtBundle.cpp
         src/api/GwtBundle.h
-        src/api/FiddlerLogEntry.cpp
-        src/api/FiddlerLogEntry.h
-        src/api/FiddlerLogParser.cpp
-        src/api/FiddlerLogParser.h
         src/api/GwtRequestParser.cpp
         src/api/GwtRequestParser.h
         src/api/GwtIterator.cpp
@@ -80,13 +76,19 @@ set(SOURCE_FILES
         src/http/HttpResponseParser.h
         src/http/HttpConnection.cpp
         src/http/HttpConnection.h
-        )
+        src/analyzer/FiddlerLogEntry.cpp
+        src/analyzer/FiddlerLogEntry.h
+        src/analyzer/FiddlerLogParser.cpp
+        src/analyzer/FiddlerLogParser.h
+        src/analyzer/GwtAnalyzer.cpp
+        src/analyzer/GwtAnalyzer.h
+        src/http/Url.cpp src/http/Url.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
 add_executable(vantagefx ${SOURCE_FILES} ${RESOURCES})
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
+target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} Winhttp)
 if(WIN32)
     target_link_libraries(vantagefx wsock32 ws2_32)
     add_definitions(-D_WIN32_WINNT=0x0501)

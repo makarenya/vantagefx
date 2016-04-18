@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace vantagefx {
-    namespace api {
+    namespace analyzer {
 
         class FiddlerLogEntry {
         public:

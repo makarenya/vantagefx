@@ -7,7 +7,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include "HttpResponseParser.h"
+#include "Url.h"
 
 namespace vantagefx {
     namespace http {
@@ -17,42 +17,21 @@ namespace vantagefx {
         namespace ip = asio::ip;
         using boost::system::error_code;
 
-        enum Scheme {
-            Http,
-            Https
-        };
-
-        struct Url {
-            Scheme scheme;
-            std::string host;
-            int port = 0;
-            std::string path;
-            std::string hash;
-			std::string uri;
-
-            std::string schemeName() const;
-            std::string serverUrl() const;
-
-			operator std::string() const
-			{
-				return uri;
-			}
-        };
-
-        class HttpRequest : public std::enable_shared_from_this<HttpRequest>
+        class HttpRequest : public boost::noncopyable
         {
         public:
 
+			HttpRequest();
+
 	        explicit HttpRequest(std::string url, std::string method = "GET");
 
-			void updateHeaders(std::string cookie);
+	        HttpRequest(HttpRequest &&rhs);
+
+	        HttpRequest &operator=(HttpRequest &&rhs);
+
+	        void updateHeaders(std::string cookie);
 
 			std::vector<asio::const_buffer> toBuffers() const;
-
-            void setResponse(HttpResponse &response);
-            void setError(const error_code &ec);
-            error_code const &error() const;
-			HttpResponse const &response() const;
 
 			void setMethod(std::string method);
 			std::string const &method() const;
@@ -70,22 +49,14 @@ namespace vantagefx {
 	        void setClose(bool close);
 	        bool close() const;
 
-			void setHandler(std::function<void(std::shared_ptr<HttpRequest>)> handler);
-
         private:
-            error_code _error;
 			std::string _method;
 			Url _url;
 			std::vector<std::pair<std::string, std::string>> _headers;
 			std::string _content;
-            HttpResponse _response;
-			std::function<void(std::shared_ptr<HttpRequest> request)> _handler;
 			bool _close;
 		};
-
-		typedef std::shared_ptr<HttpRequest> HttpRequestPtr;
 	}
 }
-
 
 #endif //VANTAGEFX_HTTPREQUEST_H

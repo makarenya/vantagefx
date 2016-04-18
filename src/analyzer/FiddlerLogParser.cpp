@@ -6,7 +6,7 @@
 #include <boost/lexical_cast.hpp>
 
 namespace vantagefx {
-    namespace api {
+    namespace analyzer {
 
         FiddlerLogParser::FiddlerLogParser()
                 : _state(Method),

@@ -8,8 +8,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/atomic.hpp>
-#include <boost/function.hpp>
+#include <set>
+#include <future>
+#include "HttpConnection.h"
 
 namespace vantagefx {
     namespace http {
@@ -21,22 +22,25 @@ namespace vantagefx {
 
         class HttpRequest;
 
-		class Connection;
+		class HttpResponse;
 
         class HttpContext
 		{
         public:
+			typedef std::map<std::string, std::string> CookieParameters;
+			typedef std::pair<std::string, CookieParameters> Cookie;
+			typedef std::map<std::string, Cookie> CookieCollection;
+            typedef std::shared_ptr<Connection> ConnectionPtr;
+
             HttpContext(boost::asio::io_service &io_service, boost::asio::ssl::context &context);
 
 			void setCookie(std::string cookie);
 			std::string cookieString(std::string path) const;
-	        void closeConnection(std::shared_ptr<Connection> connection);
-	        typedef std::map<std::string, std::string> CookieParameters;
-			typedef std::pair<std::string, CookieParameters> Cookie;
-			typedef std::map<std::string, Cookie> CookieCollection;
+	        void closeConnection(ConnectionPtr connection);
 
-            void send(std::shared_ptr<HttpRequest> req);
-			void get(std::string url, std::function<void(std::shared_ptr<HttpRequest> request)> handler);
+            void send(HttpRequest &&request, ReadyHandler &&handler);
+
+			std::future<HttpResponse> send(HttpRequest &&request);
 
 	        boost::asio::io_service &service() const;
 
@@ -45,7 +49,7 @@ namespace vantagefx {
         private:
 
 			CookieCollection _cookies;
-            std::vector<std::shared_ptr<Connection>> _connections;
+            std::set<ConnectionPtr> _connections;
             boost::asio::io_service &_io_service;
             boost::asio::ssl::context &_context;
         };

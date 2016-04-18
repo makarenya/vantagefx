@@ -7,15 +7,20 @@
 
 #include <string>
 #include <vector>
+#include <boost/noncopyable.hpp>
 
 
 namespace vantagefx {
     namespace http {
 
-        class HttpResponse
+        class HttpResponse : public boost::noncopyable
         {
         public:
-            void setBody(std::string body);
+	        HttpResponse();
+	        HttpResponse(HttpResponse &&rhs);
+	        HttpResponse &operator=(HttpResponse &&rhs);
+
+	        void setBody(std::string body);
             std::string const &body() const;
             void addHeader(std::string key, std::string value);
             std::string header(std::string key) const;
@@ -29,7 +34,7 @@ namespace vantagefx {
             void setMinor(int minor);
             int minor() const;
 
-        private:
+		private:
             std::string _body;
             std::string _code;
             std::string _codeDescription;

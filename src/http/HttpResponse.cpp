@@ -13,7 +13,35 @@ namespace vantagefx {
             return _body;
         }
 
-        void HttpResponse::setBody(std::string body)
+	    HttpResponse::HttpResponse()
+			: _major(0),
+	          _minor(0)
+	    {}
+
+	    HttpResponse::HttpResponse(HttpResponse &&rhs)
+	    {
+		    _body = std::move(rhs._body);
+		    _code = std::move(rhs._code);
+		    _codeDescription = std::move(rhs._codeDescription);
+		    _headers = std::move(rhs._headers);
+		    _major = rhs._major;
+		    _minor = rhs._minor;
+	    }
+
+	    HttpResponse & HttpResponse::operator=(HttpResponse &&rhs)
+	    {
+		    if (&rhs != this) {
+			    _body = std::move(rhs._body);
+			    _code = std::move(rhs._code);
+			    _codeDescription = std::move(rhs._codeDescription);
+			    _headers = std::move(rhs._headers);
+			    _major = rhs._major;
+			    _minor = rhs._minor;
+		    }
+		    return *this;
+	    }
+
+	    void HttpResponse::setBody(std::string body)
         {
             _body = body;
         }

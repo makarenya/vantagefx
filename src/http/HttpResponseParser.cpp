@@ -14,7 +14,7 @@ namespace vantagefx {
                   _length(0)
         {}
 
-        ParserState HttpResponseParser::advance(char c)
+        ParserState HttpResponseParser::advance(char c, HttpResponse &response)
         {
             switch(_state) {
                 case Initial:
@@ -39,7 +39,7 @@ namespace vantagefx {
                     break;
                 case Major:
                     if (c >= '1' && c <= '9') {
-                        _response.setMajor(c - '0');
+                        response.setMajor(c - '0');
                         _state = Pnt;
                     }
                     else return Invalid;
@@ -50,7 +50,7 @@ namespace vantagefx {
                     break;
                 case Minor:
                     if (c >= '1' && c <= '9') {
-                        _response.setMinor(c - '0');
+                        response.setMinor(c - '0');
                         _state = VersionEnd;
                     }
                     else return Invalid;
@@ -62,7 +62,7 @@ namespace vantagefx {
                 case Code:
                     if (c == ' ') {
                         _state = CodeDescription;
-                        _response.setCode(_value);
+                        response.setCode(_value);
                         _value = "";
                     }
                     else if (c > ' ') _value += c;
@@ -71,7 +71,7 @@ namespace vantagefx {
                 case CodeDescription:
                     if (c == '\r') {
                         _state = Lf;
-                        _response.setCodeDescription(_value);
+                        response.setCodeDescription(_value);
                         _value = "";
                     }
                     else if (c >= ' ') _value += c;
@@ -90,7 +90,7 @@ namespace vantagefx {
                 case HeaderValue:
                     if (c == '\r') {
                         _state = Lf;
-                        _response.addHeader(boost::trim_copy(_key), boost::trim_copy(_value));
+                        response.addHeader(boost::trim_copy(_key), boost::trim_copy(_value));
                         _key = "";
                         _value = "";
                     }
@@ -99,7 +99,7 @@ namespace vantagefx {
                     break;
                 case EndLf:
                     if (c == '\n') {
-                        auto cl = _response.header("Content-Length");
+                        auto cl = response.header("Content-Length");
                         if (cl.empty()) _length = 0;
                         else _length = boost::lexical_cast<size_t>(cl);
                         if (_length == 0) {
@@ -114,7 +114,7 @@ namespace vantagefx {
                     _value += c;
                     if (--_length == 0) {
                         _state = Initial;
-                        _response.setBody(_value);
+                        response.setBody(_value);
                         _value = "";
 						return Complete;
                     }
@@ -123,15 +123,9 @@ namespace vantagefx {
             return Intermediate;
         }
 
-        HttpResponse &HttpResponseParser::response()
-        {
-            return _response;
-        }
-
 	    void HttpResponseParser::reset()
         {
 			_state = Initial;
-			_response = HttpResponse();
 			_key = "";
 			_value = "";
 			_length = 0;
