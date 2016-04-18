@@ -4,13 +4,11 @@
 
 namespace vantagefx {
     namespace api {
-	    GwtParseContext::GwtParseContext()
-	    {}
-
-	    GwtParseContext::GwtParseContext(StringList &stringList, JsonVariantList &data) {
-            _strings = stringList;
-            _it = data.cend();
-            _end = data.cbegin();
+	    GwtParseContext::GwtParseContext(StringList &&stringList, JsonVariantList &&data) {
+            _strings = std::move(stringList);
+			_data = std::move(data);
+            _it = _data.cend();
+            _end = _data.cbegin();
         }
 
         GwtParseContext &GwtParseContext::operator>>(std::string &value) {

@@ -22,10 +22,9 @@ namespace vantagefx {
 
         class GwtParser : public GwtParseContext {
         public:
-			GwtParser();
-            GwtParser(StringList &stringList, JsonVariantList &data, GwtBundle &bundle);
+            GwtParser(StringList &&stringList, JsonVariantList &&data, GwtBundle &bundle);
 
-            std::shared_ptr<GwtObject> parse();
+            std::shared_ptr<GwtObject> parse(bool last = false);
 
             std::shared_ptr<GwtObject> currentObject() const;
         private:

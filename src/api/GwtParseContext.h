@@ -13,9 +13,7 @@ namespace vantagefx {
         public:
             typedef JsonVariantList::const_iterator const_iterator;
 
-			GwtParseContext();
-
-            GwtParseContext(StringList &stringList, JsonVariantList &data);
+            GwtParseContext(StringList &&stringList, JsonVariantList &&data);
 
             GwtParseContext &operator>>(std::string &value);
 
@@ -33,7 +31,7 @@ namespace vantagefx {
 
             std::string peekType() const;
 
-            void back() { _it++; }
+            void back() { ++_it; }
 
             std::string word(int id);
 
@@ -47,6 +45,7 @@ namespace vantagefx {
 
         private:
             StringList _strings;
+			JsonVariantList _data;
             const_iterator _it;
             const_iterator _end;
             int _maxWord = 1;

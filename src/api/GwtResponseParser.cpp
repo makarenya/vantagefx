@@ -51,8 +51,9 @@ namespace vantagefx {
                 int_rule = int_ >> !double_;
 
                 json_item = int_rule | double_ | json_string;
-                data_list = +(json_item >> ',');
-                response = "//OK[" >> data_list >> '[' >> string_list >> ']' >> ',' >> int_ >> ',' >> int_ >> ']';
+                data_list = +(json_item >> (',' | qi::lit("].concat([")));
+				response = "//OK[" >> data_list >> '[' >> string_list >> ']' >> 
+					',' >> int_ >> ',' >> int_ >> ']' >> -qi::lit(')');
             }
 
             qi::rule<Iterator, GwtResponseData()> response;
@@ -69,15 +70,15 @@ namespace vantagefx {
 
 		GwtParser makeResponseParser(std::string response, GwtBundle &bundle) {
             ResponseParser<std::string::const_iterator> parser;
-            GwtResponseData data;
+			GwtResponseData data;
 
             auto it = response.cbegin();
             auto end = response.cend();
 
             if (parse(it, end, parser, data) && it == end) {
-				return GwtParser(data.strings, data.data, bundle);
+				return GwtParser(std::move(data.strings), std::move(data.data), bundle);
             }
-            return GwtParser();
+			throw std::runtime_error("GWT parse fails");
         }
     }
 }

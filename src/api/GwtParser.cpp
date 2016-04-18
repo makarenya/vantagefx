@@ -12,15 +12,12 @@
 namespace vantagefx {
     namespace api {
 
-	    GwtParser::GwtParser()
-			: _bundle(GwtBundle())
-	    {}
-
-	    GwtParser::GwtParser(StringList &stringList, JsonVariantList &data, GwtBundle &bundle)
-                : GwtParseContext(stringList, data),
+	    GwtParser::GwtParser(StringList &&stringList, JsonVariantList &&data, GwtBundle &bundle)
+                : GwtParseContext(std::move(stringList), std::move(data)),
                   _bundle(bundle) { }
 
-        GwtObjectPtr GwtParser::parse() {
+        GwtObjectPtr GwtParser::parse(bool last) {
+			if (eof()) return  GwtObjectPtr();
             int typeId;
             *this >> typeId;
             GwtObjectPtr obj;
@@ -43,6 +40,7 @@ namespace vantagefx {
                 it->parse(*this, obj);
                 _currentObject = oldObject;
             }
+			if (last && !eof()) throw std::runtime_error("not all fetched");
             return obj;
         }
     }
