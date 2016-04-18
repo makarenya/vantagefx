@@ -36,8 +36,9 @@ int main(int argc, char *argv[])
 		std::cout << "stop" << std::endl;
 	});
 
-	auto ctx = ssl::context(ssl::context::sslv23);
+	auto ctx = ssl::context(ssl::context::tlsv1_client);
 	ctx.load_verify_file(std::string(DATA_DIR) + "ca.cer");
+	ctx.set_options(ssl::context::default_workarounds);
 
 	HttpContext session(io_service, ctx);
 
