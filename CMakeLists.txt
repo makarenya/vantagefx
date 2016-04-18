@@ -82,7 +82,11 @@ set(SOURCE_FILES
         src/analyzer/FiddlerLogParser.h
         src/analyzer/GwtAnalyzer.cpp
         src/analyzer/GwtAnalyzer.h
-        src/http/Url.cpp src/http/Url.h)
+        src/http/Url.cpp
+        src/http/Url.h
+        src/GwtHttpRequest.cpp
+        src/GwtHttpRequest.h
+        )
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
