@@ -49,7 +49,14 @@ int main(int argc, char *argv[])
 	index.setClose(true);
 	auto index_response = session.send(std::move(index));
 
-	auto response = index_response.get();
+	HttpResponse response;
+    try {
+        response = index_response.get();
+    }
+    catch(std::exception &e) {
+        std::cout << e.what();
+        return 0;
+    }
 
 	auto rx = std::regex("var\\s+(\\w+)\\s*=\\s*'([^']+)'\\s*;");
 	std::smatch m;
