@@ -76,7 +76,7 @@ namespace vantagefx {
             HttpRequest _request;
 			HttpResponse _response;
             HttpResponseParser _parser;
-            std::array<char, 65536> _buffer;
+            std::array<char, 4096> _buffer;
 			ip::tcp::resolver _resolver;
 			std::atomic_bool _connected;
             bool _busy;
