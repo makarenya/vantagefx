@@ -25,6 +25,7 @@ namespace fs = boost::filesystem;
 
 int main(int argc, char *argv[]) 
 {
+	using namespace vantagefx;
 	using namespace vantagefx::http;
     using namespace vantagefx::analyzer;
 
@@ -36,7 +37,10 @@ int main(int argc, char *argv[])
 		std::cout << "stop" << std::endl;
 	});
 
-	auto ctx = ssl::context(ssl::context::tlsv1_client);
+	auto ctx = ssl::context(ssl::context::sslv23_client);
+	SSL_CTX_set_cipher_list(ctx.native_handle(), "TLSv1:SSLv3:SSLv2");
+
+
 	ctx.load_verify_file(std::string(DATA_DIR) + "ca.cer");
 	ctx.set_options(ssl::context::default_workarounds);
 
@@ -72,19 +76,11 @@ int main(int argc, char *argv[])
 
 	auto filename = fs::path(DATA_DIR) / "work" / "47_Full.txt";
 
-	vantagefx::GwtHttpRequest cookie("services/cookie");
+	auto cookie_response = session.send(GwtCookieRequest(keys["serverCookie"])).get().body();
 
-	auto data = "7|0|6|https://binaryoptions.vantagefx.com/app/Basic/|F37CB27F20251B873A47EC6A32F293C7|"
-		"com.optionfair.client.cookies.CookieSaver|saveCookie|java.lang.String/2004016611|" +
-		keys["serverCookie"] + "|1|2|3|4|1|5|6|";
+	auto lut =  session.send(std::move(GwtLutRequest())).get().body();
 
-	cookie.setContent(data);
-
-	auto cookie_response = session.send(std::move(cookie));
-
-	auto dd = cookie_response.get().body();
-
-	std::cout << dd;
+	std::cout << lut;
 
 	io_service.stop();
 	worker.join();
@@ -101,11 +97,8 @@ int main(int argc, char *argv[])
 	}
 	if (argc == 3 && std::string(argv[1]) == "find") {
 		auto entries = analyzer.parseEntries(filename);
-        GwtResponseData data;
-		data = ParseResponse(entries[1].response());
-        auto table = GwtParser(data.strings, data.data, bundle).parse();
-        data = ParseResponse(entries[16].response());
-        auto refresh = GwtParser(data.strings, data.data, bundle).parse();
+		auto table = makeResponseParser(entries[1].response(), bundle).parse();
+		auto refresh = makeResponseParser(entries[16].response(), bundle).parse();
 
 		std::vector<std::string> ids;
 		std::string query = argv[2];
@@ -139,9 +132,7 @@ int main(int argc, char *argv[])
 	}
 	if (argc > 3 && std::string(argv[1]) == "values") {
 		auto entries = analyzer.parseEntries(filename);
-		GwtResponseData data;
-		data = ParseResponse(entries[1].response());
-		auto table = GwtParser(data.strings, data.data, bundle).parse();
+		auto table = makeResponseParser(entries[1].response(), bundle).parse();
 
 		std::vector<std::string> ids;
 		for (auto i = 2; i < argc; i++)

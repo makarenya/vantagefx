@@ -12,7 +12,11 @@
 namespace vantagefx {
     namespace api {
 
-        GwtParser::GwtParser(StringList &stringList, JsonVariantList &data, GwtBundle &bundle)
+	    GwtParser::GwtParser()
+			: _bundle(GwtBundle())
+	    {}
+
+	    GwtParser::GwtParser(StringList &stringList, JsonVariantList &data, GwtBundle &bundle)
                 : GwtParseContext(stringList, data),
                   _bundle(bundle) { }
 

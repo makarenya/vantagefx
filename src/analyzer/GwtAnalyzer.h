@@ -20,11 +20,13 @@ namespace vantagefx {
         class GwtAnalyzer
         {
         public:
-            GwtAnalyzer(GwtBundle &bundle);
-            void processResponse(path dir, std::string name, std::string content);
-            GwtObjectPtr processEntry(path dir, std::string name, FiddlerLogEntry entry);
-            std::vector<FiddlerLogEntry> parseEntries(path filename);
-            std::vector<std::string> usedBy(GwtObjectPtr object, std::vector<std::string> ids);
+	        explicit GwtAnalyzer(GwtBundle &bundle);
+            void processResponse(path dir, std::string name, std::string content) const;
+			GwtObjectPtr processRequest(const std::string& request, QDomElement &body) const;
+			GwtObjectPtr processResponse(const std::string &text, QDomElement &body) const;
+	        GwtObjectPtr processEntry(path dir, std::string name, FiddlerLogEntry entry) const;
+            std::vector<FiddlerLogEntry> parseEntries(path filename) const;
+            std::vector<std::string> usedBy(GwtObjectPtr object, std::vector<std::string> ids) const;
         private:
             GwtBundle &_bundle;
         };

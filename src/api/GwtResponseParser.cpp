@@ -1,15 +1,15 @@
 #include <boost/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include "GwtValue.h"
 #include "GwtResponseParser.h"
-
 
 BOOST_FUSION_ADAPT_STRUCT(
         vantagefx::api::GwtResponseData,
         (vantagefx::api::JsonVariantList, data)
-                (vantagefx::api::StringList, strings)
-                (int, flags)
-                (int, version)
+        (vantagefx::api::StringList, strings)
+        (int, flags)
+        (int, version)
 );
 
 
@@ -67,7 +67,7 @@ namespace vantagefx {
             qi::symbols<char const, char const> unesc_char;
         };
 
-        GwtResponseData ParseResponse(std::string response) {
+		GwtParser makeResponseParser(std::string response, GwtBundle &bundle) {
             ResponseParser<std::string::const_iterator> parser;
             GwtResponseData data;
 
@@ -75,9 +75,9 @@ namespace vantagefx {
             auto end = response.cend();
 
             if (parse(it, end, parser, data) && it == end) {
-                return data;
+				return GwtParser(data.strings, data.data, bundle);
             }
-            return GwtResponseData();
+            return GwtParser();
         }
     }
 }

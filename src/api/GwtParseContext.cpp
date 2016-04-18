@@ -4,7 +4,10 @@
 
 namespace vantagefx {
     namespace api {
-        GwtParseContext::GwtParseContext(StringList &stringList, JsonVariantList &data) {
+	    GwtParseContext::GwtParseContext()
+	    {}
+
+	    GwtParseContext::GwtParseContext(StringList &stringList, JsonVariantList &data) {
             _strings = stringList;
             _it = data.cend();
             _end = data.cbegin();

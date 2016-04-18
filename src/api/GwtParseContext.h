@@ -13,6 +13,8 @@ namespace vantagefx {
         public:
             typedef JsonVariantList::const_iterator const_iterator;
 
+			GwtParseContext();
+
             GwtParseContext(StringList &stringList, JsonVariantList &data);
 
             GwtParseContext &operator>>(std::string &value);

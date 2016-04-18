@@ -5,12 +5,12 @@
 #ifndef QT_SECOND_RESPONSEPARSER_H
 #define QT_SECOND_RESPONSEPARSER_H
 
-#include "GwtResponseData.h"
+#include "GwtParser.h"
 
 namespace vantagefx {
     namespace api {
-
-        GwtResponseData ParseResponse(std::string response);
+	    class GwtBundle;
+	    GwtParser makeResponseParser(std::string respons, GwtBundle &bundlee);
     }
 }
 

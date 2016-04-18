@@ -6,11 +6,11 @@
 #define VANTAGEFX_GWTREQUESTPARSER_H
 
 #include <string>
-#include "GwtResponseData.h"
+#include "GwtParser.h"
 
 namespace vantagefx {
     namespace api {
-        GwtResponseData ParseRequest(std::string content);
+        GwtParser makeRequestParser(std::string content, GwtBundle &bundle);
     }
 }
 

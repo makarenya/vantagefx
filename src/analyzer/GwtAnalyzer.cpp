@@ -14,8 +14,6 @@
 #include "FiddlerLogParser.h"
 #include "FiddlerLogEntry.h"
 
-
-
 namespace vantagefx {
     namespace analyzer {
         using namespace api;
@@ -25,83 +23,69 @@ namespace vantagefx {
                 : _bundle(bundle) { }
 
 
-        void GwtAnalyzer::processResponse(fs::path dir, std::string name, std::string content)
+        void GwtAnalyzer::processResponse(fs::path dir, std::string name, std::string content) const
         {
-            auto data = ParseResponse(content);
-            fs::create_directory(dir / "results");
-            if (data.version == 7) {
-                GwtParser parser(data.strings, data.data, _bundle);
-                try {
-                    fs::path report = dir / "results" / (name + "_response.xml");
-                    auto result = parser.parse();
-                    QDomDocument document;
-                    auto body = document.createElement("request");
-                    result->xml(body);
-                    document.appendChild(body);
-                    QFile fs(report.string().c_str());
-                    fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
-                    fs.write(document.toByteArray());
-                    fs.close();
-                    parser.print(std::cout, 100);
-                }
-                catch (std::exception &ex) {
-                    std::cout << ex.what() << std::endl;
-                    parser.print(std::cout, 20);
-                }
-            }
+	        auto report = dir / "results" / (name + "_response.xml");
+            QDomDocument document;
+            auto body = document.createElement("response");
+			processResponse(content, body);
+			body.appendChild(body);
+            QFile fs(report.string().c_str());
+            fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
+            fs.write(document.toByteArray());
+            fs.close();
         }
 
-        GwtObjectPtr GwtAnalyzer::processEntry(fs::path dir, std::string name, FiddlerLogEntry entry)
-        {
+		GwtObjectPtr GwtAnalyzer::processResponse(const std::string &text, QDomElement &body) const
+		{
+			GwtObjectPtr result;
+			auto parser = makeResponseParser(text, _bundle);
+			try {
+				result = parser.parse();
+				auto response = body.ownerDocument().createElement("response");
+				result->xml(response);
+				body.appendChild(response);
+				parser.print(std::cout, 100);
+			}
+			catch (std::exception &ex) {
+				std::cout << ex.what() << std::endl;
+				parser.print(std::cout, 20);
+			}
+			return result;
+		}
+
+		GwtObjectPtr GwtAnalyzer::processRequest(const std::string& text, QDomElement &body) const
+	    {
+			GwtObjectPtr result;
+			auto parser = makeRequestParser(text, _bundle);
+		    GwtTypePtr type = std::make_shared<GwtRequestType>();
+		    try {
+			    result = std::make_shared<GwtObject>(type);
+			    type->parse(parser, result);
+			    auto request = body.ownerDocument().createElement("request");
+			    result->xml(request);
+			    body.appendChild(request);
+			    parser.print(std::cout, 100);
+		    }
+		    catch (std::exception &ex) {
+			    std::cout << ex.what() << std::endl;
+			    parser.print(std::cout, 20);
+		    }
+			return result;
+	    }
+
+	    GwtObjectPtr GwtAnalyzer::processEntry(fs::path dir, std::string name, FiddlerLogEntry entry) const
+	    {
             fs::create_directory(dir / "results");
-            fs::path report = dir / "results" / (name + ".xml");
+	        auto report = dir / "results" / (name + ".xml");
             QDomDocument document;
             auto body = document.createElement("entry");
             body.setAttribute("method", entry.method().c_str());
             body.setAttribute("url", entry.url().c_str());
             body.setAttribute("code", entry.code().c_str());
 
-            auto data = ParseRequest(entry.request());
-            if (data.version == 7) {
-                GwtParser parser(data.strings, data.data, _bundle);
-                GwtTypePtr type = std::make_shared<GwtRequestType>();
-                try {
-                    GwtObjectPtr result = std::make_shared<GwtObject>(type);
-                    type->parse(parser, result);
-                    auto request = document.createElement("request");
-                    result->xml(request);
-                    body.appendChild(request);
-                    parser.print(std::cout, 100);
-                }
-                catch (std::exception &ex) {
-                    std::cout << ex.what() << std::endl;
-                    parser.print(std::cout, 20);
-                }
-            }
-            GwtObjectPtr result;
-            data = ParseResponse(entry.response());
-            if (data.version == 7) {
-                GwtParser parser(data.strings, data.data, _bundle);
-                try {
-                    result = parser.parse();
-                    auto response = document.createElement("response");
-                    result->xml(response);
-
-                    /*
-                    GwtValue search(50);
-                    std::vector<std::string> found;
-                    result->find(search, found);
-                    auto value = result->get("verifications/[Account]");
-                    */
-
-                    body.appendChild(response);
-                    parser.print(std::cout, 100);
-                }
-                catch (std::exception &ex) {
-                    std::cout << ex.what() << std::endl;
-                    parser.print(std::cout, 20);
-                }
-            }
+	        processRequest(entry.request(), body);
+			auto result = processResponse(entry.response(), body);
             document.appendChild(body);
             QFile fs(report.string().c_str());
             fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
@@ -110,7 +94,7 @@ namespace vantagefx {
             return result;
         }
 
-        std::vector<FiddlerLogEntry> GwtAnalyzer::parseEntries(fs::path filename)
+        std::vector<FiddlerLogEntry> GwtAnalyzer::parseEntries(fs::path filename) const
         {
             std::vector<FiddlerLogEntry> result;
             if (!fs::exists(filename) || !fs::is_regular_file(filename)) return result;
@@ -131,7 +115,7 @@ namespace vantagefx {
             return result;
         }
 
-        std::vector<std::string> GwtAnalyzer::usedBy(GwtObjectPtr object, std::vector<std::string> ids)
+        std::vector<std::string> GwtAnalyzer::usedBy(GwtObjectPtr object, std::vector<std::string> ids) const
         {
             std::vector<std::string> variants;
             std::vector<std::string> old;
