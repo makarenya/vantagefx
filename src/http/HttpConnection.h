@@ -24,7 +24,7 @@ namespace vantagefx {
         class Connection : public std::enable_shared_from_this<Connection>
         {
         public:
-	        explicit Connection(HttpContext &context, const std::string &scheme, const std::string &host, int port);
+	        Connection(HttpContext &context, const std::string &scheme, const std::string &host, int port);
 
             virtual ~Connection() { }
 

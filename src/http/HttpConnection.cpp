@@ -9,10 +9,12 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <boost/bind.hpp>
-#include <winhttp.h>
 #include <boost/locale/encoding_utf.hpp>
 #include <boost/lexical_cast.hpp>
 
+#ifdef WINVER
+#include <winhttp.h>
+#endif
 
 namespace vantagefx {
     namespace http {
@@ -20,15 +22,17 @@ namespace vantagefx {
         namespace pl = asio::placeholders;
 
         Connection::Connection(HttpContext &context, const std::string &scheme, const std::string &host, int port)
-            : _host(host),
+            : _scheme(scheme),
+              _host(host),
               _port(port),
-              _scheme(scheme),
 			  _context(context),
 			  _resolver(context.service()),
-			  _connected(false)
+			  _connected(false),
+			  _busy(false)
         {
 			std::string proxyAddress;
 
+#ifdef WINVER
 			WINHTTP_CURRENT_USER_IE_PROXY_CONFIG proxy;
 			if (WinHttpGetIEProxyConfigForCurrentUser(&proxy)) {
 				if (proxy.lpszProxy) {
@@ -68,6 +72,9 @@ namespace vantagefx {
 					break;
 				}
 			}
+#else
+			proxyAddress = getenv("https_proxy");
+#endif
 			if (!value.empty()) list[key] = value;
 			std::string schemeAddress;
 			if (list.size() == 0) {
