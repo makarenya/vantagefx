@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
 	std::map<std::string, std::string> keys;
 
 	HttpRequest index(url);
-	index.setClose(true);
 	auto index_response = session.send(std::move(index));
 
 	HttpResponse response;
@@ -54,7 +53,9 @@ int main(int argc, char *argv[])
         response = index_response.get();
     }
     catch(std::exception &e) {
-        std::cout << e.what();
+		std::cout << e.what() << std::endl;
+		io_service.stop();
+		worker.join();
         return 0;
     }
 
