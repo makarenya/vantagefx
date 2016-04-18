@@ -24,7 +24,7 @@ namespace vantagefx {
             _url = strings[get<int>(*item++)];
             _strongName = strings[get<int>(*item++)];
             if (_flags && RpcTokenIcluded) {
-                throw new std::runtime_error("rpc token not supported");
+                throw std::runtime_error("rpc token not supported");
             }
             _serviceName = strings[get<int>(*item++)];
             _methodName = strings[get<int>(*item++)];
@@ -59,7 +59,7 @@ namespace vantagefx {
                         else if (c == '$') result += 62;
                         else if (c == '_') result += 63;
                         else if (c != '=') {
-                            throw new std::runtime_error("invalid base64 symbol");
+                            throw std::runtime_error("invalid base64 symbol");
                         }
                     }
                     std::stringstream stream;

@@ -42,7 +42,7 @@ namespace vantagefx {
             if (c == '$') return 62;
             if (c == '_') return 63;
             if (c == '=') return 0;
-            throw new std::runtime_error("invalid base64 symbol");
+            throw std::runtime_error("invalid base64 symbol");
         }
 
         GwtParseContext &GwtParseContext::operator>>(int64_t &value) {
