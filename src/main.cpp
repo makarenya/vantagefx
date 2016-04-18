@@ -17,6 +17,7 @@
 #include <thread>
 #include <regex>
 #include <boost/locale.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 
 using namespace vantagefx::api;
@@ -45,6 +46,8 @@ int main(int argc, char *argv[])
 	ctx.set_options(ssl::context::default_workarounds);
 
 	HttpContext session(io_service, ctx);
+
+    GwtVantageFxBundle bundle;
 
 	std::string url = "https://binaryoptions.vantagefx.com/app/index.html";
 
@@ -78,15 +81,24 @@ int main(int argc, char *argv[])
 
 	auto cookie_response = session.send(GwtCookieRequest(keys["serverCookie"])).get().body();
 
-	auto lut =  session.send(std::move(GwtLutRequest())).get().body();
+	auto lut_parser = makeResponseParser(session.send(std::move(GwtLutRequest())).get().body(), bundle);
 
-	std::cout << lut;
+	GwtObjectPtr lut;
+	
+	try {
+		lut = lut_parser.parse(true);
+	} catch(std::exception &e) {
+		std::cout << e.what() << std::endl;
+	}
+
+    for(auto id: GwtQuery(lut, "lutTypes/[name='InstrumentTypeSuper']/luts/[name='ShortTerm']/id")) {
+        std::cout << id.second.toString() << std::endl;
+    }
 
 	io_service.stop();
 	worker.join();
 	return 0;
 
-    GwtVantageFxBundle bundle;
 	GwtAnalyzer analyzer(bundle);
 	if (argc == 2) {
 		if (!fs::is_regular_file(argv[1])) {
