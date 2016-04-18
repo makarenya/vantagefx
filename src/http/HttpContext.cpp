@@ -143,9 +143,6 @@ namespace vantagefx {
 				else
 					_promise->set_value(std::move(response));
 			}
-			SendHandler(SendHandler &&rhs) { _promise = std::move(rhs._promise); }
-		private:
-			SendHandler(SendHandler &rhs) { _promise = rhs._promise; }
 			std::shared_ptr<std::promise<HttpResponse>> _promise;
         };
 
