@@ -18,8 +18,11 @@ namespace vantagefx {
                 query = ('[' >> (entry | self) >> '=' >> value >> ']')[qi::_val = boost::phoenix::construct<GwtPathExpression>(
                         qi::_1, qi::_2)];
 				self = qi::lit('.') >> &qi::lit('=')[qi::_val = boost::phoenix::construct<GwtPath>()];
-				value = quoted | string;
-                quoted = qi::lexeme['\'' >> *(escape | (qi::char_ - '\'')) >> '\''];
+				value = quoted | int_value | long_value | double_value;
+				int_value = qi::int_ >> &qi::lit(']');
+				long_value = qi::long_long >> &qi::lit(']');
+				double_value = qi::double_ >> &qi::lit(']');
+				quoted = qi::lexeme['\'' >> *(escape | (qi::char_ - '\'')) >> '\''];
                 simple = string[qi::_val = boost::phoenix::construct<GwtPathExpression>(qi::_1)];
                 any = qi::lit('*') >> -qi::lit('*')[qi::_val = boost::phoenix::construct<GwtPathExpression>(false)];
 				many = qi::lit("**")[qi::_val = boost::phoenix::construct<GwtPathExpression>(true)];
@@ -41,7 +44,10 @@ namespace vantagefx {
             qi::rule<Iterator, GwtPathExpression(), Skipper> simple;
             qi::rule<Iterator, GwtPathExpression(), Skipper> any;
             qi::rule<Iterator, GwtPathExpression(), Skipper> many;
-			qi::rule<Iterator, std::string(), Skipper> value;
+			qi::rule<Iterator, GwtValue(), Skipper> value;
+			qi::rule<Iterator, int, Skipper> int_value;
+			qi::rule<Iterator, int64_t, Skipper> long_value;
+			qi::rule<Iterator, double, Skipper> double_value;
             qi::rule<Iterator, std::string(), Skipper> quoted;
             qi::rule<Iterator, std::string(), Skipper> string;
             qi::symbols<const char, const char> escape;
@@ -50,7 +56,7 @@ namespace vantagefx {
         GwtPathExpression::GwtPathExpression(bool deep)
                 : _deep(deep) { }
 
-        GwtPathExpression::GwtPathExpression(GwtPath filterPath, std::string filterValue)
+        GwtPathExpression::GwtPathExpression(GwtPath filterPath, GwtValue filterValue)
                 : _deep(false),
                   _filterPath(filterPath),
                   _filterValue(filterValue) { }

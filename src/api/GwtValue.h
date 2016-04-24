@@ -15,26 +15,22 @@ namespace vantagefx {
 
         class GwtParser;
 
-        class GwtValue;
-
         class GwtObject;
-
-        typedef std::shared_ptr<GwtValue> GwtValuePtr;
 
         class GwtValue {
         public:
 
             GwtValue();
 
-            GwtValue(int value);
+            explicit GwtValue(int value);
 
-            GwtValue(int64_t value);
+			explicit GwtValue(int64_t value);
 
-            GwtValue(double value);
+			explicit GwtValue(double value);
 
-            GwtValue(std::string value);
+			explicit GwtValue(std::string value);
 
-            GwtValue(std::shared_ptr<GwtObject> value);
+			explicit GwtValue(std::shared_ptr<GwtObject> value);
 
 			GwtValue(int value, std::string string);
 
@@ -44,7 +40,7 @@ namespace vantagefx {
 
             int64_t longValue() const;
 
-            std::shared_ptr<GwtObject> &objectValue();
+            const std::shared_ptr<GwtObject> &objectValue() const;
 
             const std::string &stringValue() const;
 
@@ -54,14 +50,22 @@ namespace vantagefx {
 
 			int64_t toLong() const;
 
+			bool empty() const;
+
 			std::string toString() const;
 
 			std::shared_ptr<GwtObject> toObject();
+
+			bool operator==(const GwtValue &rhs) const;
+
+			bool operator!=(const GwtValue &rhs) const;
 
 		private:
             boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>> _value;
             std::string _string;
         };
+
+		inline bool GwtValue::operator!=(const GwtValue &rhs) const { return !(rhs == *this); }
     }
 }
 

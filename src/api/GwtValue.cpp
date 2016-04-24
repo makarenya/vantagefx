@@ -130,7 +130,8 @@ namespace vantagefx {
 			return boost::get<int64_t>(_value);
 		}
 
-        std::shared_ptr<GwtObject> &GwtValue::objectValue() {
+        const std::shared_ptr<GwtObject> &GwtValue::objectValue() const
+		{
             return boost::get<std::shared_ptr<GwtObject>>(_value);
         }
 
@@ -171,6 +172,11 @@ namespace vantagefx {
 			return result;
 		}
 
+	    bool GwtValue::empty() const
+		{
+			return _value.empty();
+		}
+
 	    std::string GwtValue::toString() const
 		{
 			if (!_string.empty()) return _string;
@@ -184,7 +190,13 @@ namespace vantagefx {
 			return boost::apply_visitor(visitor, _value);
 		}
 
-		GwtValue::GwtValue(int value, std::string string)
+	    bool GwtValue::operator==(const GwtValue &rhs) const
+	    {
+			if (!_string.empty() && _string == rhs._string) return true;
+			return _value == rhs._value;
+		}
+
+	    GwtValue::GwtValue(int value, std::string string)
 			: _value(value),
 			  _string(string) { }
 

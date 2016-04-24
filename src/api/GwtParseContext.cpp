@@ -64,16 +64,6 @@ namespace vantagefx {
             return *this;
         }
 
-        std::string GwtParseContext::typeName(int id) {
-            using boost::algorithm::split;
-            using boost::algorithm::is_any_of;
-
-            auto name = word(id);
-            std::vector<std::string> parts;
-            split(parts, name, is_any_of("/"));
-            return parts[0];
-        }
-
         struct print_visitor : boost::static_visitor<std::ostream &> {
             print_visitor(std::ostream &stream, GwtParseContext &ctx)
                     : _ctx(ctx),

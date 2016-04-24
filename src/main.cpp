@@ -89,11 +89,16 @@ int main(int argc, char *argv[])
 		lut = lut_parser.parse(true);
 	} catch(std::exception &e) {
 		std::cout << e.what() << std::endl;
+		lut_parser.back(10);
+		lut_parser.print(std::cout, 9);
+		std::cout << ">>> ";
+		lut_parser.print(std::cout, 100);
 	}
 
-    for(auto id: GwtQuery(lut, "lutTypes/[name='InstrumentTypeSuper']/luts/[name='ShortTerm']/id")) {
-        std::cout << id.second.toString() << std::endl;
-    }
+
+	auto id = GwtQuery(lut, "lutTypes/[name='InstrumentTypeSuper']/luts/[name='ShortTerm']/id").first();
+
+	std::cout << id.toString() << std::endl;
 
 	io_service.stop();
 	worker.join();
@@ -114,8 +119,8 @@ int main(int argc, char *argv[])
 
 		std::vector<std::string> ids;
 		std::string query = argv[2];
-		for (auto id : GwtQuery(refresh, query)) {
-			ids.push_back(id.second.toString());
+		for (auto &id : GwtQuery(refresh, query)) {
+			ids.push_back(id.value.toString());
 		}
 
 		std::sort(ids.begin(), ids.end());
@@ -178,7 +183,7 @@ int main(int argc, char *argv[])
 			i++;
 		}
 		fs::create_directory(filename.parent_path() / "tables");
-		bundle.printTables(filename.parent_path() / "tables");
+		//bundle.printTables(filename.parent_path() / "tables");
     }
 	return 0;
 

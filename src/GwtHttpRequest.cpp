@@ -15,6 +15,18 @@ namespace vantagefx {
         addHeader("Content-Type", "text/x-gwt-rpc; charset=UTF-8");
     }
 
+    GwtAuthRequest::GwtAuthRequest(const std::string &login, const std::string &password, const std::string &server)
+            : GwtHttpRequest("AccountService")
+    {
+        std::string body = "7|0|8|https://binaryoptions.vantagefx.com/app/Basic/|413A5B61C75C56589A1EA33BAB70D8D3|";
+        body += "com.optionfair.client.common.services.AccountService|login|java.lang.String/2004016611|";
+        body += login + "|";
+        body += password + "|";
+        body += server + "|1|2|3|4|3|5|5|5|6|7|8|";
+
+        setContent(body);
+    }
+
     GwtCookieRequest::GwtCookieRequest(const std::string &serverCookie)
             : GwtHttpRequest("cookie") 
 	{
@@ -32,6 +44,3 @@ namespace vantagefx {
                            "com.optionfair.client.common.services.LutService|getAll|1|2|3|4|0|");
     }
 }
-
-
-

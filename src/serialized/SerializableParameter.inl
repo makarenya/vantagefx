@@ -28,7 +28,7 @@ namespace vantagefx {
             }
 
             static std::shared_ptr<SerializableParameter> create(int typeId, GwtParseContext &ctx) {
-                auto typeName = ctx.typeName(typeId);
+                auto typeName = ctx.word(typeId);
 
                 if (typeName == GwtReflectedType<IntegerParameter>::className()) {
                     auto value = std::make_shared<IntegerParameter>();

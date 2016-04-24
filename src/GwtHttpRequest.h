@@ -15,6 +15,11 @@ namespace vantagefx {
 	    explicit GwtHttpRequest(const std::string &uri);
     };
 
+    class GwtAuthRequest : public GwtHttpRequest {
+    public:
+        GwtAuthRequest(const std::string &login, const std::string &password, const std::string &server);
+    };
+
     class GwtCookieRequest : public GwtHttpRequest {
     public:
 	    explicit GwtCookieRequest(const std::string &serverCookie);

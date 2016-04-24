@@ -24,26 +24,27 @@ namespace vantagefx {
         class GwtType {
         public:
 
-            explicit GwtType(std::string name)
-                    : _name(name) { }
+			explicit GwtType(std::string name)
+				: _pointer(fptr("pointer")), 
+				_name(name) { }
 
             virtual ~GwtType() { }
-
-            virtual void printTable(std::ostream &stream) { }
 
             virtual void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) = 0;
 
             virtual void xml(GwtObject &object, QDomElement &parent) = 0;
 
-            virtual void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) = 0;
-
-            virtual bool empty() const { return true; }
+            virtual void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const = 0;
 
 			virtual std::string primary() const { return ""; }
 
             const std::string &name() const { return _name; }
 
-			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
+			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object, 
+				GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
+
+		protected:
+			GwtFieldPtr _pointer;
 
         private:
             std::string _name;
@@ -57,22 +58,20 @@ namespace vantagefx {
 
             std::vector<std::shared_ptr<GwtField>> &fields();
 
-            void printTable(std::ostream &stream) override;
-
             void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
 
             void xml(GwtObject &object, QDomElement &parent) override;
 
-            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
+            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
 			std::shared_ptr<GwtField> field(std::string name);
 
-            virtual bool empty() const override { return _created.size() == 0; }
-
 			std::string primary() const override;
 
+			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object,
+				GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
+
 		private:
-            std::vector<std::weak_ptr<GwtObject>> _created;
             std::vector<std::shared_ptr<GwtField>> _fields;
             std::string _primary;
         };
@@ -86,7 +85,7 @@ namespace vantagefx {
 
             void xml(GwtObject &object, QDomElement &parent) override;
 
-            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
+            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
 			std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path) override;
 		};
@@ -100,7 +99,7 @@ namespace vantagefx {
 
             void xml(GwtObject &object, QDomElement &parent) override;
 
-            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
+            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
 		private:
             int _skip;
@@ -114,27 +113,11 @@ namespace vantagefx {
 
 			void xml(GwtObject &object, QDomElement &parent) override;
 
-			void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
+			void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
 		private:
 			std::vector<std::shared_ptr<GwtField>> _fields;
 		};
-
-        class GwtSimpleType : public GwtType {
-        public:
-            GwtSimpleType(std::string name, std::shared_ptr<GwtField> type);
-
-            void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
-
-            void xml(GwtObject &object, QDomElement &parent) override;
-
-            void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) override;
-
-			std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path) override;
-
-		private:
-            std::shared_ptr<GwtField> _field;
-        };
 
         typedef std::shared_ptr<GwtType> GwtTypePtr;
     }

@@ -11,6 +11,7 @@
 #include "GwtField.h"
 #include "GwtPathExpression.h"
 #include <boost/filesystem.hpp>
+#include "GwtValue.h"
 #include <iterator>
 
 namespace vantagefx {
@@ -19,8 +20,6 @@ namespace vantagefx {
         class GwtType;
 
         class GwtParser;
-
-        class GwtValue;
 
         class GwtIterator;
 
@@ -32,13 +31,15 @@ namespace vantagefx {
 
             void xml(QDomElement &element);
 
-            std::map<std::string, std::shared_ptr<GwtValue>> &values();
+            void saveXml(boost::filesystem::path filename);
 
-            std::shared_ptr<GwtValue> &value(const std::string &name);
+            std::map<std::string, GwtValue> &values();
 
-			const std::shared_ptr<GwtValue> &value(const std::string &name) const;
+            GwtValue &value(const std::string &name);
 
-            void addValue(std::string name, std::shared_ptr<GwtValue> value);
+			const GwtValue &value(const std::string &name) const;
+
+            void addValue(std::string name, GwtValue &&value);
 
             std::shared_ptr<GwtType> type() const;
 
@@ -53,17 +54,17 @@ namespace vantagefx {
 
         private:
             std::shared_ptr<GwtType> _type;
-            std::map<std::string, std::shared_ptr<GwtValue>> _values;
+            std::map<std::string, GwtValue> _values;
         };
 
         template<typename T>
         void GwtObject::add(std::string name, T value) {
-            addValue(name, std::make_shared<GwtValue>(value));
+            addValue(name, GwtValue(value));
         }
 
         template<>
         inline void GwtObject::add(std::string name, std::string value) {
-            addValue(name, std::make_shared<GwtValue>(0, value));
+            addValue(name, GwtValue(0, value));
         }
 
         inline std::shared_ptr<GwtType> GwtObject::type() const

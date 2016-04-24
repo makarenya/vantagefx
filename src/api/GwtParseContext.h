@@ -31,13 +31,11 @@ namespace vantagefx {
 
             std::string peekType() const;
 
-            void back() { ++_it; }
+            void back(int count) { for(auto i = 0; i < count; ++i) ++_it; }
 
             std::string word(int id);
 
             std::string str(int id);
-
-            std::string typeName(int id);
 
             void print(std::ostream &stream, int count);
 

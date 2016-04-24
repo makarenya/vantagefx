@@ -40,8 +40,6 @@ namespace vantagefx {
 
             std::shared_ptr<GwtType> type(std::string name);
 
-            void printTables(boost::filesystem::path directory);
-
         private:
             std::map<std::string, std::shared_ptr<GwtType>> _types;
         };

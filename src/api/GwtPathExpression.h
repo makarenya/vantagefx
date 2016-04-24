@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include "GwtValue.h"
 
 namespace vantagefx {
     namespace api {
@@ -24,20 +26,20 @@ namespace vantagefx {
 
             explicit GwtPathExpression(std::string name);
 
-            GwtPathExpression(GwtPath filterPath, std::string filterValue);
+            GwtPathExpression(GwtPath filterPath, GwtValue filterValue);
 
             static GwtPath parse(std::string path);
 
             std::string const &name() const { return _name; }
             bool deep() const { return _deep; }
             std::vector<GwtPathExpression> const &filterPath() const { return _filterPath; }
-            std::string const &filterValue() const { return _filterValue; }
+			GwtValue const &filterValue() const { return _filterValue; }
 
         private:
             bool _deep;
             std::string _name;
             GwtPath _filterPath;
-            std::string _filterValue;
+			GwtValue _filterValue;
         };
     }
 }

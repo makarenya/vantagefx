@@ -29,9 +29,9 @@ namespace vantagefx {
                 obj = _fetched[key];
             }
             else {
-                auto it = _bundle.type(typeName(typeId));
+                auto it = _bundle.type(word(typeId));
                 if (!it) {
-                    throw ParseError("type " + typeName(typeId) + " not found");
+                    throw ParseError("type " + word(typeId) + " not found");
                 }
                 obj = std::make_shared<GwtObject>(it);
                 _fetched.push_back(obj);

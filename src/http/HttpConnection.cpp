@@ -30,9 +30,10 @@ namespace vantagefx {
 			  _connected(false),
 			  _busy(false)
         {
-			std::string proxyAddress;
+			std::string schemeAddress;
 
 #ifdef WINVER
+			std::string proxyAddress;
 			WINHTTP_CURRENT_USER_IE_PROXY_CONFIG proxy;
 			if (WinHttpGetIEProxyConfigForCurrentUser(&proxy)) {
 				if (proxy.lpszProxy) {
@@ -72,11 +73,7 @@ namespace vantagefx {
 					break;
 				}
 			}
-#else
-			proxyAddress = getenv("https_proxy");
-#endif
 			if (!value.empty()) list[key] = value;
-			std::string schemeAddress;
 			if (list.size() == 0) {
 				schemeAddress = proxyAddress;
 			}
@@ -84,6 +81,9 @@ namespace vantagefx {
 				auto it = list.find(scheme);
 				if (it != list.end()) schemeAddress = it->second;
 			}
+#else
+			schemeAddress = getenv("https_proxy");
+#endif
 			if (!schemeAddress.empty()) {
 				Url proxyUrl(schemeAddress);
 				_proxy = proxyUrl.host();

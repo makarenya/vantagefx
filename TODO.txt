@@ -8,6 +8,11 @@ Account 20k:
     Demo Account Number: 123292603
     Password: abG82
 
+Live:
+    Account Number: 26251
+    Password: 3361e6c1147f89e
+    Server: Live1
+
 Слева вверху открываешь закладку Short-Term, 60 seconds. Там 10 пар валют.
 Справа, есть градусник Trader's Choice с процентами. Он разный для каждой пары и обновляется каждые 2 секунды.
 
@@ -33,3 +38,8 @@ Account 20k:
 Лёш, ещё тебя хотел попросить, можешь сделать так, чтобы задержку можно было регулировать в ручную.
 Скажем от 10 сек до 10 мин. Я имею ввиду задержку следующего трейда по той же паре если % не изменился
 и подходит под критерии. Ок?
+
+
+7|0|8|https://binaryoptions.vantagefx.com/app/Basic/|26201133F5BDFF1A4241D2C02A077028|com.optionfair.client.common.services.AccountService|login|java.lang.String/2004016611|26251|3361e6c1147f89e|live|1|2|3|4|3|5|5|5|6|7|8|
+7|0|8|https://binaryoptions.vantagefx.com/app/Basic/|413A5B61C75C56589A1EA33BAB70D8D3|com.optionfair.client.common.services.AccountService|login|java.lang.String/2004016611|26251|3361e6c1147f89e|live|1|2|3|4|3|5|5|5|6|7|8|
+7|0|5|https://binaryoptions.vantagefx.com/app/Basic/|413A5B61C75C56589A1EA33BAB70D8D3|com.optionfair.client.common.services.AccountService|updateTimezoneOffset|I|1|2|3|4|1|5|-180|

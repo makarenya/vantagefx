@@ -9,6 +9,7 @@
 #include <ostream>
 #include <memory>
 #include <vector>
+#include "GwtValue.h"
 
 class QDomElement;
 
@@ -21,9 +22,11 @@ namespace vantagefx {
 			XmlFieldValue // Печатается для последующей вставки как значение в xml
         };
 
-        class GwtValue;
-
         class GwtParser;
+
+		class GwtField;
+
+		typedef std::shared_ptr<GwtField> GwtFieldPtr;
 
         class GwtField {
         public:
@@ -37,13 +40,13 @@ namespace vantagefx {
 
             virtual std::string type() const = 0;
 
-            virtual std::shared_ptr<GwtValue> parse(GwtParser &parser) = 0;
+            virtual GwtValue parse(GwtParser &parser) = 0;
 
-            virtual void xml(std::shared_ptr<GwtValue> &value, QDomElement &parent) const;
+            virtual void xml(const GwtValue &value, QDomElement &parent) const;
 
 			virtual bool equal(const GwtValue &value, const GwtValue &other) const = 0;
 
-            virtual void print(std::shared_ptr<GwtValue> &value, std::ostream &stream, GwtPrintStyle style) const = 0;
+            virtual void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const = 0;
 
             virtual std::string factor() const = 0;
 
@@ -51,19 +54,19 @@ namespace vantagefx {
             std::string _name;
         };
 
-        std::shared_ptr<GwtField> flng(const std::string &name);
+		GwtFieldPtr flng(const std::string &name);
 
-        std::shared_ptr<GwtField> fint(const std::string &name);
+		GwtFieldPtr fint(const std::string &name);
 
-        std::shared_ptr<GwtField> fstd(const std::string &name);
+		GwtFieldPtr fstd(const std::string &name);
 
-        std::shared_ptr<GwtField> fdbl(const std::string &name);
+        GwtFieldPtr fdbl(const std::string &name);
 
-        std::shared_ptr<GwtField> fdte(const std::string &name);
+        GwtFieldPtr fdte(const std::string &name);
 
-        std::shared_ptr<GwtField> fstr(const std::string &name);
+        GwtFieldPtr fstr(const std::string &name);
 
-        std::shared_ptr<GwtField> fptr(const std::string &name);
+        GwtFieldPtr fptr(const std::string &name);
     }
 }
 

@@ -124,10 +124,10 @@ namespace vantagefx {
                 GwtValue search(id);
                 std::vector<std::string> found;
                 for (auto pair : GwtQuery(object, "**/" + id)) {
-                    found.push_back(pair.first);
+                    found.push_back(pair.path);
                 }
                 for (auto pair : GwtQuery(object, "**/[.=" + id + "]")) {
-                    found.push_back(pair.first);
+                    found.push_back(pair.path);
                 }
                 variants.clear();
                 for (auto item : found) {
