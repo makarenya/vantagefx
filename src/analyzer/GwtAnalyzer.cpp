@@ -115,18 +115,17 @@ namespace vantagefx {
             return result;
         }
 
-        std::vector<std::string> GwtAnalyzer::usedBy(GwtObjectPtr object, std::vector<std::string> ids) const
+        std::vector<std::string> GwtAnalyzer::usedBy(GwtObjectPtr object, std::vector<GwtValue> ids) const
         {
             std::vector<std::string> variants;
             std::vector<std::string> old;
             auto first = true;
             for (auto id : ids) {
-                GwtValue search(id);
                 std::vector<std::string> found;
-                for (auto pair : GwtQuery(object, "**/" + id)) {
-                    found.push_back(pair.path);
+                for (auto &pair : GwtQuery(object, "**/*")) {
+					if (pair.value == id) found.push_back(pair.path);
                 }
-                for (auto pair : GwtQuery(object, "**/[.=" + id + "]")) {
+                for (auto pair : GwtQuery(object, "**/" + id.toString())) {
                     found.push_back(pair.path);
                 }
                 variants.clear();

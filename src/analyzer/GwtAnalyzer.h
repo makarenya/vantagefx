@@ -26,7 +26,7 @@ namespace vantagefx {
 			GwtObjectPtr processResponse(const std::string &text, QDomElement &body) const;
 	        GwtObjectPtr processEntry(path dir, std::string name, FiddlerLogEntry entry) const;
             std::vector<FiddlerLogEntry> parseEntries(path filename) const;
-            std::vector<std::string> usedBy(GwtObjectPtr object, std::vector<std::string> ids) const;
+            std::vector<std::string> usedBy(GwtObjectPtr object, std::vector<GwtValue> ids) const;
         private:
             GwtBundle &_bundle;
         };
