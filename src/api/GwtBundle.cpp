@@ -64,14 +64,15 @@ namespace vantagefx {
                 fstd("some_3")
             });
 
-            add("com.optionfair.client.model.Option/2380090003", {
+            add("com.optionfair.client.model.Option/887736323", {
+
                 fstr("serialuid"),
                 fint("assetId"), // Для какой пары текущий опцион
                 fstd("some_2"),
                 fstd("optionSeconds"),
                 fstd("some_4"),
-                fint("some_5"),
-                fptr("closeDate"),
+				fint("some_5"),
+				fptr("closeDate"),
                 fstd("some_7"),
                 fint("expiryTypeId"),
                 flng("id"),
@@ -83,13 +84,14 @@ namespace vantagefx {
                 fdbl("some_15"),
                 flng("some_16"),
                 fint("some_17"),
-                fstd("some_18"),
-                fstd("some_19"),
+                fint("some_18"),
+                fint("some_19"),
                 flng("some_20"),
-                fstd("some_21"),
-                fstd("some_22"),
-                fstd("some_23"),
-                fint("return"),
+				fstd("some_21"),
+				fstd("some_22"),
+				fstd("some_23"),
+				fint("return"),
+				fstr("some_24"),
                 fdbl("some_25"),
                 fstd("some_26"),
                 fptr("some_27"),
