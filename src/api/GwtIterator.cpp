@@ -32,8 +32,12 @@ namespace vantagefx {
 			if (name.empty())
 				return object->type()->iterateValues(object, it, end, path);
 
-			auto val = object->value(it->name());
-			auto field = object->type()->field(it->name())
+			GwtValue val;
+			try {
+				val = object->value(it->name());
+			}
+			catch(std::out_of_range) {}
+			auto field = object->type()->field(it->name());
 			if (++it == end) return std::make_shared<GwtSingleIterator>(val, field, path);
 			if (val.empty() || !val.toObject()) return std::make_shared<GwtIterator>();
 			auto obj = val.toObject();
@@ -99,6 +103,7 @@ namespace vantagefx {
             // объекта, для которго создани итератор
 			for (;!internalEnd(); advanceInternal()) {
 				auto value = internalGet();
+				auto field = internalField();
                 // Пустые значения пролистываются
 				if (value.empty()) continue;
 				auto obj = value.toObject();
@@ -107,7 +112,7 @@ namespace vantagefx {
                     // Если нет дочернего пути (путь заканчивается на звёздочку), то просто возвращаем
                     // текущее дочернее значение
 					if (_childPath.size() == 0) {
-						auto child = std::make_shared<GwtSingleIterator>(value, internalPath());
+						auto child = std::make_shared<GwtSingleIterator>(value, field, internalPath());
 						if (_filterValue.empty() || value == _filterValue) {
 							_child = child;
 							return;
@@ -131,11 +136,11 @@ namespace vantagefx {
 				for (auto it = query.begin(); it != query.end(); ++it) {
 					auto &pair = *it;
                     // И проверяются на соответствие фильтрующему значению
-                    if (!(pair.field->equal(pair.value, _filterValue))) continue;
+                    if (pair.value != _filterValue) continue;
 
                     // Если фильрующее условие выполнено, то действия аналогичны объходу без фильтрации
                     if (_childPath.size() == 0) {
-                        _child = std::make_shared<GwtSingleIterator>(value, internalPath());
+                        _child = std::make_shared<GwtSingleIterator>(value, field, internalPath());
                         return;
                     }
                     _child = createIterator(obj, _childPath.begin(), _childPath.end(), internalPath());
@@ -176,14 +181,16 @@ namespace vantagefx {
 	    }
 
 	    GwtComplexIterator::GwtComplexIterator(std::shared_ptr<GwtObject> &object, 
-			std::vector<GwtFieldPtr> fields, GwtPath::const_iterator it, GwtPath::const_iterator end, 
-			std::string path)
+			InternalIterator fieldsBegin, InternalIterator fieldsEnd, 
+			GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path)
 			: GwtMultiIterator(it, end),
 			_path(path),
-			_it(fields.begin()),
-			_end(fields.end()),
+			_it(fieldsBegin),
+			_end(fieldsEnd),
 			_object(object)
-	    {}
+	    {
+			resetChild();
+	    }
 
 	    GwtComplexIterator::GwtComplexIterator(GwtPath childPath, GwtPath filterPath, 
 			const GwtValue &filterValue, GwtIteratorPtr child, std::shared_ptr<GwtObject> &object, 
@@ -222,7 +229,7 @@ namespace vantagefx {
 
 	    GwtIteratorPtr GwtComplexIterator::clone()
 	    {
-			return std::make_shared<GwtIterator>(childPath(), filterPath(), filterValue(), 
+			return std::make_shared<GwtComplexIterator>(childPath(), filterPath(), filterValue(),
 				child(), _object, _it, _end, _path);
 	    }
 
@@ -277,7 +284,7 @@ namespace vantagefx {
 		
 		GwtIteratorPtr GwtMapIterator::clone()
 	    {
-			return std::make_shared<GwtMapIterator>(childPath(), filterPath(), filterValue(), child(), _it, _end, _path);
+			return std::make_shared<GwtMapIterator>(childPath(), filterPath(), filterValue(), child(), _it, _end, _path, _field);
 	    }
 
 	    GwtDeepIterator::GwtDeepIterator(std::shared_ptr<GwtObject>& object,
@@ -416,23 +423,38 @@ namespace vantagefx {
 
         GwtIteratorPtr GwtArrayIterator::clone() {
             return std::make_shared<GwtArrayIterator>(childPath(), filterPath(), filterValue(), child(),
-                                                      _object, _index, _length, _path);
+                                                      _object, _index, _length, _path, _field);
         }
 
 	    GwtQueryIterator::GwtQueryIterator(GwtIteratorPtr& x)
 			:_iterator(x)
-	    {}
+	    {
+			load(x);
+		}
 
 	    GwtQueryIterator::GwtQueryIterator(const GwtQueryIterator& mit)
-			: _iterator(mit._iterator->clone())
+			: _iterator(mit._iterator->clone()),
+			  _current(mit._current)
 	    {}
+
+	    void GwtQueryIterator::load(GwtIteratorPtr& x)
+	    {
+			if (!x || x->empty()) {
+				_current.path = "";
+				_current.field = GwtFieldPtr();
+				_current.value = GwtValue();
+			}
+			else {
+				_current.path = x->path();
+				_current.field = x->field();
+				_current.value = x->get();
+			}
+		}
 
 	    GwtQueryIterator& GwtQueryIterator::operator++()
 	    {
 			_iterator->advance();
-			_current.path = _iterator->path();
-			_current.field = _iterator->field();
-			_current.value = _iterator->get();
+			load(_iterator);
 			return *this; 
 		}
 

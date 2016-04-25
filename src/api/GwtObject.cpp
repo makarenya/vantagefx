@@ -62,7 +62,7 @@ namespace vantagefx {
         }
 
 		GwtValue &GwtObject::value(const std::string &name) {
-            return _values[name];
+            return _values.at(name);
         }
 
 		const GwtValue &GwtObject::value(const std::string &name) const {

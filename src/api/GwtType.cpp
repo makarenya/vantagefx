@@ -18,6 +18,11 @@ namespace vantagefx {
 			return std::make_shared<GwtMapIterator>(object, it, end, path, _pointer);
 	    }
 
+	    GwtFieldPtr GwtType::field(const std::string &name) const
+		{
+			return _pointer;
+		}
+
 	    GwtComplexType::GwtComplexType(const std::string &name,
                                        const std::string &primary,
                                        std::initializer_list<std::shared_ptr<GwtField>> fields)
@@ -60,7 +65,7 @@ namespace vantagefx {
             }
         }
 
-	    std::shared_ptr<GwtField> GwtComplexType::field(std::string name)
+		GwtFieldPtr GwtComplexType::field(const std::string &name) const
 	    {
 		    for(auto fld: _fields) {
 				if (fld->name() == name) return fld;
@@ -75,7 +80,7 @@ namespace vantagefx {
 
 	    std::shared_ptr<GwtIterator> GwtComplexType::iterateValues(GwtObjectPtr &object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path)
 		{
-			return std::make_shared<GwtComplexIterator>(object, _fields, it, end, path);
+			return std::make_shared<GwtComplexIterator>(object, _fields.begin(), _fields.end(), it, end, path);
 		}
 
 	    void GwtComplexType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style)

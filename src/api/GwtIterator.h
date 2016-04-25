@@ -118,9 +118,8 @@ namespace vantagefx {
             typedef std::vector<std::shared_ptr<GwtField>>::iterator InternalIterator;
 
 			GwtComplexIterator(std::shared_ptr<GwtObject> &object,
-						   std::vector<GwtFieldPtr> fields,
-                           GwtPath::const_iterator it,
-                           GwtPath::const_iterator end, std::string path);
+				InternalIterator fieldsBegin, InternalIterator fieldsEnd,
+                GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
 
 			GwtComplexIterator(GwtPath childPath, GwtPath filterPath,
 				const GwtValue &filterValue, GwtIteratorPtr child,
@@ -249,6 +248,8 @@ namespace vantagefx {
             explicit GwtQueryIterator(GwtIteratorPtr &x);
 
             GwtQueryIterator(const GwtQueryIterator &mit);
+
+			void load(GwtIteratorPtr &x);
 
             GwtQueryIterator &operator++();
 

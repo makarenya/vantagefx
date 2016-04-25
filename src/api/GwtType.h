@@ -38,12 +38,13 @@ namespace vantagefx {
 
 			virtual std::string primary() const { return ""; }
 
-            const std::string &name() const { return _name; }
+			virtual GwtFieldPtr field(const std::string &name) const;
+			
+			const std::string &name() const { return _name; }
 
-			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object, 
+			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object,
 				GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
-
-		protected:
+        protected:
 			GwtFieldPtr _pointer;
 
         private:
@@ -64,7 +65,7 @@ namespace vantagefx {
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
-			std::shared_ptr<GwtField> field(std::string name);
+			GwtFieldPtr field(const std::string &name) const override;
 
 			std::string primary() const override;
 

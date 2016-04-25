@@ -132,6 +132,7 @@ namespace vantagefx {
 
         const std::shared_ptr<GwtObject> &GwtValue::objectValue() const
 		{
+			if (_value.empty()) return std::shared_ptr<GwtObject>();
             return boost::get<std::shared_ptr<GwtObject>>(_value);
         }
 
@@ -174,7 +175,7 @@ namespace vantagefx {
 
 	    bool GwtValue::empty() const
 		{
-			return _value.empty();
+			return _type == 0;
 		}
 
 	    std::string GwtValue::toString() const
@@ -192,30 +193,47 @@ namespace vantagefx {
 
 	    bool GwtValue::operator==(const GwtValue &rhs) const
 	    {
-			if (!_string.empty() && _string == rhs._string) return true;
-			return _value == rhs._value;
+			// 0 - null, 1 - число, 2 - строка, 3 - строка или число
+			if (_type == 0 && rhs._type == 0) return true;
+
+			if ((_type & 1) && (rhs._type & 1)) {
+				if (_value == rhs._value) return true;
+			}
+			
+			if ((_type & 2) && (rhs._type & 2)) {
+				if (_string == rhs._string) return true;
+			}
+
+			return false;
 		}
 
 	    GwtValue::GwtValue(int value, std::string string)
 			: _value(value),
-			  _string(string) { }
+			  _string(string),
+			  _type(3) { }
 
         GwtValue::GwtValue(int value)
-            : _value(value) { }
+            : _value(value),
+			  _type(1) { }
 
         GwtValue::GwtValue(int64_t value)
-            : _value(value) { }
+            : _value(value),
+			  _type(1) { }
 
         GwtValue::GwtValue(double value)
-            : _value(value) { }
+            : _value(value),
+			  _type(1) { }
 
         GwtValue::GwtValue(std::string value)
-            : _string(value) { }
+            : _string(value),
+			  _type(2) { }
 
         GwtValue::GwtValue(std::shared_ptr<GwtObject> value)
-            : _value(value) { }
+            : _value(value),
+			  _type(1) { }
 
         GwtValue::GwtValue()
-            : _value() { }
+            : _value(),
+			  _type(0) { }
     }
 }

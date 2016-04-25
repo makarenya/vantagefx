@@ -63,6 +63,7 @@ namespace vantagefx {
 		private:
             boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>> _value;
             std::string _string;
+			int _type;
         };
 
 		inline bool GwtValue::operator!=(const GwtValue &rhs) const { return !(rhs == *this); }

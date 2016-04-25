@@ -51,8 +51,8 @@ namespace vantagefx {
                 int_rule = int_ >> !double_;
 
                 json_item = int_rule | double_ | json_string;
-                data_list = +(json_item >> (',' | qi::lit("].concat([")));
-				response = "//OK[" >> data_list >> '[' >> string_list >> ']' >> 
+                data_list = *(json_item >> (',' | qi::lit("].concat([")));
+				response = "//OK[" >> data_list >> '[' >> (string_list | qi::eps) >> ']' >> 
 					',' >> int_ >> ',' >> int_ >> ']' >> -qi::lit(')');
             }
 
