@@ -7,10 +7,25 @@
 
 #include <string>
 #include <src/http/HttpRequest.h>
+#include "http/HttpContext.h"
+#include "api/GwtBundle.h"
+#include "api/GwtResponseParser.h"
 
 namespace vantagefx {
 
-    class GwtHttpRequest : public http::HttpRequest {
+	class GwtHttpRequest;
+
+	class GwtHttpContext : public http::HttpContext {
+	public:
+		GwtHttpContext(boost::asio::io_service& io_service, boost::asio::ssl::context& context, api::GwtBundle& bundle);
+
+		api::GwtObjectPtr gwt(GwtHttpRequest&& request);
+
+	private:
+		api::GwtBundle &_bundle;
+	};
+	
+	class GwtHttpRequest : public http::HttpRequest {
     public:
 	    explicit GwtHttpRequest(const std::string &uri);
     };
@@ -29,6 +44,21 @@ namespace vantagefx {
     public:
         GwtLutRequest();
     };
+
+	class GwtInstrumentConfigurationDataRequest : public GwtHttpRequest {
+	public:
+		explicit GwtInstrumentConfigurationDataRequest(int externalId);
+	};
+
+	class GwtInstrumentTypeIdsWithOpenOptionsRequest : public GwtHttpRequest {
+	public:
+		GwtInstrumentTypeIdsWithOpenOptionsRequest();
+	};
+
+	class GwtCometUpdatesRequest : public GwtHttpRequest {
+	public:
+		explicit GwtCometUpdatesRequest(int instrumentTypeId);
+	};
 }
 
 

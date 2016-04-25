@@ -3,10 +3,34 @@
 //
 
 #include "GwtHttpRequest.h"
+#include <boost/lexical_cast.hpp>
 
 namespace vantagefx {
 
-    GwtHttpRequest::GwtHttpRequest(const std::string &uri)
+	GwtHttpContext::GwtHttpContext(boost::asio::io_service& io_service, boost::asio::ssl::context& context, api::GwtBundle& bundle)
+		: HttpContext(io_service, context), 
+		  _bundle(bundle)
+	{}
+
+	api::GwtObjectPtr GwtHttpContext::gwt(vantagefx::GwtHttpRequest&& request)
+	{
+		api::GwtObjectPtr result;
+		auto parser = api::makeResponseParser(send(std::move(request)).get().body(), _bundle);
+
+		try {
+			return parser.parse();
+		}
+		catch (std::exception &e) {
+			std::cout << e.what() << std::endl;
+			parser.back(10);
+			parser.print(std::cout, 9);
+			std::cout << ">>> ";
+			parser.print(std::cout, 100);
+			throw;
+		}
+	}
+
+	GwtHttpRequest::GwtHttpRequest(const std::string &uri)
             : http::HttpRequest("https://binaryoptions.vantagefx.com/app/services/" + uri, "POST")
 	{
         addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/app/Basic/");
@@ -43,4 +67,30 @@ namespace vantagefx {
         setContent("7|0|4|https://binaryoptions.vantagefx.com/app/Basic/|F5609C0B32D4C72047639979C6C333F4|"
                            "com.optionfair.client.common.services.LutService|getAll|1|2|3|4|0|");
     }
+
+	GwtInstrumentConfigurationDataRequest::GwtInstrumentConfigurationDataRequest(int externalId)
+		: GwtHttpRequest("Lut")
+	{
+		std::string body = "7|0|5|https://binaryoptions.vantagefx.com/app/Basic/|F5609C0B32D4C72047639979C6C333F4|";
+		body += "com.optionfair.client.common.services.LutService|getInstrumentConfigurationData|I|1|2|3|4|1|5|";
+		body += boost::lexical_cast<std::string>(externalId) + "|";
+		setContent(body);
+    }
+
+	GwtInstrumentTypeIdsWithOpenOptionsRequest::GwtInstrumentTypeIdsWithOpenOptionsRequest()
+		: GwtHttpRequest("Trading")
+	{
+	    std::string body = "7|0|4|https://binaryoptions.vantagefx.com/app/Basic/|094DCA70134E3C91D91952E12643E178|";
+		body += "com.optionfair.client.common.services.TradingService|getInstrumentTypeIdsWithOpenOptions|1|2|3|4|0|";
+		setContent(body);
+    }
+
+	GwtCometUpdatesRequest::GwtCometUpdatesRequest(int instrumentTypeId)
+		: GwtHttpRequest("refresh")
+	{
+		std::string body = "7|0|6|https://binaryoptions.vantagefx.com/app/Basic/|36F1204346683C3C0438E630893A8A1D|";
+		body += "com.optionfair.client.common.services.nongenerated.RefreshService|getCometUpdates|I|J|1|2|3|4|3|5|6|6|";
+		body += boost::lexical_cast<std::string>(instrumentTypeId) + "|A|A|";
+		setContent(body);
+	}
 }
