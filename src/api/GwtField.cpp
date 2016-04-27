@@ -373,13 +373,13 @@ namespace vantagefx {
         }
 
         void PtrField::xml(const GwtValue &value, QDomElement &element) const {
-            auto object = value.objectValue();
+            auto object = value.toObject();
             if (!object) return;
             object->xml(element);
         }
 
         void PtrField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
-            auto object = ptr.objectValue();
+            auto object = ptr.toObject();
             if (!object) return;
             object->print(stream, style);
         }
