@@ -248,11 +248,11 @@ namespace vantagefx {
                 fstd("some_14"),
                 flng("some_15"),
                 fstd("some_16"),
-                fstd("some_17"),
-                flng("some_18"),
             });
 
-            add("com.optionfair.client.model.Account/1918851505", {
+
+
+            add("com.optionfair.client.model.Account/2810493929", {
                 fstr("serialuid"),
                 fstd("some_1"),
                 fstr("regular"),
@@ -269,7 +269,8 @@ namespace vantagefx {
                 fptr("some_date"),
                 fptr("someList_1"),
                 fptr("someList_2"),
-                fint("some_12"),
+                fdbl("some_12"),
+                fint("externalId"),
                 fptr("integer_1"),
                 fstd("some_13"),
                 fstd("some_14"),
@@ -335,6 +336,9 @@ namespace vantagefx {
                 fstr("some_61"),
                 fdbl("some_62"),
                 fptr("spreadCalculator"),
+                fstd("some_63"),
+                fstd("some_64"),
+                flng("some_65"),
             });
 
             add("com.optionfair.client.model.TrackingInfo/2864454600", {
