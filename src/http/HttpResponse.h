@@ -20,14 +20,15 @@ namespace vantagefx {
 	        HttpResponse(HttpResponse &&rhs);
 	        HttpResponse &operator=(HttpResponse &&rhs);
 
-	        void setBody(std::string body);
+	        void setBody(const std::string &body);
             std::string const &body() const;
-            void addHeader(std::string key, std::string value);
-            std::string header(std::string key) const;
-			std::vector<std::string> headers(std::string key) const;
-            void setCode(std::string code);
+            void addHeader(const std::string &key, const std::string &value);
+            std::string header(const std::string &key) const;
+			std::vector<std::string> headers(const std::string &key) const;
+			bool has(const std::string &key, const std::string &value) const;
+            void setCode(const std::string &code);
             std::string const &code() const;
-            void setCodeDescription(std::string description);
+            void setCodeDescription(const std::string &description);
             std::string const &codeDescription() const;
             void setMajor(int major);
             int major() const;

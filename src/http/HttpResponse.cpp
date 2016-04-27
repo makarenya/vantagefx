@@ -41,17 +41,17 @@ namespace vantagefx {
 		    return *this;
 	    }
 
-	    void HttpResponse::setBody(std::string body)
+	    void HttpResponse::setBody(const std::string &body)
         {
             _body = body;
         }
 
-        void HttpResponse::addHeader(std::string key, std::string value)
+        void HttpResponse::addHeader(const std::string &key, const std::string &value)
         {
             _headers.push_back(std::make_pair(key, value));
         }
 
-        std::string HttpResponse::header(std::string key) const
+        std::string HttpResponse::header(const std::string &key) const
         {
             for(auto pair: _headers) {
 				if (boost::iequals(pair.first, key)) return pair.second;
@@ -59,7 +59,7 @@ namespace vantagefx {
             return std::string();
         }
 
-	    std::vector<std::string> HttpResponse::headers(std::string key) const
+	    std::vector<std::string> HttpResponse::headers(const std::string &key) const
         {
 			std::vector<std::string> result;
 			for (auto pair : _headers) {
@@ -69,8 +69,17 @@ namespace vantagefx {
 			return result;
 		}
 
+		bool HttpResponse::has(const std::string &key, const std::string &value) const
+        {
+	        for (auto pair :_headers) {
+				if (boost::iequals(pair.first, key) &&
+					boost::iequals(pair.second, value)) return true;
+	        }
+			return false;
+        }
 
-	    void HttpResponse::setCode(std::string code)
+
+	    void HttpResponse::setCode(const std::string &code)
         {
             _code = code;
         }
@@ -80,7 +89,7 @@ namespace vantagefx {
             return _code;
         }
 
-        void HttpResponse::setCodeDescription(std::string description)
+        void HttpResponse::setCodeDescription(const std::string &description)
         {
             _codeDescription = description;
         }
