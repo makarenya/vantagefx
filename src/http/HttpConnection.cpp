@@ -82,7 +82,8 @@ namespace vantagefx {
 				if (it != list.end()) schemeAddress = it->second;
 			}
 #else
-			schemeAddress = getenv("https_proxy");
+            char * data = getenv("https_proxy");
+			if (data) schemeAddress = data;
 #endif
 			if (!schemeAddress.empty()) {
 				Url proxyUrl(schemeAddress);
