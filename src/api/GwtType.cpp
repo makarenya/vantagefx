@@ -13,19 +13,14 @@
 namespace vantagefx {
     namespace api {
 
-		std::shared_ptr<GwtIterator> GwtType::iterateValues(GwtObjectPtr& object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path)
+		std::shared_ptr<GwtIterator> GwtType::iterateValues(const GwtConstObjectPtr& object) const
 	    {
-			return std::make_shared<GwtMapIterator>(object, it, end, path, _pointer);
+			return std::make_shared<GwtMapIterator>(object->values().begin(), object->values().end());
 	    }
 
-	    GwtFieldPtr GwtType::field(const std::string &name) const
-		{
-			return _pointer;
-		}
-
 	    GwtComplexType::GwtComplexType(const std::string &name,
-                                       const std::string &primary,
-                                       std::initializer_list<std::shared_ptr<GwtField>> fields)
+                                       std::initializer_list<std::shared_ptr<GwtField>> fields,
+                                       const std::string &primary)
                 : GwtType(name),
                   _fields(fields),
                   _primary(primary)
@@ -38,9 +33,33 @@ namespace vantagefx {
             }
         }
 
-        std::vector<std::shared_ptr<GwtField>> &GwtComplexType::fields()
+        void GwtComplexType::print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const
         {
-            return _fields;
+            if (_primary.empty()) {
+                stream << "complex";
+            }
+            else {
+                for (auto field: _fields) {
+                    if (field->name() != _primary) continue;
+                    auto value = object.value(_primary);
+                    field->print(value, stream, style);
+                }
+            }
+        }
+
+        void GwtComplexType::xml(const GwtObject &object, QDomElement &parent) const
+        {
+            auto doc = parent.ownerDocument();
+            parent.setAttribute("type", name().c_str());
+            for (auto field: _fields) {
+                auto fieldName = field->name();
+                auto value = object.value(fieldName);
+                if (!value.empty()) {
+                    auto prop = doc.createElement(fieldName.c_str());
+                    field->xml(value, prop);
+                    parent.appendChild(prop);
+                }
+            }
         }
 
         void GwtComplexType::parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const
@@ -78,41 +97,36 @@ namespace vantagefx {
 			return _primary;
 	    }
 
-	    std::shared_ptr<GwtIterator> GwtComplexType::iterateValues(GwtObjectPtr &object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path)
+	    std::shared_ptr<GwtIterator> GwtComplexType::iterateValues(const GwtConstObjectPtr &object) const
 		{
-			return std::make_shared<GwtComplexIterator>(object, _fields.begin(), _fields.end(), it, end, path);
+			return std::make_shared<GwtComplexIterator>(object, _fields.begin(), _fields.end());
 		}
 
-	    void GwtComplexType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style)
+        void GwtListType::print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const
         {
-            if (_primary.empty()) {
-                stream << "complex";
-            }
-            else {
-                for (auto field: _fields) {
-                    if (field->name() != _primary) continue;
-                    auto value = object.value(_primary);
-                    field->print(value, stream, style);
-                }
+            auto length = object.value("length");
+            stream << "list[" << length.intValue() << "]";
+        }
+
+        void GwtListType::xml(const GwtObject &object, QDomElement &parent) const
+        {
+            auto length = object.value("length");
+            auto doc = parent.ownerDocument();
+            parent.setAttribute("type", name().c_str());
+            parent.setAttribute("count", length.intValue());
+
+            for (auto i = 0; i < length.intValue(); i++) {
+                auto item = doc.createElement("item");
+                auto name = boost::lexical_cast<std::string>(i);
+                auto value = object.value(name);
+                auto obj = value.objectValue();
+                if (obj) obj->xml(item);
+                parent.appendChild(item);
             }
         }
 
-        void GwtComplexType::xml(GwtObject &object, QDomElement &parent)
+        void GwtListType::parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const
         {
-	        auto doc = parent.ownerDocument();
-			parent.setAttribute("type", name().c_str());
-            for (auto field: _fields) {
-	            auto fieldName = field->name();
-	            auto value = object.value(fieldName);
-				if (!value.empty()) {
-					auto prop = doc.createElement(fieldName.c_str());
-					field->xml(value, prop);
-					parent.appendChild(prop);
-				}
-            }
-        }
-
-        void GwtListType::parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const {
             int length;
             parser >> length;
             result->add("length", length);
@@ -123,31 +137,27 @@ namespace vantagefx {
             }
         }
 
-	    std::shared_ptr<GwtIterator> GwtListType::iterateValues(GwtObjectPtr& object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path)
+	    std::shared_ptr<GwtIterator> GwtListType::iterateValues(const GwtConstObjectPtr& object) const
         {
-			return std::make_shared<GwtArrayIterator>(object, it, end, path, _pointer);
+			return std::make_shared<GwtArrayIterator>(object);
         }
 
-	    void GwtListType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style)
+        void GwtMapType::print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const
         {
-            auto length = object.value("length");
-            stream << "list[" << length.intValue() << "]";
+            stream << "map[" << object.values().size() << "]";
         }
 
-        void GwtListType::xml(GwtObject &object, QDomElement &parent)
+        void GwtMapType::xml(const GwtObject &object, QDomElement &parent) const
         {
-            auto length = object.value("length");
-	        auto doc = parent.ownerDocument();
-			parent.setAttribute("type", name().c_str());
-			parent.setAttribute("count", length.intValue());
-
-            for (auto i = 0; i < length.intValue(); i++) {
+            auto doc = parent.ownerDocument();
+            parent.setAttribute("type", name().c_str());
+            parent.setAttribute("count", static_cast<int>(object.values().size()));
+            for (auto pair : object.values()) {
                 auto item = doc.createElement("item");
-                auto name = boost::lexical_cast<std::string>(i);
-	            auto value = object.value(name);
-				auto obj = value.objectValue();
+                item.setAttribute("key", pair.first.c_str());
+                auto obj = pair.second.objectValue();
                 if (obj) obj->xml(item);
-				parent.appendChild(item);
+                parent.appendChild(item);
             }
         }
 
@@ -182,6 +192,40 @@ namespace vantagefx {
                 fstr("string"),
                 fptr("pointer")
             };
+        }
+
+        void GwtRequestType::print(const GwtObject& object, std::ostream& stream, GwtPrintStyle style) const
+        {
+            stream << object.value("unit").stringValue();
+        }
+
+        void GwtRequestType::xml(const GwtObject& object, QDomElement& parent) const
+        {
+            auto doc = parent.ownerDocument();
+            auto unit = doc.createElement("unit");
+            _fields[3]->xml(object.value("unit"), unit);
+            parent.appendChild(unit);
+
+            auto hash = doc.createElement("hash");
+            _fields[3]->xml(object.value("hash"), hash);
+            parent.appendChild(hash);
+
+            auto iface = doc.createElement("interface");
+            _fields[3]->xml(object.value("interface"), iface);
+            parent.appendChild(iface);
+
+            auto method = doc.createElement("method");
+            _fields[3]->xml(object.value("method"), method);
+            parent.appendChild(method);
+
+            auto count = object.value("length").intValue();
+            for(auto i = 0; i < count; i++) {
+                auto name = boost::lexical_cast<std::string>(i);
+                auto param = doc.createElement("param");
+                auto type = object.value("type_" + name).intValue();
+                _fields[type]->xml(object.value("value_" + name), param);
+                parent.appendChild(param);
+            }
         }
 
 		void GwtRequestType::parse(GwtParser& parser, std::shared_ptr<GwtObject>& result) const
@@ -239,57 +283,6 @@ namespace vantagefx {
                     result->add("type_" + name, 4);
                 }
 			}
-        }
-
-	    void GwtRequestType::print(GwtObject& object, std::ostream& stream, GwtPrintStyle style)
-        {
-			stream << object.value("unit").stringValue();
-        }
-
-	    void GwtRequestType::xml(GwtObject& object, QDomElement& parent)
-	    {
-            auto doc = parent.ownerDocument();
-            auto unit = doc.createElement("unit");
-            _fields[3]->xml(object.value("unit"), unit);
-            parent.appendChild(unit);
-
-            auto hash = doc.createElement("hash");
-            _fields[3]->xml(object.value("hash"), hash);
-            parent.appendChild(hash);
-
-            auto iface = doc.createElement("interface");
-            _fields[3]->xml(object.value("interface"), iface);
-            parent.appendChild(iface);
-
-            auto method = doc.createElement("method");
-            _fields[3]->xml(object.value("method"), method);
-            parent.appendChild(method);
-
-            auto count = object.value("length").intValue();
-            for(auto i = 0; i < count; i++) {
-	            auto name = boost::lexical_cast<std::string>(i);
-                auto param = doc.createElement("param");
-                auto type = object.value("type_" + name).intValue();
-                _fields[type]->xml(object.value("value_" + name), param);
-                parent.appendChild(param);
-            }
-        }
-
-	    void GwtMapType::print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) {
-            stream << "map[" << object.values().size() << "]";
-        }
-
-        void GwtMapType::xml(GwtObject &object, QDomElement &parent) {
-	        auto doc = parent.ownerDocument();
-			parent.setAttribute("type", name().c_str());
-			parent.setAttribute("count", static_cast<int>(object.values().size()));
-            for (auto pair : object.values()) {
-                auto item = doc.createElement("item");
-                item.setAttribute("key", pair.first.c_str());
-                auto obj = pair.second.objectValue();
-                if (obj) obj->xml(item);
-				parent.appendChild(item);
-            }
         }
     }
 }

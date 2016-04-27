@@ -10,9 +10,9 @@
 #include <deque>
 #include <iterator>
 #include <map>
+#include <stack>
 #include "GwtPathExpression.h"
 #include "GwtValue.h"
-#include <stack>
 #include "GwtField.h"
 
 namespace vantagefx {
@@ -32,205 +32,73 @@ namespace vantagefx {
 
             virtual bool empty() const { return true; }
 
-            virtual GwtIteratorPtr clone();
+            virtual GwtValue get() const { return GwtValue(); }
 
-            virtual GwtValue get() { return GwtValue(); }
+			virtual GwtFieldPtr field() const { return GwtFieldPtr(); }
 
-			virtual GwtFieldPtr field() { return GwtFieldPtr(); }
-
-			virtual std::string path() const { return ""; }
-
-            static GwtIteratorPtr createIterator(std::shared_ptr<GwtObject> &object,
-                                                 GwtPath::const_iterator it,
-                                                 GwtPath::const_iterator end,
-												 std::string path);
+			virtual std::string part() const { return ""; }
         };
 
-        class GwtSingleIterator : public GwtIterator {
+        class GwtComplexIterator : public GwtIterator {
         public:
-            GwtSingleIterator(const GwtValue &value, const GwtFieldPtr &field, std::string path);
+            typedef std::vector<std::shared_ptr<GwtField>>::const_iterator InternalIterator;
+
+			GwtComplexIterator(const std::shared_ptr<const GwtObject> &object, InternalIterator it, InternalIterator end);
 
             void advance() override;
 
             bool empty() const override;
 
-            GwtIteratorPtr clone() override;
+			GwtValue get() const override;
 
-			GwtValue get() override;
+			GwtFieldPtr field() const override;
 
-			GwtFieldPtr field() override;
-
-			std::string path() const override { return _path; }
+			std::string part() const override;
 
 		private:
-			GwtValue _value;
-			GwtFieldPtr _field;
-			std::string _path;
-        };
-
-        class GwtMultiIterator : public GwtIterator {
-        public:
-            void advance() override;
-
-            bool empty() const override;
-
-			GwtValue get() override;
-
-			GwtFieldPtr field() override;
-
-			std::string path() const override;
-		
-		protected:
-            GwtMultiIterator(GwtPath::const_iterator it, GwtPath::const_iterator end);
-
-            GwtMultiIterator(GwtPath childPath, GwtPath filterPath,
-                             const GwtValue &filterValue, GwtIteratorPtr child);
-
-            void resetChild();
-
-            virtual void advanceInternal() = 0;
-
-            virtual bool internalEnd() const = 0;
-
-            virtual GwtValue internalGet() = 0;
-
-			virtual GwtFieldPtr internalField() = 0;
-
-			virtual std::string internalPath() = 0;
-
-            GwtPath const &childPath() const { return _childPath; }
-
-            GwtPath const &filterPath() const { return _filterPath; }
-
-            const GwtValue &filterValue() const { return _filterValue; }
-
-            GwtIteratorPtr child() const { return _child->clone(); }
-		
-		private:
-            GwtPath _childPath;
-            GwtPath _filterPath;
-			GwtValue _filterValue;
-            GwtIteratorPtr _child;
-		};
-
-        class GwtComplexIterator : public GwtMultiIterator {
-        public:
-            typedef std::vector<std::shared_ptr<GwtField>>::iterator InternalIterator;
-
-			GwtComplexIterator(std::shared_ptr<GwtObject> &object,
-				InternalIterator fieldsBegin, InternalIterator fieldsEnd,
-                GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
-
-			GwtComplexIterator(GwtPath childPath, GwtPath filterPath,
-				const GwtValue &filterValue, GwtIteratorPtr child,
-				std::shared_ptr<GwtObject> &object,
-                InternalIterator it, InternalIterator end, std::string path);
-
-            void advanceInternal() override;
-
-            bool internalEnd() const override;
-
-			GwtValue internalGet() override;
-
-			GwtFieldPtr internalField() override;
-
-			std::string internalPath() override;
-
-			GwtIteratorPtr clone() override;
-
-		private:
-			std::string _path;
 			InternalIterator _it;
             InternalIterator _end;
-			std::shared_ptr<GwtObject> _object;
+			std::shared_ptr<const GwtObject> _object;
         };
 
-		class GwtMapIterator : public GwtMultiIterator {
+		class GwtMapIterator : public GwtIterator {
 		public:
-			typedef std::map<std::string, GwtValue>::iterator InternalIterator;
+			typedef std::map<std::string, GwtValue>::const_iterator InternalIterator;
 
-			GwtMapIterator(std::shared_ptr<GwtObject> &object,
-				GwtPath::const_iterator it,
-				GwtPath::const_iterator end, std::string path,
-				const GwtFieldPtr &field);
+			GwtMapIterator(InternalIterator it, InternalIterator end);
 
-			GwtMapIterator(GwtPath childPath, GwtPath filterPath,
-				const GwtValue &filterValue, GwtIteratorPtr child,
-				InternalIterator it, InternalIterator end, std::string path,
-				const GwtFieldPtr &field);
+            void advance() override;
 
-			void advanceInternal() override;
+            bool empty() const override;
 
-			bool internalEnd() const override;
+            GwtValue get() const override;
 
-			GwtValue internalGet() override;
+            GwtFieldPtr field() const override;
 
-			GwtFieldPtr internalField() override;
-
-			std::string internalPath() override;
-
-			GwtIteratorPtr clone() override;
+            std::string part() const override;
 
 		private:
-			std::string _path;
 			GwtFieldPtr _field;
 			InternalIterator _it;
 			InternalIterator _end;
 		};
 
-		class GwtDeepIterator : public GwtMultiIterator {
+        class GwtArrayIterator : public GwtIterator {
         public:
-            GwtDeepIterator(std::shared_ptr<GwtObject> &object,
-                            GwtPath::const_iterator it,
-                            GwtPath::const_iterator end, std::string path);
+            explicit GwtArrayIterator(const std::shared_ptr<const GwtObject> &object);
 
-            GwtDeepIterator(GwtPath childPath, GwtPath filterPath,
-				const GwtValue &filterValue, GwtIteratorPtr child,
-                std::deque<GwtIteratorPtr> deep);
+            void advance() override;
 
-            void advanceInternal() override;
+            bool empty() const override;
 
-            bool internalEnd() const override;
+            GwtValue get() const override;
 
-			GwtValue internalGet() override;
+            GwtFieldPtr field() const override;
 
-			GwtFieldPtr internalField() override;
-
-			std::string internalPath() override;
-
-			GwtIteratorPtr clone() override;
-
-		private:
-            std::stack<GwtIteratorPtr> _deep;
-			GwtPath _subpath;
-        };
-
-        class GwtArrayIterator : public GwtMultiIterator {
-        public:
-            GwtArrayIterator(std::shared_ptr<GwtObject> &object,
-                GwtPath::const_iterator it, GwtPath::const_iterator end, 
-				std::string path, const GwtFieldPtr &field);
-
-            GwtArrayIterator(GwtPath childPath, GwtPath filterPath,
-				const GwtValue &filterValue, GwtIteratorPtr child,
-                std::shared_ptr<GwtObject> &object,
-                int index, int length, std::string path, const GwtFieldPtr &field);
-
-            void advanceInternal() override;
-
-            bool internalEnd() const override;
-
-			GwtValue internalGet() override;
-
-			GwtFieldPtr internalField() override;
-
-			std::string internalPath() override;
-
-			GwtIteratorPtr clone() override;
+            std::string part() const override;
 
         private:
-			std::string _path;
-			std::shared_ptr<GwtObject> _object;
+			std::shared_ptr<const GwtObject> _object;
 			GwtFieldPtr _field;
             int _index;
             int _length;
@@ -239,21 +107,29 @@ namespace vantagefx {
 		struct GwtQueryIterable
 		{
 			std::string path;
-			std::shared_ptr<GwtField> field;
 			GwtValue value;
 		};
 
         class GwtQueryIterator : std::iterator<std::input_iterator_tag, GwtQueryIterable> {
         public:
-            explicit GwtQueryIterator(GwtIteratorPtr &x);
+            typedef std::tuple<GwtPath::iterator, GwtIteratorPtr, std::string> GwtPathNode;
+            typedef std::stack<GwtPathNode> GwtPathStack;
 
-            GwtQueryIterator(const GwtQueryIterator &mit);
+            GwtQueryIterator(const GwtPath &path, const std::shared_ptr<const GwtObject> &object, 
+				const std::vector<GwtValue> &values, const std::string &prefix);
+			GwtQueryIterator();
 
-			void load(GwtIteratorPtr &x);
+			GwtQueryIterator(GwtQueryIterator &&rhs);
+			GwtQueryIterator &operator=(GwtQueryIterator &&rhs);
+
+			bool set(const GwtValue &value, const std::string &path);
+
+			bool loadLevel(const GwtIteratorPtr &iterator, GwtPath::iterator it, 
+				const std::string &pathconst);
+
+			bool load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part);
 
             GwtQueryIterator &operator++();
-
-            GwtQueryIterator operator++(int);
 
             bool operator==(const GwtQueryIterator &rhs) const;
 
@@ -265,8 +141,14 @@ namespace vantagefx {
 			const GwtQueryIterable *operator->() const;
 
         private:
-            GwtIteratorPtr _iterator;
+
+			GwtQueryIterator(const GwtQueryIterator &);
+			GwtQueryIterator &operator=(const GwtQueryIterator &);
+
+            GwtPath _path;
+            GwtPathStack _stack;
 			GwtQueryIterable _current;
+			std::vector<GwtValue> _values;
         };
 
         class GwtQuery {
@@ -274,22 +156,23 @@ namespace vantagefx {
 			typedef GwtQueryIterator iterator;
 			typedef std::pair<std::string, GwtValue> value_type;
 
-            GwtQuery(std::shared_ptr<GwtObject> &object, std::string path);
+            GwtQuery(const std::shared_ptr<const GwtObject> &object, 
+				const std::string &path, std::initializer_list<GwtValue> &&values = {});
 
-            GwtQuery(std::shared_ptr<GwtObject> &object, GwtPath path);
+            GwtQuery(const std::shared_ptr<const GwtObject> &object, 
+				const GwtPath &path, std::initializer_list<GwtValue> &&values = {});
 
-            GwtQuery(std::shared_ptr<GwtObject> &object, GwtPath::const_iterator it, GwtPath::const_iterator end);
+            GwtQueryIterator begin() const;
 
-            GwtQueryIterator begin();
-
-            GwtQueryIterator end();
+            GwtQueryIterator end() const;
 
 			GwtValue first();
 
         private:
-            std::shared_ptr<GwtObject> _object;
+            std::shared_ptr<const GwtObject> _object;
             GwtPath _path;
 			GwtValue _value;
+			std::vector<GwtValue> _values;
         };
 
     }

@@ -26,14 +26,14 @@ namespace vantagefx {
                      std::initializer_list<std::shared_ptr<GwtField>> fields,
                      const std::string &primary
             ) {
-                add(std::make_shared<GwtComplexType>(std::ref(name), std::ref(primary), fields));
+                add(std::make_shared<GwtComplexType>(std::ref(name), fields, std::ref(primary)));
             }
 
             void add(const std::string &name,
                      std::initializer_list<std::shared_ptr<GwtField>> fields) {
 
                 std::string primary;
-                add(std::make_shared<GwtComplexType>(std::ref(name), std::ref(primary), fields));
+                add(std::make_shared<GwtComplexType>(std::ref(name), fields, std::ref(primary)));
             }
 
             void append(std::shared_ptr<GwtType> type);

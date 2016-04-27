@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <boost/optional/optional.hpp>
 #include "GwtValue.h"
 
 namespace vantagefx {
@@ -17,29 +18,97 @@ namespace vantagefx {
 
         typedef std::vector<GwtPathExpression> GwtPath;
 
+        class GwtValueRef {
+        public:
+
+            explicit GwtValueRef(int num);
+
+            GwtValueRef();
+
+            explicit GwtValueRef(const GwtValue &value);
+
+            GwtValue operator()(const std::vector<GwtValue> &values) const;
+
+        private:
+            int _num;
+            GwtValue _value;
+        };
+
+        class GwtPathTest 
+		{
+        public:
+			virtual ~GwtPathTest() {}
+            virtual bool match(const std::shared_ptr<const GwtObject> &object, const std::string &prefix,
+                       const std::vector<GwtValue> &values) const = 0;
+        };
+
+        typedef std::shared_ptr<GwtPathTest> GwtPathTestPtr;
+
+        class GwtPathTestOr : public GwtPathTest
+        {
+        public:
+
+            GwtPathTestOr(const GwtPathTestPtr& left, const GwtPathTestPtr& right);
+
+            bool match(const std::shared_ptr<const GwtObject>& object, const std::string& prefix,
+				const std::vector<GwtValue> &values) const override;
+
+        private:
+            GwtPathTestPtr _left;
+            GwtPathTestPtr _right;
+        };
+
+        class GwtPathTestAnd : public GwtPathTest
+        {
+        public:
+
+            GwtPathTestAnd(const GwtPathTestPtr& left, const GwtPathTestPtr& right);
+
+            bool match(const std::shared_ptr<const GwtObject>& object, const std::string& prefix,
+				const std::vector<GwtValue> &values) const override;
+
+        private:
+            GwtPathTestPtr _left;
+            GwtPathTestPtr _right;
+        };
+
+        class GwtPathTestEq : public GwtPathTest
+        {
+        public:
+
+            GwtPathTestEq(GwtPath path, GwtValueRef value);
+
+            bool match(const std::shared_ptr<const GwtObject>& object, const std::string& prefix,
+				const std::vector<GwtValue> &values) const override;
+
+        private:
+            GwtPath _path;
+            GwtValueRef _value;
+        };
+
         class GwtPathExpression {
         public:
-			GwtPathExpression()
-				: _deep(false) { }
+            GwtPathExpression()
+                    : _deep(false) { }
 
-			explicit GwtPathExpression(bool deep);
+            explicit GwtPathExpression(bool deep);
 
             explicit GwtPathExpression(std::string name);
 
-            GwtPathExpression(GwtPath filterPath, GwtValue filterValue);
+            explicit GwtPathExpression(const GwtPathTestPtr &test);
 
             static GwtPath parse(std::string path);
 
             std::string const &name() const { return _name; }
+
             bool deep() const { return _deep; }
-            std::vector<GwtPathExpression> const &filterPath() const { return _filterPath; }
-			GwtValue const &filterValue() const { return _filterValue; }
+
+            const GwtPathTestPtr &test() const { return _test; }
 
         private:
             bool _deep;
             std::string _name;
-            GwtPath _filterPath;
-			GwtValue _filterValue;
+            GwtPathTestPtr _test;
         };
     }
 }

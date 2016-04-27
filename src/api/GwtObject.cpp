@@ -17,15 +17,18 @@ namespace vantagefx {
         GwtObject::GwtObject(std::shared_ptr<GwtType> type)
                 : _type(type) { }
 
-        void GwtObject::print(std::ostream &stream, GwtPrintStyle style) {
+        void GwtObject::print(std::ostream &stream, GwtPrintStyle style) const
+		{
             _type->print(*this, stream, style);
         }
 
-        void GwtObject::xml(QDomElement &element) {
+        void GwtObject::xml(QDomElement &element) const
+		{
             _type->xml(*this, element);
         }
 
-        void GwtObject::saveXml(fs::path filename) {
+        void GwtObject::saveXml(fs::path filename) const
+		{
             QDomDocument document;
             auto body = document.createElement("response");
             xml(body);
@@ -34,12 +37,6 @@ namespace vantagefx {
             fs.open(QIODevice::ReadWrite | QIODevice::Truncate);
             fs.write(document.toByteArray());
             fs.close();
-        }
-
-
-        bool GwtObject::has(std::string name) {
-            auto it = _values.find(name);
-            return it != _values.end();
         }
 
 	    std::string GwtObject::primary() const
@@ -61,13 +58,48 @@ namespace vantagefx {
             return _values;
         }
 
-		GwtValue &GwtObject::value(const std::string &name) {
+		const std::map<std::string, GwtValue> &GwtObject::values() const {
+			return _values;
+		}
+
+	    bool GwtObject::has(const std::string &name) const
+        {
+			return _values.find(name) != _values.end();
+        }
+
+	    GwtValue &GwtObject::value(const std::string &name) {
             return _values.at(name);
         }
 
 		const GwtValue &GwtObject::value(const std::string &name) const {
 			return _values.at(name);
 		}
+
+        std::shared_ptr<GwtIterator> GwtObject::iterateValues() const
+        {
+            return _type->iterateValues(shared_from_this());
+        }
+
+        GwtValue GwtObject::item(const std::string &path, std::initializer_list<GwtValue> &&values) const
+        {
+            return item(GwtPathExpression::parse(path), std::move(values));
+        }
+
+        GwtValue GwtObject::item(const GwtPath &path, std::initializer_list<GwtValue> &&values) const
+        {
+            GwtQueryIterator it(path, shared_from_this(), std::move(values), "");
+            return it->value;
+        }
+
+	    GwtQuery GwtObject::query(const std::string &path, std::initializer_list<GwtValue> &&values) const
+        {
+			return query(GwtPathExpression::parse(path), std::move(values));
+        }
+
+	    GwtQuery GwtObject::query(const GwtPath &path, std::initializer_list<GwtValue> &&values) const
+        {
+			return GwtQuery(shared_from_this(), path, std::move(values));
+        }
     }
 }
 

@@ -15,6 +15,7 @@ class QDomElement;
 
 namespace vantagefx {
     namespace api {
+
         class GwtObject;
 
         class GwtParser;
@@ -25,27 +26,21 @@ namespace vantagefx {
         public:
 
 			explicit GwtType(std::string name)
-				: _pointer(fptr("pointer")), 
-				_name(name) { }
+				: _name(name) { }
 
             virtual ~GwtType() { }
 
-            virtual void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) = 0;
+            virtual void print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const = 0;
 
-            virtual void xml(GwtObject &object, QDomElement &parent) = 0;
+            virtual void xml(const GwtObject &object, QDomElement &parent) const = 0;
 
             virtual void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const = 0;
 
 			virtual std::string primary() const { return ""; }
 
-			virtual GwtFieldPtr field(const std::string &name) const;
-			
 			const std::string &name() const { return _name; }
 
-			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object,
-				GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
-        protected:
-			GwtFieldPtr _pointer;
+			virtual std::shared_ptr<GwtIterator> iterateValues(const GwtConstObjectPtr &object) const;
 
         private:
             std::string _name;
@@ -54,23 +49,20 @@ namespace vantagefx {
         class GwtComplexType : public GwtType {
         public:
             GwtComplexType(const std::string &name,
-                           const std::string &primary,
-                           std::initializer_list<std::shared_ptr<GwtField>> fields);
+                           std::initializer_list<std::shared_ptr<GwtField>> fields,
+                           const std::string &primary);
 
-            std::vector<std::shared_ptr<GwtField>> &fields();
+            void print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const override;
 
-            void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
-
-            void xml(GwtObject &object, QDomElement &parent) override;
+            void xml(const GwtObject &object, QDomElement &parent) const override;
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
-			GwtFieldPtr field(const std::string &name) const override;
+			GwtFieldPtr field(const std::string &name) const;
 
 			std::string primary() const override;
 
-			virtual std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object,
-				GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path);
+			std::shared_ptr<GwtIterator> iterateValues(const GwtConstObjectPtr &object) const override;
 
 		private:
             std::vector<std::shared_ptr<GwtField>> _fields;
@@ -82,13 +74,13 @@ namespace vantagefx {
             explicit GwtListType(std::string name)
                     : GwtType(name) { }
 
-            void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
+            void print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const override;
 
-            void xml(GwtObject &object, QDomElement &parent) override;
+            void xml(const GwtObject &object, QDomElement &parent) const override;
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
-			std::shared_ptr<GwtIterator> iterateValues(GwtObjectPtr &object, GwtPath::const_iterator it, GwtPath::const_iterator end, std::string path) override;
+			std::shared_ptr<GwtIterator> iterateValues(const GwtConstObjectPtr &object) const override;
 		};
 
         class GwtMapType : public GwtType {
@@ -96,9 +88,9 @@ namespace vantagefx {
             explicit GwtMapType(std::string name, int skip)
                     : GwtType(name), _skip(skip) { }
 
-            void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
+            void print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const override;
 
-            void xml(GwtObject &object, QDomElement &parent) override;
+            void xml(const GwtObject &object, QDomElement &parent) const override;
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
@@ -110,9 +102,9 @@ namespace vantagefx {
 		public:
 			GwtRequestType();
 
-			void print(GwtObject &object, std::ostream &stream, GwtPrintStyle style) override;
+			void print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const override;
 
-			void xml(GwtObject &object, QDomElement &parent) override;
+			void xml(const GwtObject &object, QDomElement &parent) const override;
 
 			void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 

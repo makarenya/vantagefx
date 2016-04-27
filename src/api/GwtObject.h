@@ -12,6 +12,7 @@
 #include "GwtPathExpression.h"
 #include <boost/filesystem.hpp>
 #include "GwtValue.h"
+#include "GwtIterator.h"
 #include <iterator>
 
 namespace vantagefx {
@@ -23,17 +24,23 @@ namespace vantagefx {
 
         class GwtIterator;
 
-        class GwtObject {
+		class GwtQuery;
+
+        class GwtObject : public std::enable_shared_from_this<GwtObject> {
         public:
             explicit GwtObject(std::shared_ptr<GwtType> type);
 
-            void print(std::ostream &stream, GwtPrintStyle style);
+            void print(std::ostream &stream, GwtPrintStyle style) const;
 
-            void xml(QDomElement &element);
+            void xml(QDomElement &element) const;
 
-            void saveXml(boost::filesystem::path filename);
+            void saveXml(boost::filesystem::path filename) const;
 
             std::map<std::string, GwtValue> &values();
+
+			const std::map<std::string, GwtValue> &values() const;
+
+			bool has(const std::string &name) const;
 
             GwtValue &value(const std::string &name);
 
@@ -43,14 +50,22 @@ namespace vantagefx {
 
             std::shared_ptr<GwtType> type() const;
 
-            bool has(std::string name);
-
 			std::string primary() const;
 
 			bool operator==(const GwtObject &other) const;
 
             template<typename T>
             void add(std::string name, T value);
+
+            std::shared_ptr<GwtIterator> iterateValues() const;
+
+            GwtValue item(const std::string &path, std::initializer_list<GwtValue> &&values = {}) const;
+
+            GwtValue item(const GwtPath &path, std::initializer_list<GwtValue> &&values = {}) const;
+
+			GwtQuery query(const std::string &path, std::initializer_list<GwtValue> &&values = {}) const;
+
+			GwtQuery query(const GwtPath &path, std::initializer_list<GwtValue> &&values = {}) const;
 
         private:
             std::shared_ptr<GwtType> _type;
@@ -71,6 +86,8 @@ namespace vantagefx {
         { return _type; }
 
         typedef std::shared_ptr<GwtObject> GwtObjectPtr;
+
+        typedef std::shared_ptr<const GwtObject> GwtConstObjectPtr;
     }
 }
 
