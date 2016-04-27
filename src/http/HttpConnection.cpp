@@ -142,8 +142,13 @@ namespace vantagefx {
 						for (auto cookie : cookies) {
 							_context.setCookie(cookie);
 						}
-						if (_request.close()) closeConnection();
-                        _handler(std::move(_response), error_code());
+						if (_request.close() || _response.has("Connection", "Close"))
+							closeConnection();
+
+						auto response = std::move(_response);
+						_response = HttpResponse();
+
+                        _handler(std::move(response), error_code());
                         _busy = false;
 					}
                     return true;
