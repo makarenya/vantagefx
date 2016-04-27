@@ -5,6 +5,7 @@
 #include "GwtValue.h"
 #include "GwtParser.h"
 #include "GwtObject.h"
+#include "GwtType.h"
 
 namespace vantagefx {
     namespace api {
@@ -27,7 +28,8 @@ namespace vantagefx {
 					return static_cast<int>(value);
 				return 0;
 			}
-			int operator()(std::shared_ptr<GwtObject> value) const
+			template<typename T>
+			int operator()(std::shared_ptr<T> value) const
 			{
 				return 0;
 			}
@@ -49,7 +51,8 @@ namespace vantagefx {
 			{
 				return value;
 			}
-			int64_t operator()(std::shared_ptr<GwtObject> value) const
+			template<typename T>
+			int64_t operator()(std::shared_ptr<T> value) const
 			{
 				return 0;
 			}
@@ -69,7 +72,8 @@ namespace vantagefx {
 			{
 				return static_cast<double>(value);
 			}
-			double operator()(std::shared_ptr<GwtObject> value) const
+			template<typename T>
+			double operator()(std::shared_ptr<T> value) const
 			{
 				return 0;
 			}
@@ -77,41 +81,43 @@ namespace vantagefx {
 
 		struct string_visitor : boost::static_visitor<std::string>
 		{
-			std::string operator()(int value) const
+			template<typename T>
+			std::string operator()(T value) const
 			{
 				return boost::lexical_cast<std::string>(value);
 			}
-			std::string operator()(double value) const
+			template<typename T>
+			std::string operator()(std::shared_ptr<T> value) const
 			{
-				return boost::lexical_cast<std::string>(value);
-			}
-			std::string operator()(int64_t value) const
-			{
-				return boost::lexical_cast<std::string>(value);
-			}
-			std::string operator()(std::shared_ptr<GwtObject> value) const
-			{
-				return "";
+				if (value->type()->primary().empty()) return "";
+				return value->value(value->type()->primary()).toString();
 			}
 		};
 
 		struct object_visitor : boost::static_visitor<GwtObjectPtr>
 		{
-			GwtObjectPtr operator()(int value) const
-			{
-				return GwtObjectPtr();
-			}
-			GwtObjectPtr operator()(double value) const
-			{
-				return GwtObjectPtr();
-			}
-			GwtObjectPtr operator()(int64_t value) const
+			template<typename T>
+			GwtObjectPtr operator()(T value) const
 			{
 				return GwtObjectPtr();
 			}
 			GwtObjectPtr operator()(GwtObjectPtr value) const
 			{
 				return value;
+			}
+		};
+
+		struct const_object_visitor : boost::static_visitor<GwtConstObjectPtr>
+		{
+			template<typename T>
+			GwtConstObjectPtr operator()(std::shared_ptr<T> value) const
+			{
+				return value;
+			}
+			template<typename T>
+			GwtConstObjectPtr operator()(T value) const
+			{
+				return GwtObjectPtr();
 			}
 		};
 
@@ -130,13 +136,17 @@ namespace vantagefx {
 			return boost::get<int64_t>(_value);
 		}
 
-        const std::shared_ptr<GwtObject> &GwtValue::objectValue() const
+        std::shared_ptr<GwtObject> &GwtValue::objectValue()
 		{
-			if (_value.empty()) return std::shared_ptr<GwtObject>();
             return boost::get<std::shared_ptr<GwtObject>>(_value);
         }
 
-        const std::string &GwtValue::stringValue() const {
+		const std::shared_ptr<const GwtObject> &GwtValue::objectValue() const
+		{
+			return boost::get<std::shared_ptr<const GwtObject>>(_value);
+		}
+		
+		const std::string &GwtValue::stringValue() const {
             return _string;
         }
 
@@ -185,15 +195,28 @@ namespace vantagefx {
 			return boost::apply_visitor(visitor, _value);
 		}
 
+		std::string GwtValue::valueString() const
+		{
+			if (!_string.empty()) return "'" + _string + "'";
+			string_visitor visitor;
+			return boost::apply_visitor(visitor, _value);
+		}
+
 		GwtObjectPtr GwtValue::toObject()
 		{
 			object_visitor visitor;
 			return boost::apply_visitor(visitor, _value);
 		}
 
-	    bool GwtValue::operator==(const GwtValue &rhs) const
+		GwtConstObjectPtr GwtValue::toObject() const
+		{
+			const_object_visitor visitor;
+			return boost::apply_visitor(visitor, _value);
+		}
+		
+		bool GwtValue::operator==(const GwtValue &rhs) const
 	    {
-			// 0 - null, 1 - число, 2 - строка, 3 - строка или число
+			// 0 - null, 1 - пїЅпїЅпїЅпїЅпїЅ, 2 - пїЅпїЅпїЅпїЅпїЅпїЅ, 3 - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			if (_type == 0 && rhs._type == 0) return true;
 
 			if ((_type & 1) && (rhs._type & 1)) {
@@ -224,15 +247,19 @@ namespace vantagefx {
             : _value(value),
 			  _type(1) { }
 
-        GwtValue::GwtValue(std::string value)
+        GwtValue::GwtValue(const std::string &value)
             : _string(value),
 			  _type(2) { }
 
-        GwtValue::GwtValue(std::shared_ptr<GwtObject> value)
+        GwtValue::GwtValue(const std::shared_ptr<GwtObject> &value)
             : _value(value),
 			  _type(1) { }
 
-        GwtValue::GwtValue()
+		GwtValue::GwtValue(const std::shared_ptr<const GwtObject> &value)
+			: _value(value),
+			_type(1) { }
+		
+		GwtValue::GwtValue()
             : _value(),
 			  _type(0) { }
     }

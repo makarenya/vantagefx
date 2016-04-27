@@ -28,9 +28,11 @@ namespace vantagefx {
 
 			explicit GwtValue(double value);
 
-			explicit GwtValue(std::string value);
+			explicit GwtValue(const std::string &value);
 
-			explicit GwtValue(std::shared_ptr<GwtObject> value);
+			explicit GwtValue(const std::shared_ptr<GwtObject> &value);
+
+			explicit GwtValue(const std::shared_ptr<const GwtObject> &value);
 
 			GwtValue(int value, std::string string);
 
@@ -40,9 +42,11 @@ namespace vantagefx {
 
             int64_t longValue() const;
 
-            const std::shared_ptr<GwtObject> &objectValue() const;
+            std::shared_ptr<GwtObject> &objectValue();
 
-            const std::string &stringValue() const;
+			const std::shared_ptr<const GwtObject> &objectValue() const;
+			
+			const std::string &stringValue() const;
 
 			int toInt() const;
 
@@ -54,14 +58,18 @@ namespace vantagefx {
 
 			std::string toString() const;
 
+			std::string valueString() const;
+
 			std::shared_ptr<GwtObject> toObject();
+
+			std::shared_ptr<const GwtObject> toObject() const;
 
 			bool operator==(const GwtValue &rhs) const;
 
 			bool operator!=(const GwtValue &rhs) const;
 
 		private:
-            boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>> _value;
+            boost::variant<int, double, int64_t, std::shared_ptr<GwtObject>, std::shared_ptr<const GwtObject>> _value;
             std::string _string;
 			int _type;
         };
