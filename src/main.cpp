@@ -27,13 +27,177 @@ namespace fs = boost::filesystem;
 struct GwtOptionModel
 {
 	int optionId;
-	int assetId;
 	std::string name;
 	int moneyBack;
 	int seconds;
 	int rateHi;
 	double price;
 };
+
+namespace vantagefx {
+
+	using std::placeholders::_1;
+	using std::placeholders::_2;
+
+	class Controller
+	{
+	public:
+		explicit Controller(GwtHttpContext &&context)
+			: _context(std::move(context)),
+			  _instrumentTypeId(0),
+			  _brandId(0)
+		{}
+
+		void load(std::promise<std::map<int, GwtOptionModel> &> &&promise)
+		{
+			using namespace api;
+			using namespace http;
+
+			_promise = std::move(promise);
+			std::string url = "https://binaryoptions.vantagefx.com/app/index.html";
+
+			std::map<std::string, std::string> keys;
+
+			HttpRequest index(url);
+			_context.send(std::move(index), std::bind(&Controller::indexLoaded, this, _1, _2));
+		}
+
+		void refresh(std::promise<std::map<int, GwtOptionModel> &> &&promise)
+		{
+			_promise = std::move(promise);
+			_context.gwt(GwtCometUpdatesRequest(_instrumentTypeId),
+				std::bind(&Controller::refreshLoaded, this, _1, _2));
+		}
+
+		void save()
+		{
+			_lut->saveXml(fs::path(DATA_DIR) / "lut.xml");
+			_instrumentConfiguration->saveXml(fs::path(DATA_DIR) / "instrumentConfiguration.xml");
+			_instrumentOptions->saveXml(fs::path(DATA_DIR) / "instrumentOptions.xml");
+			_refresh->saveXml(fs::path(DATA_DIR) / "refresh.xml");
+			_auth->saveXml(fs::path(DATA_DIR) / "auth.xml");
+		}
+
+	private:
+
+		bool handleError(const boost::optional<std::exception> &e)
+		{
+			if (!e) return false;
+			_e = e;
+			_promise.set_exception(std::make_exception_ptr(*_e));
+			return true;
+		}
+
+		bool handleError(const boost::system::error_code &ec)
+		{
+			if (!ec) return false;
+			_e = boost::system::system_error(ec);
+			_promise.set_exception(std::make_exception_ptr(*_e));
+			return true;
+		}
+
+		void indexLoaded(http::HttpResponse && response, const boost::system::error_code &ec)
+		{
+			if (handleError(ec)) return;
+
+			auto rx = std::regex("var\\s+(\\w+)\\s*=\\s*'([^']+)'\\s*;");
+			std::smatch m;
+			auto it = response.body().begin();
+			while (std::regex_search(it, response.body().end(), m, rx)) {
+				auto key = std::string(m[1].first, m[1].second);
+				auto value = std::string(m[2].first, m[2].second);
+				_keys[key] = value;
+				it = m[0].second;
+			}
+
+			_context.gwt(GwtCookieRequest(_keys["serverCookie"]), 
+				std::bind(&Controller::cookieSets, this, _1, _2));
+		}
+
+		void cookieSets(GwtObjectPtr &&cookie, const boost::optional<std::exception> &e)
+		{
+			if (handleError(e)) return;
+			_context.gwt(GwtLutRequest(), 
+				std::bind(&Controller::lutLoaded, this, _1, _2));
+		}
+
+		void lutLoaded(GwtObjectPtr &&lut, const boost::optional<std::exception> &e)
+		{
+			if (handleError(e)) return;
+			_lut = std::move(lut);
+
+			auto instrumentTypeSuper = _lut->item("lutTypes/[name='InstrumentTypeSuper']/luts/[name='ShortTerm']/id");
+			_instrumentTypeId = _lut->item("superRels/[instrumentTypeSuperId={0}]/instrumentTypeId",
+				{ instrumentTypeSuper }).toInt();
+
+			_brandId = _lut->value("externalId").toInt();
+
+			_above = _lut->item("lutTypes/[name='PositionType']/luts/[name='Put']/id");
+
+			_context.gwt(GwtInstrumentConfigurationDataRequest(_brandId), 
+				std::bind(&Controller::instrumentConfigurationLoaded, this, _1, _2));
+		}
+
+		void instrumentConfigurationLoaded(GwtObjectPtr &&instrumentConfiguration, const boost::optional<std::exception> &e)
+		{
+			if (handleError(e)) return;
+			_instrumentConfiguration = std::move(instrumentConfiguration);
+			_context.gwt(GwtInstrumentTypeIdsWithOpenOptionsRequest(),
+				std::bind(&Controller::instrumentOptionsLoaded, this, _1, _2));
+		}
+
+		void instrumentOptionsLoaded(GwtObjectPtr &&instrumentOptions, const boost::optional<std::exception> &e)
+		{
+			if (handleError(e)) return;
+			_instrumentOptions = std::move(instrumentOptions);
+			_context.gwt(GwtAuthRequest("26251", "3361e6c1147f89e", "live"),
+				std::bind(&Controller::loggedIn, this, _1, _2));
+		}
+
+		void loggedIn(GwtObjectPtr &&auth, const boost::optional<std::exception> &e)
+		{
+			if (handleError(e)) return;
+			_auth = std::move(auth);
+			refresh(std::move(_promise));
+		}
+
+		void refreshLoaded(GwtObjectPtr &&data, const boost::optional<std::exception> &e)
+		{
+			if (handleError(e)) return;
+			_refresh = data;
+			for (auto &opt : data->query("options/*")) {
+
+				auto obj = opt.value.toObject();
+				auto id = obj->value("id").toInt();
+				auto &result = _options[id];
+
+				result.moneyBack = obj->value("return").toInt();
+				result.seconds = obj->value("optionSeconds").toInt();
+				auto asset = obj->value("assetId");
+				result.name = _lut->item("assets/[id={0}]/some_34", { asset }).toString();
+				result.price = data->item("assetUpdates/[assetId={0}]/targetPrice", { asset }).toDouble();
+				result.rateHi = data->item("positionsSentimentDto/map/[int()={0}]/[int()={1}]/value", { asset, _above }).toInt();
+			}
+			_promise.set_value(_options);
+		}
+
+	private:
+		GwtHttpContext _context;
+		GwtObjectPtr _lut;
+		int _instrumentTypeId;
+		int _brandId;
+		GwtValue _above;
+		GwtObjectPtr _instrumentConfiguration;
+		GwtObjectPtr _instrumentOptions;
+		GwtObjectPtr _refresh;
+		GwtObjectPtr _auth;
+		std::map<std::string, std::string> _keys;
+		std::map<int, GwtOptionModel> _options;
+		boost::optional<std::exception> _e;
+		std::promise<std::map<int, GwtOptionModel> &> _promise;
+	};
+
+}
 
 
 int main(int argc, char *argv[]) 
@@ -58,92 +222,34 @@ int main(int argc, char *argv[])
 	ctx.set_options(ssl::context::default_workarounds);
 
 	GwtVantageFxBundle bundle;
-	GwtHttpContext session(io_service, ctx, bundle);
+	;
 
-	std::string url = "https://binaryoptions.vantagefx.com/app/index.html";
-
-	std::map<std::string, std::string> keys;
-
-	HttpRequest index(url);
-	auto index_response = session.send(std::move(index));
-
-	HttpResponse response;
-    try {
-        response = index_response.get();
-    }
-    catch(std::exception &e) {
-		std::cout << e.what() << std::endl;
-		io_service.stop();
-		worker.join();
-        return 0;
-    }
-
-	auto rx = std::regex("var\\s+(\\w+)\\s*=\\s*'([^']+)'\\s*;");
-	std::smatch m;
-	auto it = response.body().begin();
-	while (std::regex_search(it, response.body().end(), m, rx)) {
-		auto key = std::string(m[1].first, m[1].second);
-		auto value = std::string(m[2].first, m[2].second);
-		keys[key] = value;
-		it = m[0].second;
-	}
 
 	auto filename = fs::path(DATA_DIR) / "work" / "47_Full.txt";
 
-	auto cookie = session.gwt(GwtCookieRequest(keys["serverCookie"]));
+	Controller ctr(GwtHttpContext(io_service, ctx, bundle));
 
-	auto lut = session.gwt(GwtLutRequest());
+	std::promise<std::map<int, GwtOptionModel> &> promise;
+	auto future = promise.get_future();
+	ctr.load(std::move(promise));
 
-	auto instrumentTypeSuper = GwtQuery(lut, "lutTypes/[name='InstrumentTypeSuper']/luts/[name='ShortTerm']/id").first();
-    auto instrumentTypeId = GwtQuery(lut, "superRels/[instrumentTypeSuperId=" +
-            instrumentTypeSuper.toString() + "]/instrumentTypeId").first();
-	auto brand = GwtQuery(lut, "externalId").first();
-	auto brandId = brand.toInt();
-
-	auto above = GwtQuery(lut, "lutTypes/[name='PositionType']/luts/[name='Put']/id").first().toString();
-
-	auto instrumentConfiguration = session.gwt(GwtInstrumentConfigurationDataRequest(brandId));
-	auto instrumentOptions = session.gwt(GwtInstrumentTypeIdsWithOpenOptionsRequest());
-	auto refresh = session.gwt(GwtCometUpdatesRequest(instrumentTypeId.toInt()));
-
-	std::vector<GwtOptionModel> options;
-
+	auto options = future.get();
+	ctr.save();
 	std::set<std::string> names;
-	for(auto &opt: GwtQuery(refresh, "options/*")) {
-		GwtOptionModel result;
-		auto obj = opt.value.toObject();
-		result.optionId = obj->value("id").toInt();
-		result.assetId = obj->value("assetId").toInt();
-		result.moneyBack = obj->value("return").toInt();
-		result.seconds = obj->value("optionSeconds").toInt();
-		auto asset = obj->value("assetId").toString();
-		result.name = GwtQuery(lut, "assets/[id=" + asset + "]/some_34").first().toString();
-		result.price = GwtQuery(refresh, "assetUpdates/[assetId=" + asset + "]/targetPrice").first().toDouble();
-		result.rateHi = GwtQuery(refresh, "positionsSentimentDto/map/" + asset + "/" + above + "/value").first().toInt();
-		if (names.find(result.name) == names.end()) {
-			std::cout << result.name << " = " << result.rateHi << "/" << (100 - result.rateHi) << std::endl;
-			names.insert(result.name);
+	for(auto &pair : options) {
+		if (names.find(pair.second.name) == names.end()) {
+			std::cout << pair.second.name << " = " << pair.second.rateHi << "/" << (100 - pair.second.rateHi) << std::endl;
+			names.insert(pair.second.name);
 		}
-		options.push_back(std::move(result));
 	}
 
-	for (auto &itemId : GwtQuery(refresh, "positionsSentimentDto/map/*")) {
-
-	}
-
-	lut->saveXml(fs::path(DATA_DIR) / "lut.xml");
-	instrumentConfiguration->saveXml(fs::path(DATA_DIR) / "instrumentConfiguration.xml");
-	instrumentOptions->saveXml(fs::path(DATA_DIR) / "instrumentOptions.xml");
-	refresh->saveXml(fs::path(DATA_DIR) / "refresh.xml");
-
+	/*
 	GwtAnalyzer analyzer(bundle);
 
-	std::vector<GwtValue> ids;
-	for(auto &itemId: GwtQuery(refresh, "positionsSentimentDto/map/*")) {
-		auto i = itemId.path.begin();
-		for (auto j = itemId.path.begin(); j != itemId.path.end(); ++j) if (*j == '/') i = j + 1;
 
-		ids.push_back(GwtValue(boost::lexical_cast<int>(std::string(i, itemId.path.end()))));
+	std::vector<std::string> ids;
+	for(auto &itemId: refresh->query("positionsSentimentDto/map/ * /key()")) {
+		ids.push_back(itemId.value.toString());
 	}
 
 	std::cout << std::endl << "paths:" << std::endl;
@@ -152,14 +258,14 @@ int main(int argc, char *argv[])
 	for (auto key : foundKeys) {
 		std::cout << key << std::endl;
 	}
-
+	*/
 
 	io_service.stop();
 	worker.join();
 	return 0;
 
 
-
+	GwtAnalyzer analyzer(bundle);
 	if (argc == 2) {
 		if (!fs::is_regular_file(argv[1])) {
 			std::cout << "file " << argv[1] << " not found" << std::endl;
@@ -172,10 +278,10 @@ int main(int argc, char *argv[])
 		auto table = makeResponseParser(entries[1].response(), bundle).parse();
 		auto refresh = makeResponseParser(entries[16].response(), bundle).parse();
 
-		std::vector<GwtValue> ids;
+		std::vector<std::string> ids;
 		std::string query = argv[2];
-		for (auto &id : GwtQuery(refresh, query)) {
-			ids.push_back(id.value);
+		for (auto &id : refresh->query(query)) {
+			ids.push_back(id.value.toString());
 		}
 
 		/*
@@ -193,7 +299,7 @@ int main(int argc, char *argv[])
 
 		std::cout << "found id:" << std::endl;
 		for (auto key : ids) {
-			std::cout << key.toString() << std::endl;
+			std::cout << key << std::endl;
 		}
 
 		std::cout << std::endl << "paths:" << std::endl;
@@ -208,10 +314,10 @@ int main(int argc, char *argv[])
 		auto entries = analyzer.parseEntries(filename);
 		auto table = makeResponseParser(entries[1].response(), bundle).parse();
 
-		std::vector<GwtValue> ids;
+		std::vector<std::string> ids;
 		for (auto i = 2; i < argc; i++)
 		{
-			ids.push_back(GwtValue(0, argv[i]));
+			ids.push_back(argv[i]);
 		}
 
 		std::cout << std::endl << "paths:" << std::endl;

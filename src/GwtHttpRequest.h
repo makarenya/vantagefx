@@ -17,9 +17,11 @@ namespace vantagefx {
 
 	class GwtHttpContext : public http::HttpContext {
 	public:
+		typedef std::function<void(api::GwtObjectPtr &&item, const boost::optional<std::exception> &e)> GwtHandler;
+
 		GwtHttpContext(boost::asio::io_service& io_service, boost::asio::ssl::context& context, api::GwtBundle& bundle);
 
-		api::GwtObjectPtr gwt(GwtHttpRequest&& request);
+		void gwt(GwtHttpRequest&& request, const GwtHandler &handler);
 
 	private:
 		api::GwtBundle &_bundle;

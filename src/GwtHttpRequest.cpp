@@ -7,27 +7,37 @@
 
 namespace vantagefx {
 
+	using boost::system::error_code;
+
 	GwtHttpContext::GwtHttpContext(boost::asio::io_service& io_service, boost::asio::ssl::context& context, api::GwtBundle& bundle)
 		: HttpContext(io_service, context), 
 		  _bundle(bundle)
 	{}
 
-	api::GwtObjectPtr GwtHttpContext::gwt(vantagefx::GwtHttpRequest&& request)
+
+	void GwtHttpContext::gwt(vantagefx::GwtHttpRequest&& request, const GwtHandler &handler)
 	{
 		api::GwtObjectPtr result;
-		auto parser = api::makeResponseParser(send(std::move(request)).get().body(), _bundle);
+		send(std::move(request), [this, handler](http::HttpResponse &&response, const error_code &ec)
+		{
+			if (ec) {
+				handler(api::GwtObjectPtr(), boost::system::system_error(ec));
+				return;
+			}
+			auto parser = api::makeResponseParser(response.body(), _bundle);
 
-		try {
-			return parser.parse();
-		}
-		catch (std::exception &e) {
-			std::cout << e.what() << std::endl;
-			parser.back(10);
-			parser.print(std::cout, 9);
-			std::cout << ">>> ";
-			parser.print(std::cout, 100);
-			throw;
-		}
+			try {
+				handler(parser.parse(), boost::optional<std::exception>());
+			}
+			catch (std::exception &e) {
+				std::cout << e.what() << std::endl;
+				parser.back(10);
+				parser.print(std::cout, 9);
+				std::cout << ">>> ";
+				parser.print(std::cout, 100);
+				handler(api::GwtObjectPtr(), e);
+			}
+		});
 	}
 
 	GwtHttpRequest::GwtHttpRequest(const std::string &uri)
