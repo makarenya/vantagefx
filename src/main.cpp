@@ -22,7 +22,7 @@ namespace fs = boost::filesystem;
 
 int start(int argc, char **argv, fs::path module_dir);
 
-#ifdef WINVER
+#ifndef WINVER
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
 	std::vector<wchar_t> buf(MAX_PATH);
@@ -58,12 +58,18 @@ int main(int argc, char** argv)
 }
 #endif
 
+int analyze(int argc, char **argv);
+
 int start(int argc, char **argv, fs::path ca_path)
 {
 	using namespace vantagefx;
 	using namespace vantagefx::http;
     using namespace vantagefx::analyzer;
     using namespace vantagefx::viewmodel;
+
+	if (argc >= 2 && (argv[1] == std::string("analyze") || argv[1] == std::string("find") || argv[1] == std::string("values"))) {
+		return analyze(argc, argv);
+	}
 
 	asio::io_service io_service;
 	asio::io_service::work work(io_service);
@@ -102,4 +108,91 @@ int start(int argc, char **argv, fs::path ca_path)
     io_service.stop();
     worker.join();
     return code;
+}
+
+
+int analyze(int argc, char **argv)
+{
+	using namespace vantagefx;
+	using namespace vantagefx::analyzer;
+
+	fs::path filename;
+	GwtVantageFxBundle bundle;
+	GwtAnalyzer analyzer(bundle);
+
+	if (argc > 2) {
+		if (!fs::is_regular_file(argv[2])) {
+			std::cout << "file " << argv[1] << " not found" << std::endl;
+			return 1;
+		}
+		filename = argv[2];
+	}
+	if (argc == 3 && std::string(argv[1]) == "find") {
+		auto entries = analyzer.parseEntries(filename);
+		auto table = makeResponseParser(entries[1].response(), bundle).parse();
+		auto refresh = makeResponseParser(entries[16].response(), bundle).parse();
+
+		std::vector<std::string> ids;
+		std::string query = argv[2];
+		for (auto &id : GwtQuery(refresh, query)) {
+			ids.push_back(id.value.toString());
+		}
+
+		std::sort(ids.begin(), ids.end());
+		std::string last = "";
+		for (auto it = ids.begin(); it != ids.end();) {
+			if (*it == last) {
+				it = ids.erase(it);
+			}
+			else {
+				last = *it++;
+			}
+		}
+
+		std::cout << "found id:" << std::endl;
+		for (auto key : ids) {
+			std::cout << key << std::endl;
+		}
+
+		std::cout << std::endl << "paths:" << std::endl;
+		auto keys = analyzer.usedBy(table, ids);
+
+		for (auto key : keys) {
+			std::cout << key << std::endl;
+		}
+		return 0;
+	}
+	if (argc > 3 && std::string(argv[1]) == "values") {
+		auto entries = analyzer.parseEntries(filename);
+		auto table = makeResponseParser(entries[1].response(), bundle).parse();
+
+		std::vector<std::string> ids;
+		for (auto i = 2; i < argc; i++)
+		{
+			ids.push_back(argv[i]);
+		}
+
+		std::cout << std::endl << "paths:" << std::endl;
+		auto keys = analyzer.usedBy(table, ids);
+
+		for (auto key : keys) {
+			std::cout << key << std::endl;
+		}
+		return 0;
+	}
+	if (argc == 3 && std::string(argv[1]) == "analyze") {
+		auto entries = analyzer.parseEntries(filename);
+		auto i = 0;
+		std::vector<GwtObjectPtr> created;
+		for (auto entry : entries) {
+			std::vector<std::string> paths;
+			boost::split(paths, entry.url(), [](char c) { return c == '/'; });
+			auto name = boost::lexical_cast<std::string>(i) + "_" + paths[paths.size() - 1];
+			std::cout << "processing " << name << std::endl;
+			created.push_back(analyzer.processEntry(filename.parent_path(), name, entry));
+			i++;
+		}
+		return 0;
+	}
+	return -1;
 }
