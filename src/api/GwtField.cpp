@@ -100,7 +100,7 @@ namespace vantagefx {
 
         class FloatField : public GwtIntField {
         public:
-	        explicit FloatField(const std::string &name);
+	        explicit FloatField(const std::string &name, bool ignoreOther);
 
 			GwtValue parse(GwtParser &parser) override;
 
@@ -118,6 +118,7 @@ namespace vantagefx {
 		
 		private:
             std::vector<double> _values;
+            bool _ignoreOther;
             double _last = INT_MIN;
         };
 
@@ -171,8 +172,8 @@ namespace vantagefx {
             return std::make_shared<StdField>(name);
         }
 
-        GwtFieldPtr fdbl(const std::string &name) {
-            return std::make_shared<FloatField>(name);
+        GwtFieldPtr fdbl(const std::string &name, bool ignoreOther) {
+            return std::make_shared<FloatField>(name, ignoreOther);
         }
 
         GwtFieldPtr fdte(const std::string &name) {
@@ -276,7 +277,7 @@ namespace vantagefx {
             parser >> value;
             auto string = parser.str(value);
             if (value == parser.maxWord()) {
-                std::cout << parser.currentObject()->type()->name() << "::" << name() << " can be a string '"
+                std::cout << parser.stack().back()->type()->name() << "::" << name() << " can be a string '"
                 << string << "'" << std::endl;
             }
             updateFactor(this, value);
@@ -326,18 +327,22 @@ namespace vantagefx {
             stream << date;
         }
 
-        FloatField::FloatField(const std::string &name)
-                : GwtIntField(name) { }
+        FloatField::FloatField(const std::string &name, bool ignoreOther)
+                : GwtIntField(name),
+                  _ignoreOther(ignoreOther) { }
 
 		GwtValue FloatField::parse(GwtParser &parser) {
             double value;
-            parser >> value;
+            if (_ignoreOther)
+                value = parser.popAsDouble();
+            else
+                parser >> value;
             updateFactor(this, value);
             return GwtValue(value);
         }
 
         void FloatField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
-            stream << ptr.doubleValue();
+            stream << std::scientific << ptr.doubleValue();
         }
 
 	    bool FloatField::equal(const GwtValue& value, const GwtValue& other) const

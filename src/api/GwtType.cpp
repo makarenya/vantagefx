@@ -19,7 +19,7 @@ namespace vantagefx {
 	    }
 
 	    GwtComplexType::GwtComplexType(const std::string &name,
-                                       std::initializer_list<std::shared_ptr<GwtField>> fields,
+                                       std::vector<std::shared_ptr<GwtField>> fields,
                                        const std::string &primary)
                 : GwtType(name),
                   _fields(fields),
@@ -53,6 +53,7 @@ namespace vantagefx {
             parent.setAttribute("type", name().c_str());
             for (auto field: _fields) {
                 auto fieldName = field->name();
+				if (!object.has(fieldName)) continue;
                 auto value = object.value(fieldName);
                 if (!value.empty()) {
                     auto prop = doc.createElement(fieldName.c_str());
@@ -67,19 +68,30 @@ namespace vantagefx {
             for (auto field: _fields) {
                 auto fieldName = field->name();
 				GwtValue value;
-                try {
+				if (parser.eof()) {
+					std::stringstream info;
+					info << "unexpected stream end" << std::endl;
+					parser.printStack(info);
+					throw ParseError(info.str());
+				}
+				try {
                     value = field->parse(parser);
                 }
                 catch (boost::bad_get) {
                     throw WrongGwtType(name(), fieldName, field->type(), parser.peekType());
                 }
                 if (result->has(fieldName)) {
-                    throw ParseError("two objects with key '" + fieldName + "' while parsing " +
-                                     parser.currentObject()->type()->name());
+					std::stringstream info;
+					info << "two objects with key '" << fieldName << "' while parsing " << std::endl;
+					parser.printStack(info);
+                    throw ParseError(info.str());
                 }
                 if (fieldName.empty()) {
-                    throw ParseError("empty field name while parsing " + parser.currentObject()->type()->name());
-                }
+					std::stringstream info;
+					info << "empty field name while parsing" << std::endl;
+					parser.printStack(info);
+					throw ParseError(info.str());
+				}
                 result->addValue(fieldName, std::move(value));
             }
         }
@@ -272,7 +284,7 @@ namespace vantagefx {
                     result->add("value_" + name, value);
                     result->add("type_" + name, 2);
                 }
-                else if (type == "java.lang.String") {
+                else if (type == "java.lang.String/2004016611") {
                     std::string value;
                     parser >> value;
                     result->add("value_" + name, value);

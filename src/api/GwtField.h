@@ -60,7 +60,7 @@ namespace vantagefx {
 
 		GwtFieldPtr fstd(const std::string &name);
 
-        GwtFieldPtr fdbl(const std::string &name);
+        GwtFieldPtr fdbl(const std::string &name, bool ignoreOther = false);
 
         GwtFieldPtr fdte(const std::string &name);
 

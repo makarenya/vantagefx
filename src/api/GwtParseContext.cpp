@@ -4,6 +4,64 @@
 
 namespace vantagefx {
     namespace api {
+		namespace base64 {
+			inline uint64_t base64Value(char c) {
+				if (c >= 'A' && c <= 'Z') {
+					return c - 'A';
+				}
+				if (c >= 'a' && c <= 'z') {
+					return c - 'a' + 26;
+				}
+				if (c >= '0' && c <= '9') {
+					return c - '0' + 52;
+				}
+				if (c == '$') return 62;
+				if (c == '_') return 63;
+				if (c == '=') return 0;
+				throw std::runtime_error("invalid base64 symbol");
+			}
+
+			int64_t base64Decode(std::string val)
+			{
+				int64_t result = 0;
+				for (auto i = 0; i < val.length(); i++) {
+					result = result << 6 | base64Value(val[i]);
+				}
+				return result;
+			}
+		}
+
+        namespace visitors {
+            struct double_visitor : public boost::static_visitor<double> {
+                double operator()(int value) const {
+                    return value;
+                }
+                double operator()(double value) const {
+                    return value;
+                }
+                double operator()(int64_t value) const {
+                    return static_cast<double>(value);
+                }
+                template<typename T>
+                double operator()(T value) const {
+                    return 0;
+                }
+            };
+
+			struct value_visitor : public boost::static_visitor<GwtValue>
+			{
+				GwtValue operator()(int value) const {
+					return GwtValue(value);
+				}
+				GwtValue operator()(double value) const {
+					return GwtValue(value);
+				}
+				GwtValue operator()(std::string value) const {
+					return GwtValue(base64::base64Decode(value));
+				}
+			};
+		}
+
 	    GwtParseContext::GwtParseContext(StringList &&stringList, JsonVariantList &&data) {
             _strings = std::move(stringList);
 			_data = std::move(data);
@@ -27,29 +85,24 @@ namespace vantagefx {
             return *this;
         }
 
-        inline uint64_t base64Value(char c) {
-            if (c >= 'A' && c <= 'Z') {
-                return c - 'A';
-            }
-            if (c >= 'a' && c <= 'z') {
-                return c - 'a' + 26;
-            }
-            if (c >= '0' && c <= '9') {
-                return c - '0' + 52;
-            }
-            if (c == '$') return 62;
-            if (c == '_') return 63;
-            if (c == '=') return 0;
-            throw std::runtime_error("invalid base64 symbol");
+        double GwtParseContext::popAsDouble() {
+            return boost::apply_visitor(visitors::double_visitor(), *--_it);
+        }
+
+	    GwtValue GwtParseContext::popValue()
+        {
+			return boost::apply_visitor(visitors::value_visitor(), *--_it);
+        }
+
+        int GwtParseContext::peekValueType() {
+            if (_strings.size() > 0) return -1;
+            if (eof()) return -1;
+            return (_it - 1)->which();
         }
 
         GwtParseContext &GwtParseContext::operator>>(int64_t &value) {
             auto val = boost::get<std::string>(*--_it);
-            int64_t result = 0;
-            for (auto i = 0; i < val.length(); i++) {
-                result = result << 6 | base64Value(val[i]);
-            }
-            value = result;
+            value = base64::base64Decode(val);
             return *this;
         }
 
@@ -75,6 +128,10 @@ namespace vantagefx {
                 }
                 return _stream << value << std::endl;
             }
+
+			std::ostream &operator()(double value) const {
+				return _stream << std::scientific << value << std::endl;;
+			}
 
             template<typename T>
             std::ostream &operator()(T value) const {

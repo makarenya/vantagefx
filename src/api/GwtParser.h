@@ -26,14 +26,17 @@ namespace vantagefx {
 
             std::shared_ptr<GwtObject> parse(bool last = false);
 
-            std::shared_ptr<GwtObject> currentObject() const;
+			std::vector<std::shared_ptr<GwtObject>> stack() const;
+			void printStack(std::ostream &stream);
+			std::shared_ptr<GwtObject> root();
+			std::shared_ptr<GwtObject> last();
         private:
             GwtBundle &_bundle;
             std::vector<std::shared_ptr<GwtObject>> _fetched;
-            std::shared_ptr<GwtObject> _currentObject;
+            std::vector<std::shared_ptr<GwtObject>> _fetchStack;
         };
 
-        inline std::shared_ptr<GwtObject> GwtParser::currentObject() const { return _currentObject; }
+        inline std::vector<std::shared_ptr<GwtObject>> GwtParser::stack() const { return _fetchStack; }
     }
 }
 

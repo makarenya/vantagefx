@@ -18,6 +18,21 @@ namespace vantagefx {
 
         GwtObjectPtr GwtParser::parse(bool last) {
 			if (eof()) return  GwtObjectPtr();
+
+			int valueType = peekValueType();
+			if (valueType >= 0) {
+				GwtFieldPtr field;
+				if (valueType == 0) field = fint("value");
+				else if (valueType == 1) field = fdbl("value");
+				else field = flng("value");
+				auto value = popValue();
+				std::vector<GwtFieldPtr> fields = { field };
+				auto type = std::make_shared<GwtComplexType>("temp", fields, "value");
+				auto obj = std::make_shared<GwtObject>(type);
+				obj->values()["value"] = value;
+				return obj;
+			}
+
             int typeId;
             *this >> typeId;
             GwtObjectPtr obj;
@@ -35,13 +50,35 @@ namespace vantagefx {
                 }
                 obj = std::make_shared<GwtObject>(it);
                 _fetched.push_back(obj);
-                auto oldObject = _currentObject;
-                _currentObject = obj;
+				_fetchStack.push_back(obj);
                 it->parse(*this, obj);
-                _currentObject = oldObject;
+				_fetchStack.erase(_fetchStack.end() - 1);
             }
 			if (last && !eof()) throw std::runtime_error("not all fetched");
             return obj;
         }
+
+	    void GwtParser::printStack(std::ostream &stream)
+	    {
+		    for(auto &obj: _fetchStack) {
+			    if (obj) {
+					stream << obj->type()->name() << std::endl;
+			    }
+		    }
+	    }
+
+	    std::shared_ptr<GwtObject> GwtParser::root()
+	    {
+			if (_fetchStack.size() == 0) return GwtObjectPtr();
+			return _fetchStack[0];
+	    }
+
+	    std::shared_ptr<GwtObject> GwtParser::last()
+	    {
+			for(int i = static_cast<int>(_fetchStack.size()) - 1; i >= 0; --i) {
+				if (_fetchStack[i]) return _fetchStack[i];
+			}
+			return GwtObjectPtr();
+	    }
     }
 }

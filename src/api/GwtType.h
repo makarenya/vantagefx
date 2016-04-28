@@ -49,7 +49,7 @@ namespace vantagefx {
         class GwtComplexType : public GwtType {
         public:
             GwtComplexType(const std::string &name,
-                           std::initializer_list<std::shared_ptr<GwtField>> fields,
+                           std::vector<std::shared_ptr<GwtField>> fields,
                            const std::string &primary);
 
             void print(const GwtObject &object, std::ostream &stream, GwtPrintStyle style) const override;

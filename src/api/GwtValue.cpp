@@ -216,7 +216,6 @@ namespace vantagefx {
 		
 		bool GwtValue::operator==(const GwtValue &rhs) const
 	    {
-			// 0 - null, 1 - �����, 2 - ������, 3 - ������ ��� �����
 			if (_type == 0 && rhs._type == 0) return true;
 
 			if ((_type & 1) && (rhs._type & 1)) {

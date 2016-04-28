@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include "GwtRpcRequest.h"
 #include "GwtReflectedType.h"
+#include "GwtValue.h"
 
 namespace vantagefx {
     namespace api {
@@ -21,6 +22,12 @@ namespace vantagefx {
 
             GwtParseContext &operator>>(double &value);
 
+            double popAsDouble();
+
+			GwtValue popValue();
+
+            int peekValueType();
+
             GwtParseContext &operator>>(int64_t &value);
 
             GwtParseContext &operator>>(boost::posix_time::ptime &value);
@@ -31,12 +38,12 @@ namespace vantagefx {
 
             std::string peekType() const;
 
-            void back(int count) { for(auto i = 0; i < count; ++i) ++_it; }
+            void back(int count) { for(auto i = 0; i < count && _it != _data.end(); ++i) ++_it; }
 
             std::string word(int id);
 
             std::string str(int id);
-
+			
             void print(std::ostream &stream, int count);
 
             int count() const;

@@ -43,13 +43,18 @@ namespace vantagefx {
 			try {
 				result = parser.parse();
 				auto response = body.ownerDocument().createElement("response");
-				result->xml(response);
+				if (result) result->xml(response);
 				body.appendChild(response);
 				parser.print(std::cout, 100);
 			}
 			catch (std::exception &ex) {
 				std::cout << ex.what() << std::endl;
-				parser.print(std::cout, 20);
+				if (parser.root()) parser.root()->saveXml("d:\\error.xml");
+				parser.printStack(std::cout);
+				parser.back(10);
+				parser.print(std::cout, 9);
+				std::cout << ">> ";
+				parser.print(std::cout, 60);
 			}
 			return result;
 		}
@@ -68,8 +73,13 @@ namespace vantagefx {
 			    parser.print(std::cout, 100);
 		    }
 		    catch (std::exception &ex) {
-			    std::cout << ex.what() << std::endl;
-			    parser.print(std::cout, 20);
+				std::cout << ex.what() << std::endl;
+				if (parser.root()) parser.root()->saveXml("d:\\error.xml");
+				parser.printStack(std::cout);
+				parser.back(10);
+				parser.print(std::cout, 9);
+				std::cout << ">> ";
+			    parser.print(std::cout, 60);
 		    }
 			return result;
 	    }
