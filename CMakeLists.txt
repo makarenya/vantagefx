@@ -98,7 +98,7 @@ set(SOURCE_FILES
         src/viewmodel/OptionsListModel.h
         src/model/GwtOptionModel.cpp
         src/model/GwtOptionModel.h
-        )
+        src/api/GwtHttpRequestContext.cpp src/api/GwtHttpRequestContext.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
