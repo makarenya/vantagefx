@@ -69,7 +69,7 @@ namespace vantagefx {
                 fstr("serialuid"),
                 fint("assetId"), // Для какой пары текущий опцион
                 fstd("some_2"),
-                fstd("optionSeconds"),
+                fint("optionSeconds"),
                 fstd("some_4"),
 				fint("some_5"),
 				fptr("closeDate"),
@@ -585,7 +585,7 @@ namespace vantagefx {
 				fstd("some_31"),
 				fstd("some_32"),
 				fstd("some_33"),
-				fstr("some_34"),
+				fstr("name"),
 				fstr("some_35"),
 				fstr("some_36"),
 				fstd("some_37"),

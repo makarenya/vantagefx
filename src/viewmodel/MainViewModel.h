@@ -6,64 +6,54 @@
 #define QT_SECOND_MAINVIEWMODEL_H
 
 #include <QtCore>
-#include "src/model/MainModel.h"
+#include "../model/MainModel.h"
+#include "../viewmodel/OptionsListModel.h"
+#include "Controller.h"
 #include "PersonViewModel.h"
 
-class MainViewModel : public QObject {
-Q_OBJECT
-public:
-    MainModel _mainModel;
-    PersonListModel _phonebook;
+namespace vantagefx {
+    namespace viewmodel {
 
-    Q_PROPERTY(QString sourceValue
-                       READ
-                               sourceValue
-                       WRITE
-                               setSourceValue
-                       NOTIFY
-                       sourceChanged);
-    Q_PROPERTY(QString destinationValue
-                       READ
-                               destinationValue
-                       WRITE
-                               setDestinationValue
-                       NOTIFY
-                       destinationChanged)
-    Q_PROPERTY(PersonListModel *phonebook
-                       READ
-                               phonebook
-                       NOTIFY
-                       phonebookChanged)
+        class MainViewModel : public QObject
+        {
+        Q_OBJECT
 
-public:
-    explicit MainViewModel(const MainModel &mainModel);
+        public:
 
-    virtual ~MainViewModel();
+            Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged);
+            Q_PROPERTY(OptionsListModel *options READ options NOTIFY optionsChanged)
 
-    Q_INVOKABLE void clearCommand();
+        public:
+            explicit MainViewModel(Controller &&controller);
 
-    QString sourceValue() const { return _mainModel.sourceValue(); }
+            virtual ~MainViewModel();
 
-    QString destinationValue() const { return _mainModel.destinationValue(); }
+            bool loaded() const { return _loaded; }
 
-    PersonListModel *phonebook() { return &_phonebook; }
+            OptionsListModel *options() { return &_options; }
 
-public slots:
+        public slots:
 
-    void setSourceValue(const QString &value);
+            void update();
 
-    void setDestinationValue(const QString &value);
+        signals:
 
-    void addPerson(const PersonModel &person);
+            void loadedChanged(bool loaded);
 
-signals:
+            void optionsChanged(const OptionsListModel *options);
 
-    void sourceChanged(const QString &arg);
+        private:
 
-    void destinationChanged(const QString &arg);
+            OptionsListModel _options;
+            bool _loaded;
+            Controller _controller;
+            int _refreshTimeout;
 
-    void phonebookChanged(const PersonListModel *phonebook);
-};
+			MainViewModel(const MainViewModel &rhs);
+			MainViewModel &operator=(const MainViewModel &rhs);
+        };
+    }
+}
 
 
 #endif //QT_SECOND_MAINVIEWMODEL_H

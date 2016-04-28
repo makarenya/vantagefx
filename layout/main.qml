@@ -3,70 +3,84 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 
 Window {
-  property int itemAngle: 60
-  property int itemSize: 300
+    visible: true
+    width: 360
+    height: 520
 
-  visible: true
-  width: 360
-  height: 360
-
-  Rectangle {
-    anchors.fill: parent
-ListModel {
-        id: dataModel
-
-        ListElement {
-            color: "orange"
-            text: "first"
-        }
-        ListElement {
-            color: "lightgreen"
-            text: "second"
-        }
-        ListElement {
-            color: "orchid"
-            text: "third"
-        }
-        ListElement {
-            color: "tomato"
-            text: "fourth"
+    Rectangle {
+        anchors.fill: parent
+        visible: !root.loaded
+        Text {
+            anchors.centerIn: parent
+            text: "Loading..."
+            font.pixelSize: 24
+            renderType: Text.NativeRendering
         }
     }
 
-    Flickable {
+    Rectangle {
         anchors.fill: parent
-        contentWidth: row.width
-        flickDeceleration: 1000
+        visible: root.loaded
+        ListView {
+            id: view
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 10
+            model: root.options
 
-        Row {
-            id: row
+            delegate: Item {
+                width: view.width
+                height: 20
 
-            height: parent.height
+                Rectangle {
+                    id: item
+                    anchors.fill: parent
 
-            Repeater {
-                model: dataModel
-                delegate: Item {
-                    height: parent.height
-                    width: 100
+                    Text {
+                        x: 10
+                        y: 3
+                        width: 120
+                        height: 16
+
+                        renderType: Text.NativeRendering
+                        text: model.name
+                    }
+
+                    Text {
+                        x: 130
+                        y: 3
+                        width: 20
+                        height: 16
+                        text: model.low
+                        renderType: Text.NativeRendering
+                    }
+
+                    Text {
+                        x: 270
+                        y: 3
+                        width: 20
+                        height: 16
+                        text: model.high
+                        renderType: Text.NativeRendering
+                    }
 
                     Rectangle {
-                        anchors.margins: 5
-                        anchors.fill: parent
-                        color: model.color
-                        border {
-                            color: "black"
-                            width: 1
-                        }
+                        x: 160
+                        y: 3
+                        width: model.low
+                        height: 16
+                        color: "#ff0000"
+                    }
 
-                        Text {
-                            anchors.centerIn: parent
-                            renderType: Text.NativeRendering
-                            text: model.text
-                        }
+                    Rectangle {
+                        x: 160 + model.low
+                        y: 3
+                        width: model.high
+                        height: 16
+                        color: "#00ff00"
                     }
                 }
             }
         }
     }
- }
 }

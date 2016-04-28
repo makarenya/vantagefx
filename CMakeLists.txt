@@ -7,8 +7,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 if (MSVC)
     set(CMAKE_PREFIX_PATH "c:/msvc_2015")
     set(Boost_USE_STATIC_LIBS ON) # only find static libs
+    set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:\"wWinMainCRTStartup\"")
+    add_definitions(-D_WIN32_WINNT=0x0502 -DWINVER=0x0502)
+    add_definitions(-D_UNICODE -DUNICODE)
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+endif ()
+if (MINGW)
+    set(CMAKE_EXE_LINKER_FLAGS "-mwindows -municode")
 endif ()
 
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data/")
@@ -86,6 +92,12 @@ set(SOURCE_FILES
         src/http/Url.h
         src/GwtHttpRequest.cpp
         src/GwtHttpRequest.h
+        src/viewmodel/Controller.cpp
+        src/viewmodel/Controller.h
+        src/viewmodel/OptionsListModel.cpp
+        src/viewmodel/OptionsListModel.h
+        src/model/GwtOptionModel.cpp
+        src/model/GwtOptionModel.h
         )
 
 
@@ -94,7 +106,6 @@ add_executable(vantagefx ${SOURCE_FILES} ${RESOURCES})
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 if(WIN32)
-    target_link_libraries(vantagefx wsock32 ws2_32)
+    target_link_libraries(vantagefx wsock32 ws2_32 Shell32 Winhttp)
     add_definitions(-D_WIN32_WINNT=0x0501)
-    target_link_libraries(vantagefx Winhttp)
 endif()

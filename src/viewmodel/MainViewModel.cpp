@@ -3,37 +3,43 @@
 //
 #include "MainViewModel.h"
 
-MainViewModel::MainViewModel(const MainModel &mainModel) {
-    _mainModel = mainModel;
-}
+namespace vantagefx {
+    namespace viewmodel {
 
-MainViewModel::~MainViewModel() {
-}
+        MainViewModel::MainViewModel(Controller &&controller)
+                : _loaded(false),
+                  _controller(std::move(controller)),
+                  _refreshTimeout(-1)
+        {
+			_controller.load([this](Controller &) {
+                _controller.refresh([this](Controller &) {
+					_refreshTimeout = 0;
+                });
+            });
+		
+			auto timer = new QTimer(this);
+			connect(timer, &QTimer::timeout, this, &MainViewModel::update);
+			timer->start(1000);
+		}
 
-void MainViewModel::clearCommand() {
-    QString emptyString = "";
-    _phonebook.push_back(PersonModel()
-                                 .setName("test")
-                                 .setSurname("tester")
-                                 .setPhone("6666666")
-                                 .setAge(0));
-    setSourceValue(emptyString);
-}
+        MainViewModel::~MainViewModel() {
+        }
 
-void MainViewModel::setSourceValue(const QString &value) {
-    if (_mainModel.sourceValue() == value) return;
-    _mainModel.setSourceValue(value);
-    emit sourceChanged(value);
-    setDestinationValue(value);
-}
-
-void MainViewModel::setDestinationValue(const QString &value) {
-    if (_mainModel.destinationValue() == value) return;
-    _mainModel.setDestinationValue(value);
-    emit destinationChanged(value);
-}
-
-void MainViewModel::addPerson(const PersonModel &person) {
-    _phonebook.push_back(person);
-    emit phonebookChanged(&_phonebook);
+        void MainViewModel::update() {
+			if (_refreshTimeout < 0) return;
+            if (_refreshTimeout == 0) {
+                _options.updateOptions(std::move(_controller.options()));
+				if (!_loaded) {
+					_loaded = true;
+					emit loadedChanged(_loaded);
+				}
+			}
+            if (++_refreshTimeout == 5) {
+                _refreshTimeout = -1;
+                _controller.refresh([this](Controller &) {
+                    _refreshTimeout = 0;
+                });
+            }
+        }
+    }
 }

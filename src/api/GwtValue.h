@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <memory>
+#include <stdint.h>
 #include <boost/variant.hpp>
 
 namespace vantagefx {
