@@ -125,10 +125,10 @@ namespace vantagefx {
             add("com.optionfair.client.model.OptionUpdateChangeStrike/3365438592", {
                 fdbl("targetPrice"),
                 fdbl("some_2"),
-                flng("some_3"),
+                flng("optionId"),
                 fdbl("some_4"),
                 fdbl("some_5"),
-                fint("some_6"),
+                fint("optionStatus"),
             });
 
 			add("com.optionfair.client.resolver.BrandCurrencyCountryResolver/4149870428", {
