@@ -41,14 +41,14 @@ namespace vantagefx {
                 fstd("some_15"),
                 fptr("positionsSentimentDto"),
                 fptr("some_16"),
-                fstd("some_17"),
-                fstd("some_18"),
-                fstd("some_19"),
+                fint("some_17"),
+                fint("some_18"),
+                fint("some_19"),
                 fptr("some_20"),
                 flng("some_21"),
                 fptr("some_22"),
-                fstd("some_23"),
-                fstd("some_24")
+                fint("some_23"),
+                fint("some_24")
             });
 
             add("com.optionfair.client.model.PositionsSentimentDTO/3338833266", {
@@ -101,6 +101,18 @@ namespace vantagefx {
                 fdbl("some_31"),
                 fdbl("some_32"),
                 flng("some_33"),
+            });
+
+            add("com.optionfair.client.model.PositionUpdate/3887973789", {
+                fdbl("some_1"),//0.000000e+00
+                fptr("some_date"),//0
+                flng("some_3"),//KlvU
+                fint("some_4"),//311
+                flng("some_5"),//VRdvf30
+                flng("some_6"),//A
+                flng("some_7"),//A
+                fint("some_8"),//18
+                fdbl("some_9"),//0.000000e+00
             });
 
             add("com.optionfair.client.model.AssetUpdate/3263927368", {
@@ -608,21 +620,91 @@ namespace vantagefx {
                 fint("lutTypeId")
             }, "name");
 
-            add("com.optionfair.client.model.PaymentMethod/4059381229", {
-                fstr("serialuid"),
-                fint("commissionType"),
-                fdbl("some_2"),
-                fint("id"),
-                fint("some_3"),
-                fstd("some_4"),
-                fint("some_5"),
-                fstr("some_6"),
-                fstd("some_7"),
-                fstd("some_8"),
-                fint("some_9"),
-                fstd("regulationId"),
-                fint("some_11"),
-                fstd("some_12")
+			add("com.optionfair.client.model.PaymentMethod/4059381229", {
+				fstr("serialuid"),//6 [rO0ABXcEAAAAAA==]
+				fint("commissionType"),//128 [UpBid]
+				fdbl("some_2"),//3.000000e+02
+				fint("id"),//93 [Tax]
+				fint("some_4"),//1 [com.optionfair.client.model.LutResolverInitPackage/3212179674]
+				fstd("some_5"),//0
+				fint("some_6"),//8 [com.optionfair.client.model.Lut/3629739227]
+				fstr("some_7"),//204 [Wire]
+				fstd("some_8"),//0
+				fstd("some_9"),//0
+				fint("some_10"),//1 [com.optionfair.client.model.LutResolverInitPackage/3212179674]
+				fint("regulationId"),//1502
+				fstd("some_12"),//0
+				fstd("some_13"),//267 [IdPay_cysec]
+			});
+			
+			add("com.optionfair.client.model.TradeActionResponse/3233850074", {
+                flng("some_1"), //ISw
+                fint("some_2"),//0
+                flng("some_3"),//Po
+                fint("some_4"),//4
+                fdbl("some_5", true),//0
+                fdbl("some_6"),//1.13335
+                fint("some_7"),//0
+                fstr("some_8"),//2 [ACR+yRO4lkJ3cjauwhbeAQ==]
+                fdbl("some_9", true),//0
+                fint("some_10"),//1 [com.optionfair.client.model.TradeActionResponse/3233850074]
+                flng("some_11"),//Xm$s
+                fint("some_12"),//49
+                flng("some_13"),//A
+                fstr("some_14"),//3 [0]
+                fdbl("some_15"),//1.13335
+                fstr("some_16"),//4 [1.13335]
+                fint("some_17"),//0
+                flng("some_18"),//VRdvfvC
+                fint("some_19")
+            });
+
+            add("com.optionfair.client.model.Position/1677341959", {
+                fstr("serialuid"),//2 [rO0ABXcEAAAAAA==]
+                flng("some_1"),//ISw
+                fint("some_2"),//0
+                flng("some_3"),//Po
+                flng("some_4"),//A
+                fdbl("some_5"),//0.000000e+00
+                fint("some_6"),//0
+                fint("some_7"),//0
+                fdbl("some_8"),//0.000000e+00
+                fdbl("some_9"),//0.000000e+00
+                fptr("some_date"),//3 [java.util.Date/3385151746]
+                flng("some_10"),//A
+                flng("transactionId"),//KlvU
+                flng("some_12"),//Po
+                fint("some_13"),//1 [com.optionfair.client.model.Position/1677341959]
+                fint("some_14"),//0
+                fptr("some_date_2"),//3 [java.util.Date/3385151746]
+                fstr("some_15"),//0
+                flng("some_16"),//L2
+                flng("some_17"),//L2
+                flng("some_18"),//A
+                flng("some_19"),//A
+                fint("some_20"),//1 [com.optionfair.client.model.Position/1677341959]
+                fint("some_21"),//264
+                fptr("option"),
+                fptr("some_date_3"),
+                fint("some_22"),
+                fint("some_23"),//49
+                flng("some_24"),//A
+                flng("some_25"),//A
+                fint("some_26"),//0
+                fint("some_27"),//0
+                flng("some_28"),//A
+                flng("some_29"),//A
+                fdbl("some_30"),//1.133350e+00
+                fint("some_31"),//18
+                fdbl("some_32"),//0.000000e+00
+                fdbl("some_33"),//1.133350e+00
+                fdbl("some_34"),//0.000000e+00
+                fdbl("some_35"),//0.000000e+00
+                fdbl("some_36"),//1.133350e+00
+                fint("some_37"),//0
+                fdbl("some_38"),//0.000000e+00
+                flng("some_39"),//U7fV
+                fdbl("some_40"),//0.000000e+00
             });
 
             add("com.optionfair.client.messages.MapMessageSource/3864621178", {
