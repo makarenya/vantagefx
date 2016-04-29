@@ -135,7 +135,7 @@ namespace vantagefx {
             auto first = true;
             for (auto id : ids) {
                 std::vector<std::string> found;
-				for (auto &pair : object->query("//[to_string()={0} || key()={0}]", { GwtValue(id) })) {
+				for (auto &pair : object->query("//[to_string()={0}]", { GwtValue(id) })) {
 					found.push_back(pair.path);
                 }
                 variants.clear();
