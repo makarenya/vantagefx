@@ -36,12 +36,13 @@ namespace vantagefx {
 
             virtual void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const = 0;
 
+			virtual void serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const = 0;
+
 			virtual std::string primary() const { return ""; }
 
 			const std::string &name() const { return _name; }
 
 			virtual std::shared_ptr<GwtIterator> iterateValues(const GwtConstObjectPtr &object) const;
-
         private:
             std::string _name;
         };
@@ -57,6 +58,8 @@ namespace vantagefx {
             void xml(const GwtObject &object, QDomElement &parent) const override;
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
+
+			void serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const override;
 
 			GwtFieldPtr field(const std::string &name) const;
 
@@ -80,6 +83,8 @@ namespace vantagefx {
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
+			void serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const override;
+
 			std::shared_ptr<GwtIterator> iterateValues(const GwtConstObjectPtr &object) const override;
 		};
 
@@ -94,6 +99,8 @@ namespace vantagefx {
 
             void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
 
+			void serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const override;
+
 		private:
             int _skip;
         };
@@ -107,6 +114,8 @@ namespace vantagefx {
 			void xml(const GwtObject &object, QDomElement &parent) const override;
 
 			void parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const override;
+
+			void serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const override;
 
 		private:
 			std::vector<std::shared_ptr<GwtField>> _fields;

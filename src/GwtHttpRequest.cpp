@@ -59,11 +59,7 @@ namespace vantagefx {
 
 	GwtRequestObjectField::GwtRequestObjectField(api::GwtObjectPtr value) : _value(value) {}
 	std::string GwtRequestObjectField::type() const { return _value->type()->name(); }
-
-	void GwtRequestObjectField::output(GwtHttpRequestContext &ctx) const
-	{
-		
-	}
+	void GwtRequestObjectField::output(GwtHttpRequestContext &ctx) const { _value->serialize(ctx); }
 
 	GwtHttpRequest::GwtHttpRequest(const std::string &uri, const std::string &uid,
 		const std::string &servlet, const std::string &method)
@@ -186,4 +182,14 @@ namespace vantagefx {
         intField(1);
 		updateContent();
     }
+
+	GwtOpenPositionRequest::GwtOpenPositionRequest(const GwtObjectPtr &prepareResponse)
+			: GwtHttpRequest("Trading", "094DCA70134E3C91D91952E12643E178",
+				"com.optionfair.client.common.services.TradingService","openPosition")
+	{
+		ptrField(prepareResponse);
+		updateContent();
+	}
 }
+
+

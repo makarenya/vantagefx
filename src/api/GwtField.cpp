@@ -36,7 +36,9 @@ namespace vantagefx {
 
 			GwtValue parse(GwtParser &parser) override;
 
-            void print(const GwtValue &, std::ostream &stream, GwtPrintStyle style) const override;
+			void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const override;
+			
+			void print(const GwtValue &, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "long"; }
 
@@ -59,7 +61,9 @@ namespace vantagefx {
 
 			GwtValue parse(GwtParser &parser) override;
 
-            void print(const GwtValue &, std::ostream &stream, GwtPrintStyle style) const override;
+			void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const override;
+			
+			void print(const GwtValue &, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "int"; }
 
@@ -82,7 +86,9 @@ namespace vantagefx {
 
 			GwtValue parse(GwtParser &parser) override;
 
-            void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
+			void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const override;
+			
+			void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "std"; }
 
@@ -104,7 +110,9 @@ namespace vantagefx {
 
 			GwtValue parse(GwtParser &parser) override;
 
-            void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
+			void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const override;
+			
+			void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "float"; }
 
@@ -128,7 +136,9 @@ namespace vantagefx {
 
 			GwtValue parse(GwtParser &parser) override;
 
-            void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
+			void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const override;
+			
+			void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
 
             std::string type() const override { return "string"; }
 
@@ -151,7 +161,9 @@ namespace vantagefx {
 
 			GwtValue parse(GwtParser &parser) override;
 
-            void xml(const GwtValue &value, QDomElement &element) const override;
+			void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const override;
+			
+			void xml(const GwtValue &value, QDomElement &element) const override;
 
             void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const override;
 
@@ -250,7 +262,12 @@ namespace vantagefx {
             return GwtValue(value);
         }
 
-        void LongField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
+	    void LongField::serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const
+        {
+			ctx << value.longValue();
+        }
+
+	    void LongField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
             using boost::posix_time::ptime;
             using boost::posix_time::milliseconds;
             namespace gregorian = boost::gregorian;
@@ -284,7 +301,12 @@ namespace vantagefx {
             return GwtValue(value, string);
         }
 
-        void StdField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
+	    void StdField::serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const
+        {
+			throw std::runtime_error("cannot be implemented");
+        }
+
+	    void StdField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
 	        auto value = ptr.intValue();
             if (value <= 1) stream << value;
             else stream << value << " [" << ptr.stringValue() << "]";
@@ -305,7 +327,12 @@ namespace vantagefx {
             return GwtValue(value);
         }
 
-        void IntField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
+	    void IntField::serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const
+        {
+			ctx << value.intValue();
+        }
+
+	    void IntField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
             stream << ptr.intValue();
         }
 
@@ -341,7 +368,12 @@ namespace vantagefx {
             return GwtValue(value);
         }
 
-        void FloatField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
+	    void FloatField::serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const
+        {
+			ctx << value.doubleValue();
+        }
+
+	    void FloatField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
             stream << std::scientific << ptr.doubleValue();
         }
 
@@ -361,7 +393,12 @@ namespace vantagefx {
             return GwtValue(value, string);
         }
 
-        void StringField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
+	    void StringField::serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const
+        {
+			ctx << value.stringValue();
+        }
+
+	    void StringField::print(const GwtValue &ptr, std::ostream &stream, GwtPrintStyle style) const {
             stream << ptr.stringValue();
         }
 
@@ -377,7 +414,12 @@ namespace vantagefx {
             return GwtValue(parser.parse());
         }
 
-        void PtrField::xml(const GwtValue &value, QDomElement &element) const {
+	    void PtrField::serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const
+        {
+			value.objectValue()->serialize(ctx);
+        }
+
+	    void PtrField::xml(const GwtValue &value, QDomElement &element) const {
             auto object = value.toObject();
             if (!object) return;
             object->xml(element);

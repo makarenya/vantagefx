@@ -17,8 +17,9 @@
 
 namespace vantagefx {
     namespace api {
+	    class GwtHttpRequestContext;
 
-        class GwtType;
+	    class GwtType;
 
         class GwtParser;
 
@@ -29,6 +30,8 @@ namespace vantagefx {
         class GwtObject : public std::enable_shared_from_this<GwtObject> {
         public:
             explicit GwtObject(std::shared_ptr<GwtType> type);
+
+            void serialize(GwtHttpRequestContext &ctx) const;
 
             void print(std::ostream &stream, GwtPrintStyle style) const;
 

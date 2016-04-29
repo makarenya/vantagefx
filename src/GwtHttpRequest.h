@@ -148,6 +148,12 @@ namespace vantagefx {
 	public:
 		explicit GwtPrepare2OpenPositionRequest(int64_t accountId, int64_t optionId, int64_t sum, double price, int positionType);
 	};
+
+	class GwtOpenPositionRequest : public GwtHttpRequest
+	{
+	public:
+		explicit GwtOpenPositionRequest(const api::GwtObjectPtr &prepareResponse);
+	};
 }
 
 

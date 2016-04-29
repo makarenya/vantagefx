@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include "GwtValue.h"
+#include "GwtHttpRequestContext.h"
 
 class QDomElement;
 
@@ -42,14 +43,15 @@ namespace vantagefx {
 
             virtual GwtValue parse(GwtParser &parser) = 0;
 
-            virtual void xml(const GwtValue &value, QDomElement &parent) const;
+			virtual void serialize(const GwtValue &value, GwtHttpRequestContext &ctx) const = 0;
+			
+			virtual void xml(const GwtValue &value, QDomElement &parent) const;
 
 			virtual bool equal(const GwtValue &value, const GwtValue &other) const = 0;
 
             virtual void print(const GwtValue &value, std::ostream &stream, GwtPrintStyle style) const = 0;
 
             virtual std::string factor() const = 0;
-
         private:
             std::string _name;
         };

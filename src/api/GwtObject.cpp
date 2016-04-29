@@ -5,6 +5,7 @@
 #include "GwtObject.h"
 #include "GwtType.h"
 #include "ParseError.h"
+#include "GwtHttpRequestContext.h"
 #include "GwtIterator.h"
 #include <QDomDocument>
 #include <QFile>
@@ -17,7 +18,13 @@ namespace vantagefx {
         GwtObject::GwtObject(std::shared_ptr<GwtType> type)
                 : _type(type) { }
 
-        void GwtObject::print(std::ostream &stream, GwtPrintStyle style) const
+	    void GwtObject::serialize(GwtHttpRequestContext &ctx) const
+        {
+			ctx << type()->name();
+			_type->serialize(*this, ctx);
+        }
+
+	    void GwtObject::print(std::ostream &stream, GwtPrintStyle style) const
 		{
             _type->print(*this, stream, style);
         }

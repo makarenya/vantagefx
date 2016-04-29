@@ -96,7 +96,14 @@ namespace vantagefx {
             }
         }
 
-		GwtFieldPtr GwtComplexType::field(const std::string &name) const
+	    void GwtComplexType::serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const
+		{
+			for(auto field: _fields) {
+				field->serialize(object.value(field->name()), ctx);
+			}
+		}
+
+	    GwtFieldPtr GwtComplexType::field(const std::string &name) const
 	    {
 		    for(auto fld: _fields) {
 				if (fld->name() == name) return fld;
@@ -149,6 +156,16 @@ namespace vantagefx {
             }
         }
 
+	    void GwtListType::serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const
+		{
+			auto length = object.value("length").intValue();
+			ctx << length;
+			for(auto i = 0; i < length; ++i) {
+				auto key = boost::lexical_cast<std::string>(i);
+				object.value(key).objectValue()->serialize(ctx);
+			}
+		}
+
 	    std::shared_ptr<GwtIterator> GwtListType::iterateValues(const GwtConstObjectPtr& object) const
         {
 			return std::make_shared<GwtArrayIterator>(object);
@@ -193,6 +210,11 @@ namespace vantagefx {
                 result->add(stream.str(), value);
             }
         }
+
+	    void GwtMapType::serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const
+		{
+			throw std::runtime_error("cannot be implemented");
+		}
 
 	    GwtRequestType::GwtRequestType()
 			: GwtType("request")
@@ -296,5 +318,10 @@ namespace vantagefx {
                 }
 			}
         }
+
+	    void GwtRequestType::serialize(const GwtObject &object, GwtHttpRequestContext &ctx) const
+		{
+			throw std::runtime_error("cannot be implemented");
+		}
     }
 }
