@@ -109,13 +109,27 @@ namespace vantagefx {
 			return index;
 		}
 
+	    std::string GwtArrayIterator::name() const
+		{
+			auto index = boost::lexical_cast<std::string>(_index);
+			auto value = _object->value(index);
+			auto obj = value.toObject();
+			if (obj) {
+				auto primary = obj->type()->primary();
+				if (!primary.empty()) {
+					auto name = obj->value(primary).valueString();
+					return "[" + primary + "=" + name + "]";
+				}
+			}
+			return index;
+		}
 
-		GwtQueryIterator::GwtQueryIterator(const GwtPath &path, const GwtConstObjectPtr &object,
+	    GwtQueryIterator::GwtQueryIterator(const GwtPath &path, const GwtConstObjectPtr &object,
 			const std::vector<GwtValue> &values, const std::string &prefix)
 			: _path(path),
 			  _values(values)
 	    {
-            load(_path.begin(), GwtValue(object), "", prefix);
+            load(_path.begin(), GwtValue(object), "", prefix, prefix);
 		}
 
 	    GwtQueryIterator::GwtQueryIterator(GwtQueryIterator &&rhs)
@@ -151,13 +165,13 @@ namespace vantagefx {
 				if (!current) return false;
 				if (!it->test()->match(current, iterator->part(), _values)) return false;
 			}
-			return load(it + 1, iterator->get(), path, iterator->part());
+			return load(it + 1, iterator->get(), path, iterator->part(), iterator->name());
 		}
 
-        bool GwtQueryIterator::load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part)
+        bool GwtQueryIterator::load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name)
         {
-			if (!path.empty()) path += "/" + part;
-			else path = part;
+			if (!path.empty()) path += "/" + name;
+			else path = name;
             if (it == _path.end()) {
 				return set(item, path);
             }
@@ -204,7 +218,7 @@ namespace vantagefx {
 			if (!it->name().empty()) {
                 auto obj = item.toObject();
                 if (!obj || !obj->has(it->name())) return false;
-                return load(it + 1, obj->value(it->name()), path, it->name());
+                return load(it + 1, obj->value(it->name()), path, it->name(), it->name());
             }
             else {
                 auto obj = item.toObject();
@@ -234,7 +248,7 @@ namespace vantagefx {
 
 				auto current =  iterator->get().toObject();
                 if (child->deep() && current && deepAvailable) {
-					path = path + "/" + iterator->part();
+					path = path + "/" + iterator->name();
 					iterator = current->iterateValues();
 					_stack.push(std::make_tuple(child, iterator, path));
                 }

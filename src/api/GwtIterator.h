@@ -37,6 +37,8 @@ namespace vantagefx {
 			virtual GwtFieldPtr field() const { return GwtFieldPtr(); }
 
 			virtual std::string part() const { return ""; }
+
+			virtual std::string name() const { return part(); }
         };
 
         class GwtComplexIterator : public GwtIterator {
@@ -97,6 +99,8 @@ namespace vantagefx {
 
             std::string part() const override;
 
+			std::string name() const override;
+
         private:
 			std::shared_ptr<const GwtObject> _object;
 			GwtFieldPtr _field;
@@ -127,7 +131,7 @@ namespace vantagefx {
 			bool loadLevel(const GwtIteratorPtr &iterator, GwtPath::iterator it, 
 				const std::string &pathconst);
 
-			bool load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part);
+			bool load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name);
 
             GwtQueryIterator &operator++();
 
