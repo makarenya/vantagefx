@@ -2,6 +2,7 @@
 // Created by alexx on 09.03.2016.
 //
 #include "MainViewModel.h"
+#include <QMessageBox>
 
 namespace vantagefx {
     namespace viewmodel {
@@ -30,6 +31,11 @@ namespace vantagefx {
             if (_refreshTimeout == 0) {
                 _options.updateOptions(std::move(_controller.options()));
 				if (!_loaded) {
+					if (!_controller.isSuccessfull()) {
+						QMessageBox msgBox;
+						msgBox.setText(_controller.exception().what());
+						msgBox.exec();
+					}
 					_loaded = true;
 					emit loadedChanged(_loaded);
 				}
