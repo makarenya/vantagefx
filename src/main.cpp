@@ -174,7 +174,7 @@ int analyze(int argc, char **argv)
 		auto table = makeResponseParser(entries[index].response(), bundle).parse();
 
 		std::vector<std::string> ids;
-		for (auto i = 2; i < argc; i++)
+		for (auto i = 4; i < argc; i++)
 		{
 			ids.push_back(argv[i]);
 		}
