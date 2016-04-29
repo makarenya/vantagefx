@@ -32,7 +32,7 @@ namespace vantagefx {
 
             void save();
 
-            bool is_successfull() const { return !!_e; }
+            bool isSuccessfull() const { return !_e; }
             const std::exception &exception() const { return *_e; }
             QMap<int, model::GwtOptionModel> options() const { return _options; }
 
