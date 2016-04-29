@@ -128,14 +128,17 @@ int analyze(int argc, char **argv)
 		}
 		filename = argv[2];
 	}
-	if (argc == 3 && std::string(argv[1]) == "find") {
+	if (argc == 6 && std::string(argv[1]) == "find") {
+		// find FIDDLER_LOG_PATH VALUES_INDEX SEARCH_INDEX QUERY
 		auto entries = analyzer.parseEntries(filename);
-		auto table = makeResponseParser(entries[1].response(), bundle).parse();
-		auto refresh = makeResponseParser(entries[16].response(), bundle).parse();
+		auto valuesIndex = boost::lexical_cast<int>(argv[3]);
+		auto searchIndex = boost::lexical_cast<int>(argv[4]);
+
+		auto table = makeResponseParser(entries[searchIndex].response(), bundle).parse();
+		auto values = makeResponseParser(entries[valuesIndex].response(), bundle).parse();
 
 		std::vector<std::string> ids;
-		std::string query = argv[2];
-		for (auto &id : GwtQuery(refresh, query)) {
+		for (auto &id : values->query(argv[5])) {
 			ids.push_back(id.value.toString());
 		}
 
@@ -163,9 +166,12 @@ int analyze(int argc, char **argv)
 		}
 		return 0;
 	}
-	if (argc > 3 && std::string(argv[1]) == "values") {
+	if (argc > 4 && std::string(argv[1]) == "values") {
+		// analyze FIDDLER_LOG_PATH LOG_INDEX VALUE1 [VALUE2 [VALUE3...]]
+		// Поиск путей, содержащих все указанные опции
 		auto entries = analyzer.parseEntries(filename);
-		auto table = makeResponseParser(entries[1].response(), bundle).parse();
+		auto index = boost::lexical_cast<int>(argv[3]);
+		auto table = makeResponseParser(entries[index].response(), bundle).parse();
 
 		std::vector<std::string> ids;
 		for (auto i = 2; i < argc; i++)
@@ -182,6 +188,7 @@ int analyze(int argc, char **argv)
 		return 0;
 	}
 	if (argc == 3 && std::string(argv[1]) == "analyze") {
+		// analyze FIDDLER_LOG_PATH
 		auto entries = analyzer.parseEntries(filename);
 		auto i = 0;
 		std::vector<GwtObjectPtr> created;
@@ -196,6 +203,7 @@ int analyze(int argc, char **argv)
 		return 0;
 	}
 	if (argc == 6 && std::string(argv[1]) == "table") {
+		// table FIDDLER_LOG_PATH LOG_INDEX QUERY CSV_PATH
 		auto entries = analyzer.parseEntries(filename);
 		auto index = boost::lexical_cast<int>(argv[3]);
 		auto entry = entries[index];
