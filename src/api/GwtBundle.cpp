@@ -25,9 +25,9 @@ namespace vantagefx {
             add("com.optionfair.client.model.ClientUpdatePack/839029662", {
                 fstd("some_1"),
                 fptr("assetUpdates"),
-                fptr("some_2"),
+                fptr("money"),
                 fptr("some_3"),
-                fstd("some_4"),
+                fstd("instrumentType"),
                 fstd("some_5"),
                 fstd("some_6"),
                 fstd("some_7"),
@@ -40,12 +40,12 @@ namespace vantagefx {
                 fptr("some_14"),
                 fstd("some_15"),
                 fptr("positionsSentimentDto"),
-                fptr("some_16"),
+                fptr("positionUpdates"),
                 fint("some_17"),
                 fint("some_18"),
                 fint("some_19"),
                 fptr("some_20"),
-                flng("some_21"),
+                flng("date"),
                 fptr("some_22"),
                 fint("some_23"),
                 fint("some_24")
@@ -95,7 +95,7 @@ namespace vantagefx {
                 fdbl("some_25"),
                 fstd("some_26"),
                 fptr("some_27"),
-                fstd("some_28"),
+                fstd("optionStatus"),
                 fdbl("some_29"),
                 fdbl("some_30"),
                 fdbl("some_31"),
@@ -104,14 +104,14 @@ namespace vantagefx {
             });
 
             add("com.optionfair.client.model.PositionUpdate/3887973789", {
-                fdbl("some_1"),//0.000000e+00
-                fptr("some_date"),//0
-                flng("some_3"),//KlvU
-                fint("some_4"),//311
-                flng("some_5"),//VRdvf30
-                flng("some_6"),//A
+                fdbl("closedPrice"),//0.000000e+00
+                fptr("positionCloseDate"),//0
+                flng("transactionId"),//KlvU
+                fint("instrumentId"),//311
+                flng("date"),//VRdvf30
+                flng("returned"),//A
                 flng("some_7"),//A
-                fint("some_8"),//18
+                fint("positionStatus"),//18
                 fdbl("some_9"),//0.000000e+00
             });
 
@@ -638,9 +638,9 @@ namespace vantagefx {
 			});
 			
 			add("com.optionfair.client.model.TradeActionResponse/3233850074", {
-                flng("some_1"), //ISw
+                flng("accountId"), //ISw
                 fint("some_2"),//0
-                flng("some_3"),//Po
+                flng("money"),//Po
                 fint("some_4"),//4
                 fdbl("some_5", true),//0
                 fdbl("some_6"),//1.13335
@@ -649,19 +649,19 @@ namespace vantagefx {
                 fdbl("some_9", true),//0
                 fint("some_10"),//1 [com.optionfair.client.model.TradeActionResponse/3233850074]
                 flng("some_11"),//Xm$s
-                fint("some_12"),//49
+                fint("positionType"),//49
                 flng("some_13"),//A
                 fstr("some_14"),//3 [0]
                 fdbl("some_15"),//1.13335
                 fstr("some_16"),//4 [1.13335]
                 fint("some_17"),//0
-                flng("some_18"),//VRdvfvC
+                flng("purchasedAt"),//VRdvfvC
                 fint("some_19")
             });
 
             add("com.optionfair.client.model.Position/1677341959", {
                 fstr("serialuid"),//2 [rO0ABXcEAAAAAA==]
-                flng("some_1"),//ISw
+                flng("accountId"),//ISw
                 fint("some_2"),//0
                 flng("some_3"),//Po
                 flng("some_4"),//A
