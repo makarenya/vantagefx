@@ -67,7 +67,8 @@ int start(int argc, char **argv, fs::path ca_path)
     using namespace vantagefx::analyzer;
     using namespace vantagefx::viewmodel;
 
-	if (argc >= 2 && (argv[1] == std::string("analyze") || argv[1] == std::string("find") || argv[1] == std::string("values"))) {
+	if (argc >= 2 && (argv[1] == std::string("analyze") || argv[1] == std::string("find") 
+		|| argv[1] == std::string("values") || argv[1] == std::string("table"))) {
 		return analyze(argc, argv);
 	}
 
@@ -191,6 +192,38 @@ int analyze(int argc, char **argv)
 			std::cout << "processing " << name << std::endl;
 			created.push_back(analyzer.processEntry(filename.parent_path(), name, entry));
 			i++;
+		}
+		return 0;
+	}
+	if (argc == 6 && std::string(argv[1]) == "table") {
+		auto entries = analyzer.parseEntries(filename);
+		auto index = boost::lexical_cast<int>(argv[3]);
+		auto entry = entries[index];
+		auto root = makeResponseParser(entry.response(), bundle).parse();
+		std::string typeName = "";
+		fs::ofstream file(fs::path(argv[5]), std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
+		for (auto item : root->query(argv[4])) {
+			auto object = item.value.objectValue();
+			if (!object) continue;
+			if (typeName.empty()) {
+				typeName = object->type()->name();
+				auto first = true;
+				for (auto it = object->iterateValues();!it->empty(); it->advance()) {
+					if (first) first = false;
+					else file << ";";
+					file << it->field()->name();
+				}
+				file << std::endl;
+			}
+			if (typeName == object->type()->name()) {
+				auto first = true;
+				for (auto it = object->iterateValues();!it->empty(); it->advance()) {
+					if (first) first = false;
+					else file << ";";
+					it->field()->print(it->get(), file, GwtPrintStyle::CsvValue);
+				}
+				file << std::endl;
+			}
 		}
 		return 0;
 	}
