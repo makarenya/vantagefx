@@ -75,6 +75,8 @@ namespace vantagefx {
             _instrumentTypeId = _lut->item("superRels/[instrumentTypeSuperId={0}]/instrumentTypeId",
                                            { instrumentTypeSuper }).toInt();
 
+			_openId = _lut->item("lutTypes/[name='OptionStatus']/luts[name='Open']/id");
+
             _brandId = _lut->value("externalId").toInt();
 
             for(auto &rate : _lut->query("lutTypes/[name='PositionType']/luts/*")) {
@@ -109,7 +111,7 @@ namespace vantagefx {
             if (handleError(e)) return;
             _refresh = std::move(data);
 
-            for (auto &opt : _refresh->query("options/*")) {
+			for (auto &opt : _refresh->query("options/[optionStatus={0}]", { _openId })) {
 
                 auto obj = opt.value.toObject();
                 auto id = obj->value("id").toInt();

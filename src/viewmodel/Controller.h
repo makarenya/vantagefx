@@ -63,6 +63,7 @@ namespace vantagefx {
             api::GwtObjectPtr _lut;
             int _instrumentTypeId;
             int _brandId;
+			api::GwtValue _openId;
             std::map<std::string, std::string> _rates;
             api::GwtObjectPtr _instrumentConfiguration;
             api::GwtObjectPtr _instrumentOptions;
