@@ -135,12 +135,14 @@ namespace vantagefx {
             parent.setAttribute("count", length.intValue());
 
             for (auto i = 0; i < length.intValue(); i++) {
-                auto item = doc.createElement("item");
                 auto name = boost::lexical_cast<std::string>(i);
-                auto value = object.value(name);
-                auto obj = value.objectValue();
-                if (obj) obj->xml(item);
-                parent.appendChild(item);
+				if (object.has(name)) {
+					auto item = doc.createElement("item");
+					auto value = object.value(name);
+					auto obj = value.objectValue();
+					if (obj) obj->xml(item);
+					parent.appendChild(item);
+				}
             }
         }
 
