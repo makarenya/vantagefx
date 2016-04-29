@@ -73,11 +73,11 @@ namespace vantagefx {
                 fstd("some_4"),
 				fint("some_5"),
 				fptr("closeDate"),
-                fstd("some_7"),
+                fptr("some_7"),
                 fint("expiryTypeId"),
                 flng("id"),
                 fdbl("some_10"),
-                fstd("instrumentId"),
+                fint("instrumentId"),
                 fstd("some_12"),
                 fptr("some_13"),
                 fdbl("some_14"),
@@ -89,13 +89,13 @@ namespace vantagefx {
                 flng("some_20"),
 				fstd("some_21"),
 				fstd("some_22"),
-				fstd("some_23"),
+				fint("some_23"),
 				fint("return"),
 				fstr("some_24"),
                 fdbl("some_25"),
                 fstd("some_26"),
                 fptr("some_27"),
-                fstd("optionStatus"),
+                fint("optionStatus"),
                 fdbl("some_29"),
                 fdbl("some_30"),
                 fdbl("some_31"),
@@ -667,27 +667,27 @@ namespace vantagefx {
                 flng("some_4"),//A
                 fdbl("some_5"),//0.000000e+00
                 fint("some_6"),//0
-                fint("some_7"),//0
+                fptr("some_7"),//0
                 fdbl("some_8"),//0.000000e+00
                 fdbl("some_9"),//0.000000e+00
-                fptr("some_date"),//3 [java.util.Date/3385151746]
+                fptr("expiryDate"),//3 [java.util.Date/3385151746]
                 flng("some_10"),//A
                 flng("transactionId"),//KlvU
                 flng("some_12"),//Po
                 fint("some_13"),//1 [com.optionfair.client.model.Position/1677341959]
                 fint("some_14"),//0
-                fptr("some_date_2"),//3 [java.util.Date/3385151746]
+                fptr("openDate"),//3 [java.util.Date/3385151746]
                 fstr("some_15"),//0
                 flng("some_16"),//L2
                 flng("some_17"),//L2
                 flng("some_18"),//A
                 flng("some_19"),//A
                 fint("some_20"),//1 [com.optionfair.client.model.Position/1677341959]
-                fint("some_21"),//264
+                fint("positionOpenType"),//264
                 fptr("option"),
                 fptr("some_date_3"),
                 fint("some_22"),
-                fint("some_23"),//49
+                fint("positionType"),//49
                 flng("some_24"),//A
                 flng("some_25"),//A
                 fint("some_26"),//0
@@ -695,7 +695,7 @@ namespace vantagefx {
                 flng("some_28"),//A
                 flng("some_29"),//A
                 fdbl("some_30"),//1.133350e+00
-                fint("some_31"),//18
+                fint("positionStatus"),//18
                 fdbl("some_32"),//0.000000e+00
                 fdbl("some_33"),//1.133350e+00
                 fdbl("some_34"),//0.000000e+00
@@ -744,6 +744,7 @@ namespace vantagefx {
 			add("java.lang.Long/4227064769", { flng("value") }, "value");
 			add("java.lang.String/2004016611", { fstr("value") }, "value");
 			add("java.util.Date/3385151746", { fdte("value") }, "value");
+            add("java.lang.Double/858496421", { fdbl("value") }, "value");
         }
     }
 }
