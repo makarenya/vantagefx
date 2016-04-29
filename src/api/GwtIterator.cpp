@@ -105,12 +105,8 @@ namespace vantagefx {
 
 		std::string GwtArrayIterator::part() const
 		{
-            if (_object->type()->primary().empty()) {
-                return boost::lexical_cast<std::string>(_index);
-            }
-            auto value = _object->value(_object->type()->primary()).valueString();
-            return "[" + _object->type()->primary() + "=" + value + "]";
-
+			auto index = boost::lexical_cast<std::string>(_index);
+			return index;
 		}
 
 
