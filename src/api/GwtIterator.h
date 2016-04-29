@@ -128,12 +128,11 @@ namespace vantagefx {
 
 			bool set(const GwtValue &value, const std::string &path);
 
-			bool loadLevel(const GwtIteratorPtr &iterator, GwtPath::iterator it, 
-				const std::string &pathconst);
-
 			bool load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name);
 
             GwtQueryIterator &operator++();
+
+			bool processNext(int tail);
 
             bool operator==(const GwtQueryIterator &rhs) const;
 

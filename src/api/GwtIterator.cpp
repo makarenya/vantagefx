@@ -129,7 +129,7 @@ namespace vantagefx {
 			: _path(path),
 			  _values(values)
 	    {
-            load(_path.begin(), GwtValue(object), "", prefix, prefix);
+		    load(_path.begin(), GwtValue(object), "", prefix, prefix);
 		}
 
 	    GwtQueryIterator::GwtQueryIterator(GwtQueryIterator &&rhs)
@@ -156,17 +156,6 @@ namespace vantagefx {
 
 	    GwtQueryIterator::GwtQueryIterator()
         { }
-
-		bool GwtQueryIterator::loadLevel(const GwtIteratorPtr &iterator, GwtPath::iterator it, 
-			const std::string &path)
-		{
-			auto current =  iterator->get().toObject();
-			if (it->test()) {
-				if (!current) return false;
-				if (!it->test()->match(current, iterator->part(), _values)) return false;
-			}
-			return load(it + 1, iterator->get(), path, iterator->part(), iterator->name());
-		}
 
         bool GwtQueryIterator::load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name)
         {
@@ -223,37 +212,41 @@ namespace vantagefx {
             else {
                 auto obj = item.toObject();
 				if (!obj) return false;
-                for(auto iterator = obj->iterateValues(); !iterator->empty(); iterator->advance()) {
-					if (loadLevel(iterator, it, path)) {
-						_stack.push(std::make_tuple(it, iterator, path));
-						return true;
-					}
-                }
-                return false;
+				_stack.push(std::make_tuple(it, obj->iterateValues(), path));
+				return processNext(_stack.size() - 1);
             }
         }
 
 	    GwtQueryIterator& GwtQueryIterator::operator++()
 	    {
-		    auto deepAvailable = true;
-            while(true) {
-				if (_stack.empty()) {
+			processNext(0);
+			return *this;
+		}
+
+	    bool GwtQueryIterator::processNext(int tail)
+		{
+			auto deepAvailable = true;
+			auto advance = tail == 0;
+			while (true) {
+				if (_stack.size() == tail) {
 					_current.path = "";
 					_current.value = GwtValue();
 					break;
 				}
-                auto child = std::get<0>(_stack.top());
-                auto iterator = std::get<1>(_stack.top());
-                auto path = std::get<2>(_stack.top());
+				auto child = std::get<0>(_stack.top());
+				auto iterator = std::get<1>(_stack.top());
+				auto path = std::get<2>(_stack.top());
 
-				auto current =  iterator->get().toObject();
-                if (child->deep() && current && deepAvailable) {
-					path = path + "/" + iterator->name();
-					iterator = current->iterateValues();
-					_stack.push(std::make_tuple(child, iterator, path));
-                }
-                else {
-					iterator->advance();
+				if (advance) {
+					auto current = iterator->get().toObject();
+					if (child->deep() && current && deepAvailable) {
+						path = path + "/" + iterator->name();
+						iterator = current->iterateValues();
+						_stack.push(std::make_tuple(child, iterator, path));
+					}
+					else {
+						iterator->advance();
+					}
 				}
 
 				if (iterator->empty()) {
@@ -262,10 +255,14 @@ namespace vantagefx {
 				}
 				else {
 					deepAvailable = true;
-					if (loadLevel(iterator, child, path)) break;
+					auto current = iterator->get().toObject();
+					if (!child->test() || (current && child->test()->match(current, iterator->part(), _values))) {
+						if (load(child + 1, iterator->get(), path, iterator->part(), iterator->name())) return true;
+					}
 				}
-            }
-			return *this;
+				advance = true;
+			}
+			return false;
 		}
 
 	    bool GwtQueryIterator::operator==(const GwtQueryIterator& rhs) const
