@@ -165,13 +165,14 @@ namespace vantagefx {
 		updateContent();
 	}
 
-	GwtPrepare2OpenPositionRequest::GwtPrepare2OpenPositionRequest(int64_t accountId, int64_t optionId, int64_t sum, double price, int positionType)
+	GwtPrepare2OpenPositionRequest::GwtPrepare2OpenPositionRequest(int64_t accountId, int64_t optionId, int assetId,
+																   int64_t sum, double price, int positionType)
 		: GwtHttpRequest("Trading", "094DCA70134E3C91D91952E12643E178",
 			"com.optionfair.client.common.services.TradingService", "prepare2OpenPosition")
     {
         lngField(accountId);
         lngField(optionId);
-        lngField(5);
+        lngField(assetId);
         lngField(sum);
         dblField(price);
         dblField(price);

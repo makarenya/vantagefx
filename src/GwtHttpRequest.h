@@ -146,7 +146,7 @@ namespace vantagefx {
 	class GwtPrepare2OpenPositionRequest : public GwtHttpRequest
 	{
 	public:
-		explicit GwtPrepare2OpenPositionRequest(int64_t accountId, int64_t optionId, int64_t sum, double price, int positionType);
+		explicit GwtPrepare2OpenPositionRequest(int64_t accountId, int64_t optionId, int assetId, int64_t sum, double price, int positionType);
 	};
 
 	class GwtOpenPositionRequest : public GwtHttpRequest
