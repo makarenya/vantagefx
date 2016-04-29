@@ -75,7 +75,7 @@ namespace vantagefx {
             _instrumentTypeId = _lut->item("superRels/[instrumentTypeSuperId={0}]/instrumentTypeId",
                                            { instrumentTypeSuper }).toInt();
 
-			_openId = _lut->item("lutTypes/[name='OptionStatus']/luts[name='Open']/id");
+			_openId = _lut->item("lutTypes/[name='OptionStatus']/luts/[name='Open']/id");
 
             _brandId = _lut->value("externalId").toInt();
 
