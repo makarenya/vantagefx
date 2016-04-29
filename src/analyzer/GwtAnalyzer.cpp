@@ -122,6 +122,9 @@ namespace vantagefx {
                     result.push_back(parser.result());
                 }
             }
+			if (parser.lastComplete()) {
+				result.push_back(parser.result());
+			}
             return result;
         }
 

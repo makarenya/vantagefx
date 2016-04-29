@@ -25,6 +25,16 @@ namespace vantagefx {
 
             Status advance(uint8_t c);
 			FiddlerLogEntry const &result() const { return _result; }
+			bool lastComplete() 
+			{
+				if(_state == ResponseBodyCr) {
+					_state = Method;
+					std::swap(_result, _current);
+					_current = FiddlerLogEntry();
+					return true;
+				}
+				return false;
+			}
 
         private:
             enum ParseState {
