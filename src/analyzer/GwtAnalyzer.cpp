@@ -142,15 +142,17 @@ namespace vantagefx {
                 for (auto item : found) {
                     std::vector<std::string> parts;
                     boost::split(parts, item, boost::is_any_of("/"));
-                    for (auto i = 0; i < parts.size(); i++) {
-                        std::string value = "";
-                        for (auto j = 0; j < parts.size(); j++) {
-                            if (!value.empty()) value += "/";
-                            value += (i == j) ? "*" : parts[j];
-                        }
-                        if (first || std::find(old.begin(), old.end(), value) != old.end()) {
-                            if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
-                                variants.push_back(value);
+                    for (auto i = 0; i < parts.size(); ++i) {
+                        for (auto j = i; j < parts.size(); ++j) {
+                            std::string value = "";
+                            for (auto k = 0; k < parts.size(); ++k) {
+                                if (!value.empty()) value += "/";
+                                value += (i == k || j == k) ? "*" : parts[k];
+                            }
+                            if (first || std::find(old.begin(), old.end(), value) != old.end()) {
+                                if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
+                                    variants.push_back(value);
+                                }
                             }
                         }
                     }
