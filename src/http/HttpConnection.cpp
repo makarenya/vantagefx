@@ -324,7 +324,8 @@ namespace vantagefx {
 
         void SslConnection::close() {
 			if(disconnect()) {
-				_socket.lowest_layer().shutdown(ip::tcp::socket::shutdown_receive);
+				error_code ec;
+				_socket.lowest_layer().shutdown(ip::tcp::socket::shutdown_receive, ec);
 			}
         }
 
