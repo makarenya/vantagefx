@@ -38,7 +38,7 @@ namespace vantagefx {
 		{
         public:
 			virtual ~GwtPathTest() {}
-            virtual bool match(const std::shared_ptr<const GwtObject> &object, const std::string &prefix,
+            virtual bool match(const GwtValue &value, const std::string &prefix,
                        const std::vector<GwtValue> &values) const = 0;
         };
 
@@ -50,7 +50,7 @@ namespace vantagefx {
 
             GwtPathTestOr(const GwtPathTestPtr& left, const GwtPathTestPtr& right);
 
-            bool match(const std::shared_ptr<const GwtObject>& object, const std::string& prefix,
+            bool match(const GwtValue &value, const std::string& prefix,
 				const std::vector<GwtValue> &values) const override;
 
         private:
@@ -64,7 +64,7 @@ namespace vantagefx {
 
             GwtPathTestAnd(const GwtPathTestPtr& left, const GwtPathTestPtr& right);
 
-            bool match(const std::shared_ptr<const GwtObject>& object, const std::string& prefix,
+            bool match(const GwtValue &value, const std::string& prefix,
 				const std::vector<GwtValue> &values) const override;
 
         private:
@@ -78,7 +78,7 @@ namespace vantagefx {
 
             GwtPathTestEq(GwtPath path, GwtValueRef value);
 
-            bool match(const std::shared_ptr<const GwtObject>& object, const std::string& prefix,
+            bool match(const GwtValue &value, const std::string& prefix,
 				const std::vector<GwtValue> &values) const override;
 
         private:

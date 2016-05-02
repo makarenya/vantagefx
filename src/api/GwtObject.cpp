@@ -94,7 +94,7 @@ namespace vantagefx {
 
         GwtValue GwtObject::item(const GwtPath &path, std::initializer_list<GwtValue> &&values) const
         {
-            GwtQueryIterator it(path, shared_from_this(), std::move(values), "");
+            GwtQueryIterator it(path, GwtValue(shared_from_this()), std::move(values), "");
             return it->value;
         }
 
@@ -105,7 +105,7 @@ namespace vantagefx {
 
 	    GwtQuery GwtObject::query(const GwtPath &path, std::initializer_list<GwtValue> &&values) const
         {
-			return GwtQuery(shared_from_this(), path, std::move(values));
+			return GwtQuery(GwtValue(shared_from_this()), path, std::move(values));
         }
     }
 }

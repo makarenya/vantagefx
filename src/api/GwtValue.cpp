@@ -89,6 +89,7 @@ namespace vantagefx {
 			template<typename T>
 			std::string operator()(std::shared_ptr<T> value) const
 			{
+				if (!value) return "empty";
 				if (value->type()->primary().empty()) return "";
 				return value->value(value->type()->primary()).toString();
 			}

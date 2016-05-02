@@ -143,9 +143,9 @@ namespace vantagefx {
 			_right(right)
 		{}
 
-	    bool GwtPathTestOr::match(const std::shared_ptr<const GwtObject> &object, const std::string &prefix, const std::vector<GwtValue> &values) const
+	    bool GwtPathTestOr::match(const GwtValue &value, const std::string &prefix, const std::vector<GwtValue> &values) const
 	    {
-			return _left->match(object, prefix, values) || _right->match(object, prefix, values);
+			return _left->match(value, prefix, values) || _right->match(value, prefix, values);
 		}
 
 	    GwtPathTestAnd::GwtPathTestAnd(const GwtPathTestPtr &left, const GwtPathTestPtr &right)
@@ -153,9 +153,9 @@ namespace vantagefx {
 			  _right(right)
 		{}
 
-	    bool GwtPathTestAnd::match(const std::shared_ptr<const GwtObject> &object, const std::string &prefix, const std::vector<GwtValue> &values) const
+	    bool GwtPathTestAnd::match(const GwtValue &value, const std::string &prefix, const std::vector<GwtValue> &values) const
 	    {
-			return _left->match(object, prefix, values) && _right->match(object, prefix, values);
+			return _left->match(value, prefix, values) && _right->match(value, prefix, values);
 		}
 
 	    GwtPathTestEq::GwtPathTestEq(GwtPath path, GwtValueRef value)
@@ -163,11 +163,11 @@ namespace vantagefx {
 			  _value(value)
 	    {}
 
-	    bool GwtPathTestEq::match(const std::shared_ptr<const GwtObject> &object, const std::string &prefix, const std::vector<GwtValue> &values) const
+	    bool GwtPathTestEq::match(const GwtValue &value, const std::string &prefix, const std::vector<GwtValue> &values) const
 	    {
-			auto value = _value(values);
-			for (GwtQueryIterator f(_path, object, values, prefix); f != GwtQueryIterator(); ++f) {
-				if (f->value == value) return true;
+			auto test = _value(values);
+			for (GwtQueryIterator filter(_path, value, values, prefix); filter != GwtQueryIterator(); ++filter) {
+				if (filter->value == test) return true;
 			}
 			return false;
 		}

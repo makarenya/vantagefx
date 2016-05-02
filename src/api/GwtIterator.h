@@ -119,7 +119,7 @@ namespace vantagefx {
             typedef std::tuple<GwtPath::iterator, GwtIteratorPtr, std::string> GwtPathNode;
             typedef std::stack<GwtPathNode> GwtPathStack;
 
-            GwtQueryIterator(const GwtPath &path, const std::shared_ptr<const GwtObject> &object, 
+            GwtQueryIterator(const GwtPath &path, const GwtValue &value,
 				const std::vector<GwtValue> &values, const std::string &prefix);
 			GwtQueryIterator();
 
@@ -159,11 +159,9 @@ namespace vantagefx {
 			typedef GwtQueryIterator iterator;
 			typedef std::pair<std::string, GwtValue> value_type;
 
-            GwtQuery(const std::shared_ptr<const GwtObject> &object, 
-				const std::string &path, std::initializer_list<GwtValue> &&values = {});
+            GwtQuery(const GwtValue &value,	const std::string &path, std::initializer_list<GwtValue> &&values = {});
 
-            GwtQuery(const std::shared_ptr<const GwtObject> &object, 
-				const GwtPath &path, std::initializer_list<GwtValue> &&values = {});
+            GwtQuery(const GwtValue &value,	const GwtPath &path, std::initializer_list<GwtValue> &&values = {});
 
             GwtQueryIterator begin() const;
 
@@ -172,9 +170,8 @@ namespace vantagefx {
 			GwtValue first();
 
         private:
-            std::shared_ptr<const GwtObject> _object;
+            const GwtValue _value;
             GwtPath _path;
-			GwtValue _value;
 			std::vector<GwtValue> _values;
         };
 

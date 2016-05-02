@@ -124,12 +124,12 @@ namespace vantagefx {
 			return index;
 		}
 
-	    GwtQueryIterator::GwtQueryIterator(const GwtPath &path, const GwtConstObjectPtr &object,
+	    GwtQueryIterator::GwtQueryIterator(const GwtPath &path, const GwtValue &value,
 			const std::vector<GwtValue> &values, const std::string &prefix)
 			: _path(path),
 			  _values(values)
 	    {
-		    load(_path.begin(), GwtValue(object), "", prefix, prefix);
+		    load(_path.begin(), value, "", prefix, prefix);
 		}
 
 	    GwtQueryIterator::GwtQueryIterator(GwtQueryIterator &&rhs)
@@ -204,13 +204,12 @@ namespace vantagefx {
 				return set(GwtValue(item.toLong()), path);
 			}
 
+			auto obj = item.toObject();
 			if (!it->name().empty()) {
-                auto obj = item.toObject();
                 if (!obj || !obj->has(it->name())) return false;
                 return load(it + 1, obj->value(it->name()), path, it->name(), it->name());
             }
             else {
-                auto obj = item.toObject();
 				if (!obj) return false;
 				_stack.push(std::make_tuple(it, obj->iterateValues(), path));
 				return processNext(static_cast<int>(_stack.size()));
@@ -262,8 +261,7 @@ namespace vantagefx {
 				}
 				else {
 					deepAvailable = true;
-					auto current = iterator->get().toObject();
-					if (!child->test() || (current && child->test()->match(current, iterator->part(), _values))) {
+					if (!child->test() || child->test()->match(iterator->get(), iterator->part(), _values)) {
 						if (load(child + 1, iterator->get(), path, iterator->part(), iterator->name())) return true;
 					}
 				}
@@ -302,24 +300,24 @@ namespace vantagefx {
 			return &_current;
 		}
 
-		GwtQuery::GwtQuery(const std::shared_ptr<const GwtObject>& object, 
+		GwtQuery::GwtQuery(const GwtValue &value,
 			const std::string &path, std::initializer_list<GwtValue> &&values)
-			: _object(object),
-			  _path(GwtPathExpression::parse(path)),
-			  _values(std::move(values))
+				: _value(value),
+			      _path(GwtPathExpression::parse(path)),
+			      _values(std::move(values))
 
 	    {}
 
-	    GwtQuery::GwtQuery(const std::shared_ptr<const GwtObject>& object, 
+	    GwtQuery::GwtQuery(const GwtValue &value,
 			const GwtPath &path, std::initializer_list<GwtValue> &&values)
-			: _object(object),
-			  _path(path),
-			  _values(std::move(values))
+				: _value(value),
+				  _path(path),
+				  _values(std::move(values))
 		{}
 
 	    GwtQueryIterator GwtQuery::begin() const
 	    {
-			return GwtQueryIterator(_path, _object, _values, "");
+			return GwtQueryIterator(_path, _value, _values, "");
 	    }
 
 	    GwtQueryIterator GwtQuery::end() const
