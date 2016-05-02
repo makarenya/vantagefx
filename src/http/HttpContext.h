@@ -46,7 +46,9 @@ namespace vantagefx {
 
 	        boost::asio::ssl::context &ssl() const;
 
-        private:
+			void stop();
+
+		private:
 
 			CookieCollection _cookies;
             std::set<ConnectionPtr> _connections;

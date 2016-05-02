@@ -106,6 +106,7 @@ int start(int argc, char **argv, fs::path ca_path)
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     auto code = app.exec();
+    controller.stop();
     io_service.stop();
     worker.join();
     return code;

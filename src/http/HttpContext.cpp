@@ -164,5 +164,12 @@ namespace vantagefx {
         {
 	        return _context;
         }
+
+        void HttpContext::stop() {
+            for(auto connection : _connections) {
+                connection->close();
+            }
+            _connections.clear();
+        }
     }
 }
