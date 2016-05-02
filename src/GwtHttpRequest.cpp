@@ -122,6 +122,7 @@ namespace vantagefx {
     {
         strField(login);
         strField(password);
+		strField(server);
 		updateContent();
 	}
 
