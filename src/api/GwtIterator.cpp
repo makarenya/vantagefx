@@ -213,7 +213,7 @@ namespace vantagefx {
                 auto obj = item.toObject();
 				if (!obj) return false;
 				_stack.push(std::make_tuple(it, obj->iterateValues(), path));
-				return processNext(_stack.size() - 1);
+				return processNext(static_cast<int>(_stack.size()));
             }
         }
 
@@ -226,15 +226,22 @@ namespace vantagefx {
 	    bool GwtQueryIterator::processNext(int tail)
 		{
 			auto deepAvailable = true;
-			auto advance = tail == 0;
+			auto advance = true;
+			if (tail > 0) {
+				tail--;
+				advance = false;
+			}
 			while (true) {
-				if (_stack.size() == tail) {
-					_current.path = "";
-					_current.value = GwtValue();
-					break;
-				}
+                if (_stack.size() == tail) {
+                    _current.path = "";
+                    _current.value = GwtValue();
+                    break;
+                }
+                // Текущий кусок пути
 				auto child = std::get<0>(_stack.top());
+                // Итератор внутри текущего куска пути
 				auto iterator = std::get<1>(_stack.top());
+                // Путь к итерируемой ноде
 				auto path = std::get<2>(_stack.top());
 
 				if (advance) {
