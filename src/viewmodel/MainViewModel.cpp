@@ -7,45 +7,124 @@
 namespace vantagefx {
     namespace viewmodel {
 
-        MainViewModel::MainViewModel(Controller &&controller)
-                : _loaded(false),
-                  _controller(std::move(controller)),
-                  _refreshTimeout(-1)
+        MainViewModel::MainViewModel(Controller &controller)
+                : _mode(""),
+                  _controller(controller),
+                  _refreshTimeout(0),
+                  _login("123301954"),
+                  _password("eNJ0D")
         {
-			_controller.load([this](Controller &) {
-                _controller.refresh([this](Controller &) {
-					_refreshTimeout = 0;
-                });
-            });
+			_controller.load();
 		
 			auto timer = new QTimer(this);
 			connect(timer, &QTimer::timeout, this, &MainViewModel::update);
-			timer->start(1000);
+			timer->start(100);
 		}
 
         MainViewModel::~MainViewModel() {
         }
 
         void MainViewModel::update() {
-			if (_refreshTimeout < 0) return;
-            if (_refreshTimeout == 0) {
-                _options.updateOptions(std::move(_controller.options()));
-				if (!_loaded) {
-					if (!_controller.isSuccessfull()) {
-						QMessageBox msgBox;
-						msgBox.setText(_controller.exception().what());
-						msgBox.exec();
-					}
-					_loaded = true;
-					emit loadedChanged(_loaded);
-				}
-			}
-            if (++_refreshTimeout == 5) {
-                _refreshTimeout = -1;
-                _controller.refresh([this](Controller &) {
-                    _refreshTimeout = 0;
-                });
+            if (_controller.isError()) {
+                setMode("");
+                _controller.finish();
+                _controller.load();
             }
+			if (_mode.isEmpty()) {
+				if (_controller.isReady()) {
+                    setMode("view");
+                    QStringList servers;
+                    for(auto server : _controller.servers()) {
+                        servers.push_back(server.c_str());
+                    }
+                    _servers.setComboList(servers);
+                    emit serversChanged(&_servers);
+                    setFullName(_controller.fullName().c_str());
+                    _options.updateOptions(std::move(_controller.options()));
+                    _controller.finish();
+                }
+			}
+            if (_mode == "view") {
+                if (_controller.isReady()) {
+                    _options.updateOptions(std::move(_controller.options()));
+                    setMoney(_controller.money());
+                    _controller.finish();
+                    _refreshTimeout = 0;
+                }
+                if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
+                    _refreshTimeout = -1;
+                    _controller.refresh();
+                }
+            }
+        }
+
+		void MainViewModel::doLogin()
+		{
+            setMode("login");
+		}
+
+		void MainViewModel::processLogin()
+		{
+			_controller.auth(_login.toStdString(), _password.toStdString(), _server.toStdString());
+            setMode("");
+		}
+
+        void MainViewModel::cancelLogin()
+        {
+            setMode("view");
+        }
+
+        void MainViewModel::setMode(const QString &mode)
+        {
+            if (_mode == mode) return;
+            _mode = mode;
+            emit modeChanged(mode);
+        }
+
+		void MainViewModel::setLogin(const QString &login)
+		{
+            if (_login == login) return;
+            _login = login;
+            emit loginChanged(_login);
+
+		}
+
+		void MainViewModel::setPassword(const QString &password)
+		{
+            if (_password == password) return;
+            _password = password;
+            emit passwordChanged(_password);
+		}
+
+		void MainViewModel::setServer(const QString &server)
+		{
+            if (_server == server) return;
+            _server = server;
+            emit serverChanged(_server);
+
+		}
+
+        void MainViewModel::setFullName(const QString &fullName) {
+            if (_fullName == fullName) return;
+            _fullName = fullName;
+            emit fullNameChanged(_fullName);
+        }
+
+        void MainViewModel::setMoney(int64_t money) {
+            QString sub = QString::number(money % 100);
+            money /= 100;
+            QString ones = QString::number(money % 1000);
+            money /= 1000;
+            auto value = "$ " + ((money == 0) ? ones + "." + sub :
+                         QString::number(money) + " " + ones + "." + sub);
+            if (value == _money) return;
+            _money = value;
+            emit moneyChanged(_money);
+        }
+
+        const QString &MainViewModel::money() const
+        {
+            return _money;
         }
     }
 }

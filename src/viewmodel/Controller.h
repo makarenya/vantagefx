@@ -12,29 +12,47 @@
 
 namespace vantagefx {
     namespace viewmodel {
-        using std::placeholders::_1;
-        using std::placeholders::_2;
 
         class Controller
         {
         public:
 
+            enum State {
+                Idle,
+                Busy,
+                Ready
+            };
+
             explicit Controller(GwtHttpContext &&context);
 
-            void load(std::function<void(Controller &controller)> handler);
+            bool load();
 
-            void auth(const std::string &login,
-                      const std::string &password,
-                      const std::string &server,
-                      std::function<void(Controller &controller)> handler);
+            bool auth(const std::string &login, const std::string &password, const std::string &server);
 
-            void refresh(std::function<void(Controller &controller)> handler);
+            bool refresh();
 
-            void save();
+            bool buy(int64_t optionId, int money);
 
-            bool isSuccessfull() const { return !_e; }
+            void save() const;
+
+            bool isReady() const { return _state == Ready && !_e; }
+
+			bool isError() const { return _state == Ready && !!_e; }
+
             const std::exception &exception() const { return *_e; }
-            QMap<int, model::GwtOptionModel> options() const { return _options; }
+
+	        bool prepare();
+
+	        void finish();
+
+	        std::map<int, model::GwtOptionModel> options() const { return _options; }
+            const std::vector<std::string> &servers() const { return _servers; }
+            const std::string &fullName() const { return _fullName; }
+            const int64_t accountId() const { return _accountId; }
+            const std::string &email() const { return _email; }
+            int64_t money() const { return _money; }
+
+            void stop();
 
         private:
 
@@ -48,11 +66,9 @@ namespace vantagefx {
 
             void lutLoaded(api::GwtObjectPtr &&lut, const boost::optional<std::exception> &e);
 
-            void instrumentConfigurationLoaded(api::GwtObjectPtr &&instrumentConfiguration,
-                                               const boost::optional<std::exception> &e);
+            void instrumentConfigurationLoaded(api::GwtObjectPtr &&instrumentConfiguration, const boost::optional<std::exception> &e);
 
-            void instrumentOptionsLoaded(api::GwtObjectPtr &&instrumentOptions,
-                                         const boost::optional<std::exception> &e);
+            void instrumentOptionsLoaded(api::GwtObjectPtr &&instrumentOptions, const boost::optional<std::exception> &e);
 
             void loggedIn(api::GwtObjectPtr &&auth, const boost::optional<std::exception> &e);
 
@@ -69,10 +85,15 @@ namespace vantagefx {
             api::GwtObjectPtr _instrumentOptions;
             api::GwtObjectPtr _refresh;
             api::GwtObjectPtr _auth;
+            std::string _fullName;
+            int64_t _accountId;
+            std::string _email;
+            int64_t _money;
             std::map<std::string, std::string> _keys;
-            QMap<int, model::GwtOptionModel> _options;
+            std::map<int, model::GwtOptionModel> _options;
+            std::vector<std::string> _servers;
             boost::optional<std::exception> _e;
-            std::function<void(Controller &controller)> _handler;
+            std::atomic<State> _state;
         };
     }
 }

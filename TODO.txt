@@ -1,17 +1,15 @@
 Нужет авто-робот трейдер/бот.
 Есть html страница: https://binaryoptions.vantagefx.com/app/index.html
-Account 1:
-    Demo Account Number: 123291747
-    Password: v8VAG
-
-Account 20k:
-    Demo Account Number: 123292603
-    Password: abG82
 
 Live:
     Account Number: 26251
     Password: 3361e6c1147f89e
     Server: Live1
+
+Demo:
+    Account Number: 123301954
+    Password: eNJ0D
+    Server: Demo
 
 Слева вверху открываешь закладку Short-Term, 60 seconds. Там 10 пар валют.
 Справа, есть градусник Trader's Choice с процентами. Он разный для каждой пары и обновляется каждые 2 секунды.

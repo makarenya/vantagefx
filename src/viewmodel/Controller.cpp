@@ -8,40 +8,48 @@
 
 namespace vantagefx {
     namespace viewmodel {
+        using std::placeholders::_1;
+        using std::placeholders::_2;
         using namespace api;
         namespace fs = boost::filesystem;
 
         Controller::Controller(GwtHttpContext &&context)
                 : _context(std::move(context)),
                   _instrumentTypeId(0),
-                  _brandId(0) { }
+                  _brandId(0),
+                  _state(Idle),
+                  _money(-1) { }
 
-        void Controller::load(std::function<void(Controller &controller)> handler) {
+        bool Controller::load() {
             using namespace api;
             using namespace http;
 
-            _handler = handler;
+			if (!prepare()) return false;
             std::string url = "https://binaryoptions.vantagefx.com/app/index.html";
-
-            std::map<std::string, std::string> keys;
-
             HttpRequest index(url);
             _context.send(std::move(index), std::bind(&Controller::indexLoaded, this, _1, _2));
+            return true;
         }
 
-        void Controller::auth(const std::string &login,
-                              const std::string &password,
-                              const std::string &server,
-                              std::function<void(Controller &controller)> handler) {
-            _handler = handler;
+        bool Controller::auth(const std::string &login, const std::string &password, const std::string &server)
+		{
+            if (!prepare()) return false;
             _context.gwt(GwtAuthRequest(login, password, server), //"26251", "3361e6c1147f89e", "live"
                          std::bind(&Controller::loggedIn, this, _1, _2));
+            return true;
         }
 
-        void Controller::refresh(std::function<void(Controller &controller)> handler) {
-            _handler = handler;
-            _context.gwt(GwtCometUpdatesRequest(_instrumentTypeId),
+        bool Controller::refresh() {
+			if (!prepare()) return false;
+			_context.gwt(GwtCometUpdatesRequest(_instrumentTypeId),
                          std::bind(&Controller::refreshLoaded, this, _1, _2));
+            return true;
+        }
+
+        bool Controller::buy(int64_t optionId, int money) {
+			if (!prepare()) return false;
+			//_context.gwt(GwtPrepare2OpenPositionRequest());
+            return true;
         }
 
         void Controller::indexLoaded(http::HttpResponse && response, const boost::system::error_code &ec) {
@@ -84,32 +92,44 @@ namespace vantagefx {
                 _rates[rateLut->value("name").toString()] = rateLut->value("id").toString();
             }
 
+            for (auto &server: _lut->query("servers/*/key()")) {
+                _servers.push_back(server.value.toString());
+            }
+
             _context.gwt(GwtInstrumentConfigurationDataRequest(_brandId),
                          std::bind(&Controller::instrumentConfigurationLoaded, this, _1, _2));
         }
 
-        void Controller::instrumentConfigurationLoaded(GwtObjectPtr &&instrumentConfiguration, const boost::optional<std::exception> &e) {
+        void Controller::instrumentConfigurationLoaded(GwtObjectPtr &&instrumentConfiguration,
+                                                       const boost::optional<std::exception> &e) {
             if (handleError(e)) return;
             _instrumentConfiguration = std::move(instrumentConfiguration);
             _context.gwt(GwtInstrumentTypeIdsWithOpenOptionsRequest(),
                          std::bind(&Controller::instrumentOptionsLoaded, this, _1, _2));
         }
 
-        void Controller::instrumentOptionsLoaded(GwtObjectPtr &&instrumentOptions, const boost::optional<std::exception> &e) {
+        void Controller::instrumentOptionsLoaded(GwtObjectPtr &&instrumentOptions,
+                                                 const boost::optional<std::exception> &e) {
             if (handleError(e)) return;
             _instrumentOptions = std::move(instrumentOptions);
-            _handler(*this);
+            _context.gwt(GwtCometUpdatesRequest(_instrumentTypeId),
+                         std::bind(&Controller::refreshLoaded, this, _1, _2));
         }
 
         void Controller::loggedIn(GwtObjectPtr &&auth, const boost::optional<std::exception> &e) {
             if (handleError(e)) return;
             _auth = std::move(auth);
-            _handler(*this);
+            _fullName = _auth->item("account/fullName").toString();
+            _accountId = _auth->item("account/accountId").toLong();
+            _email = _auth->item("account/email").toString();
+            _state = Ready;
         }
 
         void Controller::refreshLoaded(GwtObjectPtr &&data, const boost::optional<std::exception> &e) {
             if (handleError(e)) return;
             _refresh = std::move(data);
+
+            _money = _refresh->item("money/value").toLong();
 
 			for (auto &opt : _refresh->query("options/[optionStatus={0}]", { _openId })) {
 
@@ -133,29 +153,49 @@ namespace vantagefx {
 					}
 				}
             }
-            _handler(*this);
+            _state = Ready;
         }
 
         bool Controller::handleError(const boost::system::error_code &ec) {
             if (!ec) return false;
             _e = boost::system::system_error(ec);
-            _handler(*this);
-            return true;
+			_state = Ready;
+			return true;
         }
 
-        bool Controller::handleError(const boost::optional<std::exception> &e) {
-            if (!e) return false;
-            _e = e;
-            _handler(*this);
-            return true;
-        }
+		bool Controller::handleError(const boost::optional<std::exception> &e) {
+			if (!e) return false;
+			_e = e;
+			_state = Ready;
+			return true;
+		}
+		
+		bool Controller::prepare()
+	    {
+		    auto check = Idle;
+		    return _state.compare_exchange_strong(check, Busy);
+	    }
 
-        void Controller::save() {
+	    void Controller::finish()
+	    {
+			_e.reset();
+		    auto check = Ready;
+		    if (!_state.compare_exchange_strong(check, Idle)) {
+			    throw std::runtime_error("server is busy");
+		    }
+	    }
+
+        void Controller::save() const
+        {
             _lut->saveXml(fs::path(DATA_DIR) / "lut.xml");
             _instrumentConfiguration->saveXml(fs::path(DATA_DIR) / "instrumentConfiguration.xml");
             _instrumentOptions->saveXml(fs::path(DATA_DIR) / "instrumentOptions.xml");
             _refresh->saveXml(fs::path(DATA_DIR) / "refresh.xml");
             _auth->saveXml(fs::path(DATA_DIR) / "auth.xml");
+        }
+
+        void Controller::stop() {
+            _context.stop();
         }
     }
 }

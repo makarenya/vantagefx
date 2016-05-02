@@ -11,6 +11,20 @@
 namespace vantagefx {
     namespace viewmodel {
 
+        struct OptionListItem {
+            int assetId;
+            QString name;
+            int moneyBack;
+            int rateHi;
+            int rateLow;
+            double price;
+
+            int option30;
+            int option60;
+            int option120;
+            int option300;
+        };
+
         class OptionsListModel : public QAbstractListModel
         {
             Q_OBJECT
@@ -18,13 +32,16 @@ namespace vantagefx {
         public:
 
             enum RoleNames {
-                OptionIdRole = Qt::UserRole + 1,
-                AssetIdRole,
+                AssetIdRole = Qt::UserRole + 1,
                 NameRole,
                 MoneyBackRole,
                 RateLowRole,
                 RateHiRole,
-                PriceRole
+                PriceRole,
+                Option30Role,
+                Option60Role,
+                Option120Role,
+                Option300Role
             };
 
 	        explicit OptionsListModel(QObject *parent = 0);
@@ -35,16 +52,10 @@ namespace vantagefx {
 
             QHash<int, QByteArray> roleNames() const override;
 
-        private slots:
-
-            void optionsUpdate(QMap<int, model::GwtOptionModel> options);
-
-        signals:
-
-            void updateOptions(QMap<int, model::GwtOptionModel> options);
+            void updateOptions(std::map<int, model::GwtOptionModel> options);
 
         private:
-            QList<model::GwtOptionModel> _items;
+            QList<OptionListItem> _items;
         };
     }
 }

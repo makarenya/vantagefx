@@ -11,20 +11,22 @@ namespace vantagefx {
         OptionsListModel::OptionsListModel(QObject *parent)
                 : QAbstractListModel(parent)
         {
-            connect(this, &OptionsListModel::updateOptions, &OptionsListModel::optionsUpdate);
         }
 
         QHash<int, QByteArray> OptionsListModel::roleNames() const
         {
             QHash<int, QByteArray> roles;
             roles[Qt::DisplayRole] = "display";
-            roles[OptionIdRole] = "id";
             roles[AssetIdRole] = "asset";
             roles[NameRole] = "name";
             roles[MoneyBackRole] = "back";
             roles[RateLowRole] = "low";
             roles[RateHiRole] = "high";
             roles[PriceRole] = "price";
+            roles[Option30Role] = "option_30";
+            roles[Option60Role] = "option_60";
+            roles[Option120Role] = "option_120";
+            roles[Option300Role] = "option_300";
             return roles;
         }
 
@@ -38,19 +40,25 @@ namespace vantagefx {
             switch(role) {
                 case Qt::DisplayRole:
                 case NameRole:
-                    return option.name();
-                case OptionIdRole:
-                    return option.optionId();
+                    return option.name;
                 case AssetIdRole:
-                    return option.assetId();
+                    return option.assetId;
                 case MoneyBackRole:
-                    return option.moneyBack();
+                    return option.moneyBack;
                 case RateLowRole:
-                    return option.rate("Call");
+                    return option.rateLow;
                 case RateHiRole:
-                    return option.rate("Put");
+                    return option.rateHi;
                 case PriceRole:
-                    return option.price();
+                    return option.price;
+                case Option30Role:
+                    return option.option30;
+                case Option60Role:
+                    return option.option60;
+                case Option120Role:
+                    return option.option120;
+                case Option300Role:
+                    return option.option300;
                 default:
                     return QVariant();
             }
@@ -62,35 +70,60 @@ namespace vantagefx {
 			return cnt;
         }
 
-        void OptionsListModel::optionsUpdate(QMap<int, model::GwtOptionModel> options)
+        void OptionsListModel::updateOptions(std::map<int, model::GwtOptionModel> options)
         {
-            for(auto item: options) {
+            for(auto pair: options) {
+				auto &item = pair.second;
 	            auto added = false;
 	            auto empty = item.rate("Put") == 0 || item.rate("Call") == 0;
-                for(auto i = 0; i < _items.size(); ++i) {
+
+                for (auto &current : _items) {
+                    current.option30 = -current.option30;
+                    current.option60 = -current.option60;
+                    current.option120 = -current.option120;
+                    current.option300 = -current.option300;
+                }
+
+                for (auto i = 0; i < _items.size(); ++i) {
                     auto &current = _items[i];
-                    if (item.assetId() == current.assetId()) {
+                    if (item.assetId() == current.assetId) {
 						added = true;
                         QVector<int> roles;
-                        if (item.name() != current.name()) {
-                            current.setName(item.name());
+                        if (item.name() != current.name) {
+                            current.name = item.name();
                             roles.push_back(NameRole);
                         }
-                        if (item.moneyBack() != current.moneyBack()) {
-                            current.setMoneyBack(item.moneyBack());
+                        if (item.moneyBack() != current.moneyBack) {
+                            current.moneyBack = item.moneyBack();
                             roles.push_back(MoneyBackRole);
                         }
-                        if (item.rate("Call") != current.rate("Call")) {
-                            current.setRate("Call", item.rate("Call"));
+                        if (item.rate("Call") != current.rateLow) {
+                            current.rateLow = item.rate("Call");
                             roles.push_back(RateLowRole);
                         }
-                        if (item.rate("Put") != current.rate("Put")) {
-                            current.setRate("Put", item.rate("Put"));
+                        if (item.rate("Put") != current.rateHi) {
+                            current.rateHi = item.rate("Put");
                             roles.push_back(RateHiRole);
                         }
-                        if (item.price() != current.price()) {
-                            current.setPrice(item.price());
+                        if (item.price() != current.price) {
+                            current.price = item.price();
                             roles.push_back(PriceRole);
+                        }
+                        if (item.seconds() == 30) {
+                            if (item.optionId() != -current.option30) roles.push_back(Option30Role);
+                            current.option30 = item.optionId();
+                        }
+                        if (item.seconds() == 60) {
+                            if (item.optionId() != -current.option60) roles.push_back(Option60Role);
+                            current.option60 = item.optionId();
+                        }
+                        if (item.seconds() == 120) {
+                            if (item.optionId() != -current.option120) roles.push_back(Option120Role);
+                            current.option120 = item.optionId();
+                        }
+                        if (item.seconds() == 300) {
+                            if (item.optionId() != -current.option300) roles.push_back(Option300Role);
+                            current.option300 = item.optionId();
                         }
 
 						if (empty) {
@@ -103,38 +136,58 @@ namespace vantagefx {
                         }
                         break;
                     }
-                    else if (item.assetId() < current.assetId() && !empty) {
+                    else if (item.assetId() < current.assetId && !empty) {
 						added = true;
-						model::GwtOptionModel inserted;
-						inserted.setAssetId(item.assetId());
-                        inserted.setName(item.name());
-                        inserted.setMoneyBack(item.moneyBack());
-                        inserted.setRate("Call", item.rate("Call"));
-                        inserted.setRate("Put", item.rate("Put"));
-                        inserted.setPrice(item.price());
-                        inserted.setPrice(item.price());
+                        OptionListItem inserted;
+						inserted.assetId = item.assetId();
+                        inserted.name = item.name();
+                        inserted.moneyBack = item.moneyBack();
+                        inserted.rateLow = item.rate("Call");
+                        inserted.rateHi = item.rate("Put");
+                        inserted.price = item.price();
                         beginInsertRows(QModelIndex(), i, i);
                         _items.insert(i, inserted);
                         endInsertRows();
 						break;
                     }
                 }
-				if (!added && !empty)
+                if (!added && !empty)
 				{
-					added = true;
-					model::GwtOptionModel inserted;
-					inserted.setAssetId(item.assetId());
-					inserted.setName(item.name());
-					inserted.setMoneyBack(item.moneyBack());
-					inserted.setRate("Call", item.rate("Call"));
-					inserted.setRate("Put", item.rate("Put"));
-					inserted.setPrice(item.price());
-					inserted.setPrice(item.price());
+                    OptionListItem inserted;
+                    inserted.assetId = item.assetId();
+                    inserted.name = item.name();
+                    inserted.moneyBack = item.moneyBack();
+                    inserted.rateLow = item.rate("Call");
+                    inserted.rateHi = item.rate("Put");
+                    inserted.price = item.price();
 					beginInsertRows(QModelIndex(), _items.size(), _items.size());
 					_items.push_back(inserted);
 					endInsertRows();
 				}
 			}
+            for (auto i = 0; i < _items.size(); ++i) {
+                auto &current = _items[i];
+                QVector<int> roles;
+                if (current.option30 < 0) {
+                    current.option30 = 0;
+                    roles.push_back(Option30Role);
+                }
+                if (current.option60 < 0) {
+                    current.option60 = 0;
+                    roles.push_back(Option60Role);
+                }
+                if (current.option120 < 0) {
+                    current.option120 = 0;
+                    roles.push_back(Option120Role);
+                }
+                if (current.option300 < 0) {
+                    current.option300 = 0;
+                    roles.push_back(Option300Role);
+                }
+                if (roles.size() > 0) {
+                    dataChanged(index(i, 0), index(i, 0), roles);
+                }
+            }
         }
     }
 }

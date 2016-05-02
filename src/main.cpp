@@ -9,9 +9,11 @@
 #include "src/http/HttpRequest.h"
 #include "src/analyzer/GwtAnalyzer.h"
 #include <thread>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/locale.hpp>
 #include <src/viewmodel/MainViewModel.h>
 #include "src/viewmodel/Controller.h"
+
 #ifdef WINVER
 #include <shellapi.h>
 #endif
@@ -22,7 +24,7 @@ namespace fs = boost::filesystem;
 
 int start(int argc, char **argv, fs::path module_dir);
 
-#ifndef WINVER
+#ifdef WINVER
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
 	std::vector<wchar_t> buf(MAX_PATH);
@@ -100,7 +102,8 @@ int start(int argc, char **argv, fs::path ca_path)
 	engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
 
 	GwtVantageFxBundle bundle;
-	MainViewModel mainViewModel(Controller(GwtHttpContext(io_service, ctx, bundle)));
+	Controller controller(GwtHttpContext(io_service, ctx, bundle));
+	MainViewModel mainViewModel(controller);
 
     engine.rootContext()->setContextProperty("root", &mainViewModel);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
