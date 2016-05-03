@@ -124,18 +124,53 @@ namespace vantagefx {
 			return index;
 		}
 
+		template<typename T>
+		GwtValue ConvertPathTo(const GwtValue &item, const std::string &, const std::string &part)
+		{
+			try {
+				return GwtValue(boost::lexical_cast<T>(part));
+			}
+			catch(boost::bad_lexical_cast) {
+				return GwtValue();
+			}
+		}
+
 	    GwtQueryIterator::GwtQueryIterator(const GwtPath &path, const GwtValue &value,
 			const std::vector<GwtValue> &values, const std::string &prefix)
 			: _path(path),
 			  _values(values)
 	    {
-		    load(_path.begin(), value, "", prefix, prefix);
+			using namespace std::placeholders;
+            _methods["int"] = std::bind(&ConvertPathTo<int>, _1, _2, _3);
+            _methods["long"] = std::bind(&ConvertPathTo<int64_t>, _1, _2, _3);
+            _methods["double"] = std::bind(&ConvertPathTo<double>, _1, _2, _3);
+
+            _methods["key"] = [this](const GwtValue &item, const std::string &, const std::string &part) {
+                return GwtValue(part);
+            };
+            _methods["to_string"] = [this](const GwtValue &item, const std::string &, const std::string &part) {
+                return GwtValue(item.toString());
+            };
+            _methods["to_int"] = [this](const GwtValue &item, const std::string &, const std::string &part) {
+                return GwtValue(item.toInt());
+            };
+            _methods["to_long"] = [this](const GwtValue &item, const std::string &, const std::string &part) {
+                return GwtValue(item.toLong());
+            };
+            _methods["to_double"] = [this](const GwtValue &item, const std::string &, const std::string &part) {
+                return GwtValue(item.toDouble());
+            };
+
+            if (load(_path.begin(), value, "", prefix, prefix) == 2) {
+				processNext(false);
+			}
 		}
 
 	    GwtQueryIterator::GwtQueryIterator(GwtQueryIterator &&rhs)
 			: _path(std::move(rhs._path)),
 			  _stack(std::move(rhs._stack)),
-			  _current(std::move(rhs._current))
+			  _current(std::move(rhs._current)),
+			  _methods(std::move(rhs._methods))
 		{ }
 
 	    GwtQueryIterator &GwtQueryIterator::operator=(GwtQueryIterator &&rhs)
@@ -144,94 +179,54 @@ namespace vantagefx {
 			_path = std::move(rhs._path);
 			_stack = std::move(rhs._stack);
 			_current = std::move(rhs._current);
+			_methods = std::move(rhs._methods);
 			return *this;
 		}
 
-	    bool GwtQueryIterator::set(const GwtValue &value, const std::string &path)
+	    void GwtQueryIterator::set(const GwtValue &value, const std::string &path)
 		{
 			_current.value = value;
 			_current.path = path;
-			return true;
 		}
 
-	    GwtQueryIterator::GwtQueryIterator()
-        { }
-
-        bool GwtQueryIterator::load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name)
+        int GwtQueryIterator::load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name)
         {
 			if (!path.empty()) path += "/" + name;
 			else path = name;
-            if (it == _path.end()) {
-				return set(item, path);
-            }
-			if (it->name() == "int()") {
-				try {
-					return set(GwtValue(boost::lexical_cast<int>(part)), path);
-				}
-				catch(boost::bad_lexical_cast) {
-					return set(GwtValue(), path);
-				}
+			if (it == _path.end()) {
+				set(item, path);
+				return 1;
 			}
-			if (it->name() == "long()") {
-				try {
-					return set(GwtValue(boost::lexical_cast<int64_t>(part)), path);
-				} 
-				catch (boost::bad_lexical_cast) {
-					return set(GwtValue(), path);
-				}
+			auto nameLength = it->name().length();
+			if (nameLength > 2 && it->name().find("()") == nameLength - 2) {
+				set(_methods.at(it->name().substr(0, nameLength - 2))(item, path, part), path);
+				return 1;
 			}
-			if (it->name() == "double()") {
-				try {
-					return set(GwtValue(boost::lexical_cast<double>(part)), path);
-				}
-				catch (boost::bad_lexical_cast) {
-					return set(GwtValue(), path);
-				}
-			}
-			if (it->name() == "key()") {
-				return set(GwtValue(part), path);
-			}
-			if (it->name() == "to_string()") {
-				return set(GwtValue(item.toString()), path);
-			}
-			if (it->name() == "to_int()") {
-				return set(GwtValue(item.toInt()), path);
-			}
-			if (it->name() == "to_double()") {
-				return set(GwtValue(item.toDouble()), path);
-			}
-			if (it->name() == "to_long()") {
-				return set(GwtValue(item.toLong()), path);
-			}
-
 			auto obj = item.toObject();
 			if (!it->name().empty()) {
-                if (!obj || !obj->has(it->name())) return false;
-                return load(it + 1, obj->value(it->name()), path, it->name(), it->name());
-            }
-            else {
-				if (!obj) return false;
-				_stack.push(std::make_tuple(it, obj->iterateValues(), path));
-				return processNext(static_cast<int>(_stack.size()));
-            }
+				if (!obj || !obj->has(it->name())) return 0;
+				return load(it + 1, obj->value(it->name()), path, it->name(), it->name());
+			}
+			
+			if (!obj) return 0; 
+			auto iterator = obj->iterateValues();
+			if (iterator->empty()) return 0;
+			_stack.push(std::make_tuple(it, iterator, path));
+			return 2;
         }
 
 	    GwtQueryIterator& GwtQueryIterator::operator++()
 	    {
-			processNext(0);
+			processNext(true);
 			return *this;
 		}
 
-	    bool GwtQueryIterator::processNext(int tail)
+	    bool GwtQueryIterator::processNext(bool advance)
 		{
 			auto deepAvailable = true;
-			auto advance = true;
-			if (tail > 0) {
-				tail--;
-				advance = false;
-			}
+
 			while (true) {
-                if (_stack.size() == tail) {
+                if (_stack.size() == 0) {
                     _current.path = "";
                     _current.value = GwtValue();
                     break;
@@ -246,7 +241,7 @@ namespace vantagefx {
 				if (advance) {
 					auto current = iterator->get().toObject();
 					if (child->deep() && current && deepAvailable) {
-						path = path + "/" + iterator->name();
+						path = path.empty() ? iterator->name() : path + "/" + iterator->name();
 						iterator = current->iterateValues();
 						_stack.push(std::make_tuple(child, iterator, path));
 					}
@@ -255,17 +250,20 @@ namespace vantagefx {
 					}
 				}
 
+				advance = true;
+				deepAvailable = true;
+
 				if (iterator->empty()) {
+					if (child->deep()) deepAvailable = false;
 					_stack.pop();
-					deepAvailable = false;
 				}
 				else {
-					deepAvailable = true;
 					if (!child->test() || child->test()->match(iterator->get(), iterator->part(), _values)) {
-						if (load(child + 1, iterator->get(), path, iterator->part(), iterator->name())) return true;
+						auto result = load(child + 1, iterator->get(), path, iterator->part(), iterator->name());
+						if (result == 1) return true;
+						if (result == 2) advance = false;
 					}
 				}
-				advance = true;
 			}
 			return false;
 		}

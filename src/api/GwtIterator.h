@@ -118,21 +118,21 @@ namespace vantagefx {
         public:
             typedef std::tuple<GwtPath::iterator, GwtIteratorPtr, std::string> GwtPathNode;
             typedef std::stack<GwtPathNode> GwtPathStack;
+			typedef std::function<GwtValue (const GwtValue &, const std::string &, const std::string &)> PathMethod;
 
             GwtQueryIterator(const GwtPath &path, const GwtValue &value,
 				const std::vector<GwtValue> &values, const std::string &prefix);
-			GwtQueryIterator();
-
+			GwtQueryIterator() {}
 			GwtQueryIterator(GwtQueryIterator &&rhs);
 			GwtQueryIterator &operator=(GwtQueryIterator &&rhs);
 
-			bool set(const GwtValue &value, const std::string &path);
+			void set(const GwtValue &value, const std::string &path);
 
-			bool load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name);
+			int load(GwtPath::iterator it, const GwtValue &item, std::string path, const std::string &part, const std::string &name);
 
             GwtQueryIterator &operator++();
 
-			bool processNext(int tail);
+			bool processNext(bool advance);
 
             bool operator==(const GwtQueryIterator &rhs) const;
 
@@ -152,6 +152,7 @@ namespace vantagefx {
             GwtPathStack _stack;
 			GwtQueryIterable _current;
 			std::vector<GwtValue> _values;
+			std::map<std::string, PathMethod> _methods;
         };
 
         class GwtQuery {
