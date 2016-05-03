@@ -81,7 +81,7 @@ namespace vantagefx {
 				simple = string[_val = boost::phoenix::construct<GwtPathExpression>(_1)];
                 any = lit('*') >> -lit('*')[_val = boost::phoenix::construct<GwtPathExpression>(false)];
 				many = &lit('/')[_val = boost::phoenix::construct<GwtPathExpression>(true)];
-                string = qi::lexeme[+(qi::alnum | qi::char_('-') | qi::char_('_'))];
+                string = qi::lexeme[+(qi::alnum | qi::char_('-') | qi::char_('_') | qi::char_('.'))];
                 escape.add
                         ("\\\\", '\\')
                         ("\\'", '\'')
