@@ -9,10 +9,10 @@ namespace vantagefx {
 
         MainViewModel::MainViewModel(Controller &controller)
                 : _mode(""),
-                  _controller(controller),
-                  _refreshTimeout(0),
                   _login("123301954"),
-                  _password("eNJ0D")
+                  _password("eNJ0D"),
+                  _controller(controller),
+                  _refreshTimeout(0)
         {
 			_controller.load();
 		
