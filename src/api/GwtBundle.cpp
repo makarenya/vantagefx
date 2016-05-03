@@ -595,7 +595,7 @@ namespace vantagefx {
 				fint("some_29"),
 				fint("some_30"),
 				fstd("some_31"),
-				fint("some_32"),
+				fint("subMarketId"),
 				fstd("some_33"),
 				fstr("name"),
 				fstr("some_35"),
