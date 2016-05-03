@@ -24,7 +24,7 @@ namespace fs = boost::filesystem;
 
 int start(int argc, char **argv, fs::path module_dir);
 
-#ifdef WINVER
+#ifdef GUI_MAIN
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
 	std::vector<wchar_t> buf(MAX_PATH);

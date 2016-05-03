@@ -7,7 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 if (MSVC)
     set(CMAKE_PREFIX_PATH "c:/msvc_2015")
     set(Boost_USE_STATIC_LIBS ON) # only find static libs
-    #set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:\"wWinMainCRTStartup\"")
+	#set(MAKE_GUI "1")
     add_definitions(-D_WIN32_WINNT=0x0502 -DWINVER=0x0502)
     add_definitions(-D_UNICODE -DUNICODE)
 else ()
@@ -16,6 +16,11 @@ endif ()
 if (MINGW)
     set(CMAKE_EXE_LINKER_FLAGS "-mwindows -municode")
 endif ()
+
+if (MAKE_GUI) 
+    set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:\"wWinMainCRTStartup\"")
+    add_definitions(-DGUI_MAIN)
+endif()
 
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data/")
 
