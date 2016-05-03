@@ -6,7 +6,15 @@
 
 namespace vantagefx {
     namespace model {
-        void GwtOptionModel::setOptionId(int optionId) {
+
+		int GwtOptionModel::rate(const std::string &name) const
+		{
+			auto it = _rates.find(name);
+			if (it == _rates.end()) return 0;
+			return it->second;
+		}
+
+		void GwtOptionModel::setOptionId(int optionId) {
             _optionId = optionId;
         }
 
@@ -14,7 +22,7 @@ namespace vantagefx {
             _assetId = assetId;
         }
 
-        void GwtOptionModel::setName(const QString &name) {
+        void GwtOptionModel::setName(const std::string &name) {
             _name = name;
         }
 
@@ -34,19 +42,23 @@ namespace vantagefx {
             _price = price;
         }
 
-        void GwtOptionModel::setMarket(const QString &market) {
+		void GwtOptionModel::setMarketId(int marketId) {
+			_marketId = marketId;
+		}
+		
+		void GwtOptionModel::setMarket(const std::string &market) {
             _market = market;
         }
 
-        void GwtOptionModel::setSubMarket(const QString &subMarket) {
+        void GwtOptionModel::setSubMarket(const std::string &subMarket) {
             _subMarket = subMarket;
         }
 
-        void GwtOptionModel::setClose(const QDateTime &close) {
+        void GwtOptionModel::setClose(int64_t close) {
             _close = close;
         }
 
-        void GwtOptionModel::setRate(const QString &name, int value) {
+        void GwtOptionModel::setRate(const std::string &name, int value) {
             _rates[name] = value;
         }
     }

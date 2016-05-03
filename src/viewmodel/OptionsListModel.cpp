@@ -3,6 +3,8 @@
 //
 
 #include "OptionsListModel.h"
+#include <sstream>
+#include <iomanip>
 
 
 namespace vantagefx {
@@ -12,8 +14,8 @@ namespace vantagefx {
                 : QAbstractListModel(parent)
         {
         }
-
-        QHash<int, QByteArray> OptionsListModel::roleNames() const
+		
+		QHash<int, QByteArray> OptionsListModel::roleNames() const
         {
             QHash<int, QByteArray> roles;
             roles[Qt::DisplayRole] = "display";
@@ -70,96 +72,111 @@ namespace vantagefx {
 			return cnt;
         }
 
+		QVector<int> OptionsListModel::updateOption(OptionListItem &current, model::GwtOptionModel &item, int hi, int lo)
+        {
+			QVector<int> roles;
+			if (item.name() != current.name.toStdString()) {
+				current.name = item.name().c_str();
+				roles.push_back(NameRole);
+			}
+			if (item.moneyBack() != current.moneyBack) {
+				current.moneyBack = item.moneyBack();
+				roles.push_back(MoneyBackRole);
+			}
+			if (lo != current.rateLow) {
+				current.rateLow = lo;
+				roles.push_back(RateLowRole);
+			}
+			if (hi != current.rateHi) {
+				current.rateHi = hi;
+				roles.push_back(RateHiRole);
+			}
+			if (item.price() != current.price) {
+				current.price = item.price();
+				roles.push_back(PriceRole);
+			}
+			if (item.seconds() == 30) {
+				if (item.optionId() != -current.option30) roles.push_back(Option30Role);
+				current.option30 = item.optionId();
+			}
+			if (item.seconds() == 60) {
+				if (item.optionId() != -current.option60) roles.push_back(Option60Role);
+				current.option60 = item.optionId();
+			}
+			if (item.seconds() == 120) {
+				if (item.optionId() != -current.option120) roles.push_back(Option120Role);
+				current.option120 = item.optionId();
+			}
+			if (item.seconds() == 300) {
+				if (item.optionId() != -current.option300) roles.push_back(Option300Role);
+				current.option300 = item.optionId();
+			}
+			return roles;
+        }
+
+		OptionListItem OptionsListModel::createOption(model::GwtOptionModel &item, std::string lineId, int hi, int lo)
+        {
+			OptionListItem inserted;
+			inserted.lineId = lineId.c_str();
+			inserted.assetId = item.assetId();
+			inserted.name = item.name().c_str();
+			inserted.moneyBack = item.moneyBack();
+			inserted.rateLow = lo;
+			inserted.rateHi = hi;
+			inserted.price = item.price();
+			if (item.seconds() == 30) inserted.option30 = item.optionId();
+			if (item.seconds() == 60) inserted.option60 = item.optionId();
+			if (item.seconds() == 120) inserted.option120 = item.optionId();
+			if (item.seconds() == 300) inserted.option300 = item.optionId();
+			return inserted;
+        }
+
         void OptionsListModel::updateOptions(std::map<int, model::GwtOptionModel> options)
         {
-            for(auto pair: options) {
+			for (auto &current : _items) {
+				current.option30 = -current.option30;
+				current.option60 = -current.option60;
+				current.option120 = -current.option120;
+				current.option300 = -current.option300;
+			}
+			for(auto pair: options) {
 				auto &item = pair.second;
 	            auto added = false;
-	            auto empty = item.rate("Put") == 0 || item.rate("Call") == 0;
+	            auto hi = item.rate("Put");
+	            auto lo = item.rate("Call");
+				if (hi == 0 && lo == 0) {
+					hi = 50;
+					lo = 50;
+				}
 
-                for (auto &current : _items) {
-                    current.option30 = -current.option30;
-                    current.option60 = -current.option60;
-                    current.option120 = -current.option120;
-                    current.option300 = -current.option300;
-                }
+				std::stringstream linestream;
+				linestream << std::setw(4) << std::setfill('0') << item.marketId() << "." 
+					<< std::setw(6) << std::setfill('0') << item.assetId();
+
+				auto lineId = linestream.str();
 
                 for (auto i = 0; i < _items.size(); ++i) {
                     auto &current = _items[i];
                     if (item.assetId() == current.assetId) {
 						added = true;
-                        QVector<int> roles;
-                        if (item.name() != current.name) {
-                            current.name = item.name();
-                            roles.push_back(NameRole);
-                        }
-                        if (item.moneyBack() != current.moneyBack) {
-                            current.moneyBack = item.moneyBack();
-                            roles.push_back(MoneyBackRole);
-                        }
-                        if (item.rate("Call") != current.rateLow) {
-                            current.rateLow = item.rate("Call");
-                            roles.push_back(RateLowRole);
-                        }
-                        if (item.rate("Put") != current.rateHi) {
-                            current.rateHi = item.rate("Put");
-                            roles.push_back(RateHiRole);
-                        }
-                        if (item.price() != current.price) {
-                            current.price = item.price();
-                            roles.push_back(PriceRole);
-                        }
-                        if (item.seconds() == 30) {
-                            if (item.optionId() != -current.option30) roles.push_back(Option30Role);
-                            current.option30 = item.optionId();
-                        }
-                        if (item.seconds() == 60) {
-                            if (item.optionId() != -current.option60) roles.push_back(Option60Role);
-                            current.option60 = item.optionId();
-                        }
-                        if (item.seconds() == 120) {
-                            if (item.optionId() != -current.option120) roles.push_back(Option120Role);
-                            current.option120 = item.optionId();
-                        }
-                        if (item.seconds() == 300) {
-                            if (item.optionId() != -current.option300) roles.push_back(Option300Role);
-                            current.option300 = item.optionId();
-                        }
-
-						if (empty) {
-							beginRemoveRows(QModelIndex(), i, i);
-							_items.removeAt(i);
-							endRemoveRows();
+						auto roles = updateOption(current, item, hi, lo);
+						if (roles.size() > 0) {
+							dataChanged(index(i, 0), index(i, 0), roles);
 						}
-						else if (roles.size() > 0) {
-                            dataChanged(index(i, 0), index(i, 0), roles);
-                        }
-                        break;
+						break;
                     }
-                    else if (item.assetId() < current.assetId && !empty) {
+                    else if (lineId.c_str() < current.lineId) {
 						added = true;
-                        OptionListItem inserted;
-						inserted.assetId = item.assetId();
-                        inserted.name = item.name();
-                        inserted.moneyBack = item.moneyBack();
-                        inserted.rateLow = item.rate("Call");
-                        inserted.rateHi = item.rate("Put");
-                        inserted.price = item.price();
+						auto inserted = createOption(item, lineId, hi, lo);
                         beginInsertRows(QModelIndex(), i, i);
                         _items.insert(i, inserted);
                         endInsertRows();
 						break;
                     }
                 }
-                if (!added && !empty)
+                if (!added)
 				{
-                    OptionListItem inserted;
-                    inserted.assetId = item.assetId();
-                    inserted.name = item.name();
-                    inserted.moneyBack = item.moneyBack();
-                    inserted.rateLow = item.rate("Call");
-                    inserted.rateHi = item.rate("Put");
-                    inserted.price = item.price();
+					auto inserted = createOption(item, lineId, hi, lo);
 					beginInsertRows(QModelIndex(), _items.size(), _items.size());
 					_items.push_back(inserted);
 					endInsertRows();
@@ -184,7 +201,12 @@ namespace vantagefx {
                     current.option300 = 0;
                     roles.push_back(Option300Role);
                 }
-                if (roles.size() > 0) {
+				if (roles.size() == 4) {
+					beginRemoveRows(QModelIndex(), i, i);
+					_items.removeAt(i--);
+					endRemoveRows();
+				}
+                else if (roles.size() > 0) {
                     dataChanged(index(i, 0), index(i, 0), roles);
                 }
             }

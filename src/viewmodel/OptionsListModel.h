@@ -12,12 +12,28 @@ namespace vantagefx {
     namespace viewmodel {
 
         struct OptionListItem {
+
+			OptionListItem() 
+				: assetId(0),
+				  moneyBack(0),
+				  rateHi(0),
+				  rateLow(0),
+				  price(0.0),
+				  option30(0),
+				  option60(0),
+				  option120(0),
+				  option300(0)
+			{}
+
             int assetId;
             QString name;
             int moneyBack;
             int rateHi;
             int rateLow;
             double price;
+			QString market;
+			QString subMarket;
+			QString lineId;
 
             int option30;
             int option60;
@@ -55,6 +71,8 @@ namespace vantagefx {
             void updateOptions(std::map<int, model::GwtOptionModel> options);
 
         private:
+			static QVector<int> updateOption(OptionListItem &current, model::GwtOptionModel &item, int hi, int lo);
+			static OptionListItem createOption(model::GwtOptionModel &item, std::string lineId, int hi, int lo);
             QList<OptionListItem> _items;
         };
     }

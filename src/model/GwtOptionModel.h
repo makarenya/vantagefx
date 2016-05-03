@@ -6,6 +6,8 @@
 #define VANTAGEFX_GWTOPTIONMODEL_H
 
 #include <QtCore>
+#include <map>
+#include <string>
 
 
 namespace vantagefx {
@@ -14,13 +16,12 @@ namespace vantagefx {
         class GwtOptionModel
         {
         public:
-            GwtOptionModel() {}
 
-            int optionId() const;
+			int optionId() const;
 
             int assetId() const;
 
-            const QString & name() const;
+            const std::string &name() const;
 
             int moneyBack() const;
 
@@ -30,19 +31,21 @@ namespace vantagefx {
 
             double price() const;
 
-            const QDateTime & close() const;
+            int64_t close() const;
 
-            const QString &market() const;
+			int marketId() const;
 
-            const QString &subMarket() const;
+            const std::string &market() const;
 
-            int rate(const QString &name) const;
+            const std::string &subMarket() const;
+
+            int rate(const std::string &name) const;
 
             void setOptionId(int optionId);
 
             void setAssetId(int assetId);
 
-            void setName(const QString &name);
+            void setName(const std::string &name);
 
             void setMoneyBack(int moneyBack);
 
@@ -52,35 +55,38 @@ namespace vantagefx {
 
             void setPrice(double price);
 
-            void setMarket(const QString &market);
+			void setMarketId(int marketId);
 
-            void setSubMarket(const QString &subMarket);
+            void setMarket(const std::string &market);
 
-            void setClose(const QDateTime &close);
+            void setSubMarket(const std::string &subMarket);
 
-            void setRate(const QString &name, int value);
+            void setClose(int64_t close);
+
+            void setRate(const std::string &name, int value);
 
         private:
             int _optionId;
             int _assetId;
-            QString _name;
+            std::string _name;
             int _moneyBack;
             int _seconds;
             int _rateLow;
             double _price;
-            QString _market;
-            QString _subMarket;
-            QDateTime _close;
-            QMap<QString, int> _rates;
+			int _marketId;
+			std::string _market;
+			std::string _subMarket;
+            int64_t _close;
+            std::map<std::string, int> _rates;
         };
 
-        inline int GwtOptionModel::rate(const QString &name) const { return _rates[name]; }
+        inline int64_t GwtOptionModel::close() const { return _close; }
 
-        inline const QDateTime &GwtOptionModel::close() const { return _close; }
+		inline int GwtOptionModel::marketId() const { return _marketId; }
 
-        inline const QString &GwtOptionModel::market() const { return _market; }
+        inline const std::string &GwtOptionModel::market() const { return _market; }
 
-        inline const QString &GwtOptionModel::subMarket() const { return _subMarket; }
+        inline const std::string &GwtOptionModel::subMarket() const { return _subMarket; }
 
         inline double GwtOptionModel::price() const { return _price; }
 
@@ -90,7 +96,7 @@ namespace vantagefx {
 
         inline int GwtOptionModel::moneyBack() const { return _moneyBack; }
 
-        inline const QString &GwtOptionModel::name() const { return _name; }
+        inline const std::string &GwtOptionModel::name() const { return _name; }
 
         inline int GwtOptionModel::assetId() const { return _assetId; }
 

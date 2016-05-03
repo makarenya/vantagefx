@@ -7,7 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 if (MSVC)
     set(CMAKE_PREFIX_PATH "c:/msvc_2015")
     set(Boost_USE_STATIC_LIBS ON) # only find static libs
-	#set(MAKE_GUI "1")
+	set(MAKE_GUI "1")
     add_definitions(-D_WIN32_WINNT=0x0502 -DWINVER=0x0502)
     add_definitions(-D_UNICODE -DUNICODE)
 else ()

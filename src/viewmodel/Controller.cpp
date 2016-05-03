@@ -141,19 +141,21 @@ namespace vantagefx {
                 result.setAssetId(asset.toInt());
                 result.setMoneyBack(obj->value("return").toInt());
                 result.setSeconds(obj->value("optionSeconds").toInt());
-                result.setName(QString(_lut->item("assets/[id={0}]/name", { asset }).toString().c_str()));
+                result.setName(_lut->item("assets/[id={0}]/name", { asset }).toString());
                 result.setPrice(_refresh->item("assetUpdates/[assetId={0}]/targetPrice", { asset }).toDouble());
                 auto subMarket = _lut->item("assets/[id={0}]/subMarketId", { asset });
                 auto marketName = _lut->item("markets/[subMarkets/*/id = {0}]/name", { subMarket }).toString();
-                auto subMarketName = _lut->item("markets/*/subMarkets/[id = {0}]/name", { subMarket }).toString();
-                result.setMarket(marketName.c_str());
-                result.setSubMarket(subMarketName.c_str());
-                result.setClose(QDateTime::fromMSecsSinceEpoch(obj->item("closeDate/value").toLong()));
+				auto marketId = _lut->item("markets/[subMarkets/*/id = {0}]/id", { subMarket }).toInt();
+				auto subMarketName = _lut->item("markets/*/subMarkets/[id = {0}]/name", { subMarket }).toString();
+				result.setMarketId(marketId);
+                result.setMarket(marketName);
+                result.setSubMarket(subMarketName);
+                result.setClose(obj->item("closeDate/value").toLong());
                 auto rates = _refresh->item("positionsSentimentDto/map/[int()={0}]", { asset }).toObject();
 				if (rates) {
 					for (auto &pair : _rates) {
 						if (rates->has(pair.second)) {
-							result.setRate(QString(pair.first.c_str()), rates->item(pair.second + "/value").toInt());
+							result.setRate(pair.first, rates->item(pair.second + "/value").toInt());
 						}
 					}
 				}
