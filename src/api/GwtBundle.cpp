@@ -434,7 +434,7 @@ namespace vantagefx {
 
             add("com.optionfair.client.model.Market/3553066736", {
                 fstr("serialuid"),
-                fint("some_1"),
+                fint("id"),
                 fint("some_2"),
                 fstr("name"),
                 fptr("subMarkets"),
