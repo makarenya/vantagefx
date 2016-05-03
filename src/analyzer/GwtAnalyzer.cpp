@@ -128,6 +128,23 @@ namespace vantagefx {
             return result;
         }
 
+		typedef std::vector<std::string> StringVector;
+
+		void formatValues(StringVector::iterator begin, StringVector::iterator end, 
+			std::string prefix, GwtConstObjectPtr object, std::function<void(const std::string&)> aggregator)
+		{
+			if (begin == end) aggregator(prefix);
+			else if (dynamic_cast<GwtComplexType *>(object->type().get()) == nullptr) {
+				if (!prefix.empty()) prefix += "/";
+				formatValues(begin + 1, end, prefix + *begin, object->item(*begin).toObject(), aggregator);
+				formatValues(begin + 1, end, prefix + "*", object->item(*begin).toObject(), aggregator);
+			}
+			else {
+				if (!prefix.empty()) prefix += "/";
+				formatValues(begin + 1, end, prefix + *begin, object->value(*begin).toObject(), aggregator);
+			}
+		}
+
         std::vector<std::string> GwtAnalyzer::usedBy(GwtConstObjectPtr object, std::vector<std::string> ids) const
         {
             std::vector<std::string> variants;
@@ -142,25 +159,19 @@ namespace vantagefx {
                 for (auto item : found) {
                     std::vector<std::string> parts;
                     boost::split(parts, item, boost::is_any_of("/"));
-                    for (auto i = 0; i < parts.size(); ++i) {
-                        for (auto j = i; j < parts.size(); ++j) {
-                            std::string value = "";
-                            for (auto k = 0; k < parts.size(); ++k) {
-                                if (!value.empty()) value += "/";
-                                value += (i == k || j == k) ? "*" : parts[k];
-                            }
-                            if (first || std::find(old.begin(), old.end(), value) != old.end()) {
-                                if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
-                                    variants.push_back(value);
-                                }
-                            }
-                        }
-                    }
+					formatValues(parts.begin(), parts.end(), "", object, [&first, &old, &variants](const std::string &value)
+					{
+						if (first || std::find(old.begin(), old.end(), value) != old.end()) {
+							if (std::find(variants.begin(), variants.end(), value) == variants.end()) {
+								variants.push_back(value);
+							}
+						}
+					});
                 }
                 std::swap(variants, old);
                 first = false;
             }
-            return variants;
+            return old;
         }
     }
 }
