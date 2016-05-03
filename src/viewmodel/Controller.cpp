@@ -143,6 +143,11 @@ namespace vantagefx {
                 result.setSeconds(obj->value("optionSeconds").toInt());
                 result.setName(QString(_lut->item("assets/[id={0}]/name", { asset }).toString().c_str()));
                 result.setPrice(_refresh->item("assetUpdates/[assetId={0}]/targetPrice", { asset }).toDouble());
+                auto subMarket = _lut->item("assets/[id={0}]/subMarketId", { asset });
+                auto marketName = _lut->item("markets/[subMarkets/*/id = {0}]/name", { subMarket }).toString();
+                auto subMarketName = _lut->item("markets/*/subMarkets/[id = {0}]/name", { subMarket }).toString();
+                result.setMarket(marketName.c_str());
+                result.setSubMarket(subMarketName.c_str());
                 result.setClose(QDateTime::fromMSecsSinceEpoch(obj->item("closeDate/value").toLong()));
                 auto rates = _refresh->item("positionsSentimentDto/map/[int()={0}]", { asset }).toObject();
 				if (rates) {

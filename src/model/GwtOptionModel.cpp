@@ -34,6 +34,14 @@ namespace vantagefx {
             _price = price;
         }
 
+        void GwtOptionModel::setMarket(const QString &market) {
+            _market = market;
+        }
+
+        void GwtOptionModel::setSubMarket(const QString &subMarket) {
+            _subMarket = subMarket;
+        }
+
         void GwtOptionModel::setClose(const QDateTime &close) {
             _close = close;
         }

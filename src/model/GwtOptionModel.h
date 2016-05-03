@@ -32,6 +32,10 @@ namespace vantagefx {
 
             const QDateTime & close() const;
 
+            const QString &market() const;
+
+            const QString &subMarket() const;
+
             int rate(const QString &name) const;
 
             void setOptionId(int optionId);
@@ -48,6 +52,10 @@ namespace vantagefx {
 
             void setPrice(double price);
 
+            void setMarket(const QString &market);
+
+            void setSubMarket(const QString &subMarket);
+
             void setClose(const QDateTime &close);
 
             void setRate(const QString &name, int value);
@@ -60,6 +68,8 @@ namespace vantagefx {
             int _seconds;
             int _rateLow;
             double _price;
+            QString _market;
+            QString _subMarket;
             QDateTime _close;
             QMap<QString, int> _rates;
         };
@@ -67,6 +77,10 @@ namespace vantagefx {
         inline int GwtOptionModel::rate(const QString &name) const { return _rates[name]; }
 
         inline const QDateTime &GwtOptionModel::close() const { return _close; }
+
+        inline const QString &GwtOptionModel::market() const { return _market; }
+
+        inline const QString &GwtOptionModel::subMarket() const { return _subMarket; }
 
         inline double GwtOptionModel::price() const { return _price; }
 
