@@ -15,6 +15,7 @@ namespace vantagefx {
                   _refreshTimeout(0)
         {
 			_controller.load();
+            setDescription("Loading stuff...");
 		
 			auto timer = new QTimer(this);
 			connect(timer, &QTimer::timeout, this, &MainViewModel::update);
@@ -65,8 +66,11 @@ namespace vantagefx {
 
 		void MainViewModel::processLogin()
 		{
-			_controller.auth(_login.toStdString(), _password.toStdString(), _server.toStdString());
-            setMode("");
+			setMode("");
+            setDescription("Logging in...");
+			while (!_controller.auth(_login.toStdString(), _password.toStdString(), _server.toStdString())) {
+				QThread::sleep(10);
+			}
 		}
 
         void MainViewModel::cancelLogin()
@@ -74,11 +78,27 @@ namespace vantagefx {
             setMode("view");
         }
 
+        void MainViewModel::view(long long optionId)
+        {
+            setMode("details");
+            auto info = _controller.optionInfo(optionId);
+            setOptionName(info.name.c_str());
+            setOptionReturn(info.returnValue);
+            setOptionExpire(info.expires.c_str());
+        }
+
         void MainViewModel::setMode(const QString &mode)
         {
             if (_mode == mode) return;
             _mode = mode;
             emit modeChanged(mode);
+        }
+
+		void MainViewModel::setDescription(const QString &description)
+        {
+			if (_description == description) return;
+			_description = description;
+			emit descriptionChanged(description);
         }
 
 		void MainViewModel::setLogin(const QString &login)
@@ -120,6 +140,24 @@ namespace vantagefx {
             if (value == _money) return;
             _money = value;
             emit moneyChanged(_money);
+        }
+
+        void MainViewModel::setOptionName(const QString &optionName) {
+            if (optionName == _optionName) return;
+            _optionName = optionName;
+            emit optionNameChanged();
+        }
+
+        void MainViewModel::setOptionReturn(int optionReturn) {
+            if (optionReturn == _optionReturn) return;
+            _optionReturn = optionReturn;
+            emit optionReturnChanged();
+        }
+
+        void MainViewModel::setOptionExpire(const QString &optionExpire) {
+            if (optionExpire == _optionExpire) return;
+            _optionExpire = optionExpire;
+            emit optionExpireChanged();
         }
 
         const QString &MainViewModel::money() const

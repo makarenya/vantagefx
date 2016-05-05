@@ -9,6 +9,7 @@
 #include "src/GwtHttpRequest.h"
 #include "src/model/GwtOptionModel.h"
 #include <QtCore>
+#include "../model/OptionInfo.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -31,7 +32,7 @@ namespace vantagefx {
 
             bool refresh();
 
-            bool buy(int64_t optionId, int money);
+            bool buy(int64_t optionId, int64_t money, int positionType);
 
             void save() const;
 
@@ -39,16 +40,18 @@ namespace vantagefx {
 
 			bool isError() const { return _state == Ready && !!_e; }
 
+			OptionInfo optionInfo(int64_t optionId);
+
             const std::exception &exception() const { return *_e; }
 
 	        bool prepare();
 
 	        void finish();
 
-	        std::map<int, model::GwtOptionModel> options() const { return _options; }
+	        const std::map<int, model::GwtOptionModel> &options() const { return _options; }
             const std::vector<std::string> &servers() const { return _servers; }
             const std::string &fullName() const { return _fullName; }
-            const int64_t accountId() const { return _accountId; }
+            int64_t accountId() const { return _accountId; }
             const std::string &email() const { return _email; }
             int64_t money() const { return _money; }
 
@@ -74,6 +77,10 @@ namespace vantagefx {
 
             void refreshLoaded(api::GwtObjectPtr &&data, const boost::optional<std::exception> &e);
 
+			void positionOpened(api::GwtObjectPtr &&data, const boost::optional<std::exception> &e);
+
+			void buyComplete(api::GwtObjectPtr &&data, const boost::optional<std::exception> &e);
+
         private:
             GwtHttpContext _context;
             api::GwtObjectPtr _lut;
@@ -89,6 +96,7 @@ namespace vantagefx {
             int64_t _accountId;
             std::string _email;
             int64_t _money;
+			int64_t _transactionId;
             std::map<std::string, std::string> _keys;
             std::map<int, model::GwtOptionModel> _options;
             std::vector<std::string> _servers;

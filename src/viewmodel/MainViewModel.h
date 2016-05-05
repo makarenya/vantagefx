@@ -20,6 +20,7 @@ namespace vantagefx {
         public:
 
             Q_PROPERTY(QString mode READ mode NOTIFY modeChanged);
+			Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
             Q_PROPERTY(OptionsListModel *options READ options NOTIFY optionsChanged)
             Q_PROPERTY(QString login READ login WRITE setLogin NOTIFY loginChanged)
             Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
@@ -27,6 +28,10 @@ namespace vantagefx {
             Q_PROPERTY(ComboBoxModel *servers READ servers NOTIFY serversChanged)
             Q_PROPERTY(QString fullName READ fullName NOTIFY fullNameChanged)
             Q_PROPERTY(QString money READ money NOTIFY moneyChanged)
+
+			Q_PROPERTY(QString optionName READ optionName NOTIFY optionNameChanged)
+			Q_PROPERTY(QString optionReturn READ optionReturn NOTIFY optionReturnChanged)
+			Q_PROPERTY(QString optionExpire READ optionExpire NOTIFY optionExpireChanged)
 
         public:
             explicit MainViewModel(Controller &controller);
@@ -40,9 +45,13 @@ namespace vantagefx {
             Q_INVOKABLE void doLogin();
             Q_INVOKABLE void processLogin();
             Q_INVOKABLE void cancelLogin();
+            Q_INVOKABLE void view(long long optionId);
 
             const QString &mode() const;
             void setMode(const QString &mode);
+
+			const QString &description() const;
+			void setDescription(const QString &description);
 
             const QString &login() const;
             void setLogin(const QString &login);
@@ -61,6 +70,16 @@ namespace vantagefx {
             const QString &money() const;
             void setMoney(int64_t money);
 
+			const QString &optionName() const;
+			void setOptionName(const QString &optionName);
+
+			int optionReturn() const;
+			void setOptionReturn(int optionReturn);
+
+			const QString &optionExpire() const;
+			void setOptionExpire(const QString &optionExpire);
+
+
         public slots:
 
             void update();
@@ -68,6 +87,8 @@ namespace vantagefx {
         signals:
 
             void modeChanged(QString mode);
+
+			void descriptionChanged(QString description);
 
             void optionsChanged(const OptionsListModel *options);
 
@@ -83,10 +104,17 @@ namespace vantagefx {
 
             void moneyChanged(const QString &money);
 
+			void optionNameChanged();
+
+			void optionReturnChanged();
+
+			void optionExpireChanged();
+
         private:
 
             OptionsListModel _options;
             QString _mode;
+			QString _description;
             QString _login;
             QString _password;
             QString _server;
@@ -94,12 +122,18 @@ namespace vantagefx {
             QString _fullName;
             QString _money;
 
+			QString _optionName;
+			int _optionReturn;
+			QString _optionExpire;
+
             Controller &_controller;
             int _refreshTimeout;
         };
 
 
         inline const QString &MainViewModel::mode() const { return _mode; }
+
+		inline const QString &MainViewModel::description() const { return _description; }
 
         inline const QString &MainViewModel::login() const { return _login; }
 
@@ -110,6 +144,12 @@ namespace vantagefx {
         inline ComboBoxModel *MainViewModel::servers() { return &_servers; }
 
         inline const QString &MainViewModel::fullName() const { return _fullName; }
+
+		inline const QString &MainViewModel::optionName() const { return _optionName; }
+
+		inline int MainViewModel::optionReturn() const { return _optionReturn; }
+
+		inline const QString &MainViewModel::optionExpire() const { return _optionExpire; }
     }
 }
 

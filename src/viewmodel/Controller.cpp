@@ -17,8 +17,8 @@ namespace vantagefx {
                 : _context(std::move(context)),
                   _instrumentTypeId(0),
                   _brandId(0),
-                  _state(Idle),
-                  _money(-1) { }
+                  _money(-1),
+                  _state(Idle) { }
 
         bool Controller::load() {
             using namespace api;
@@ -46,9 +46,12 @@ namespace vantagefx {
             return true;
         }
 
-        bool Controller::buy(int64_t optionId, int money) {
+        bool Controller::buy(int64_t optionId, int64_t money, int positionType) {
 			if (!prepare()) return false;
-			//_context.gwt(GwtPrepare2OpenPositionRequest());
+	        auto assetId = _refresh->item("options/[id = {0}]/assetId", { GwtValue(optionId) }).toInt();
+			auto price = _refresh->item("options/[id = {0}]/price", { GwtValue(optionId) }).toDouble();
+			_context.gwt(GwtPrepare2OpenPositionRequest(_accountId, optionId, assetId, money, price, positionType),
+				std::bind(&Controller::positionOpened, this, _1, _2));
             return true;
         }
 
@@ -92,6 +95,7 @@ namespace vantagefx {
                 _rates[rateLut->value("name").toString()] = rateLut->value("id").toString();
             }
 
+            _servers.clear();
             for (auto &server: _lut->query("servers/*/key()")) {
                 _servers.push_back(server.value.toString());
             }
@@ -163,7 +167,19 @@ namespace vantagefx {
             _state = Ready;
         }
 
-        bool Controller::handleError(const boost::system::error_code &ec) {
+		void Controller::positionOpened(GwtObjectPtr &&data, const boost::optional<std::exception> &e) {
+			if (handleError(e)) return;
+			_context.gwt(GwtOpenPositionRequest(data),
+				std::bind(&Controller::buyComplete, this, _1, _2));
+		}
+
+		void Controller::buyComplete(GwtObjectPtr &&data, const boost::optional<std::exception> &e) {
+			if (handleError(e)) return;
+			_transactionId = data->value("transactionId").toLong();
+			_state = Ready;
+		}
+
+		bool Controller::handleError(const boost::system::error_code &ec) {
             if (!ec) return false;
             _e = boost::system::system_error(ec);
 			_state = Ready;
@@ -180,7 +196,11 @@ namespace vantagefx {
 		bool Controller::prepare()
 	    {
 		    auto check = Idle;
-		    return _state.compare_exchange_strong(check, Busy);
+		    while(!_state.compare_exchange_strong(check, Busy)) {
+				QThread::sleep(10);
+				check = Idle;
+		    }
+			return true;
 	    }
 
 	    void Controller::finish()
@@ -191,6 +211,32 @@ namespace vantagefx {
 			    throw std::runtime_error("server is busy");
 		    }
 	    }
+
+        OptionInfo Controller::optionInfo(int64_t optionId)
+        {
+            OptionInfo result;
+            prepare();
+            try {
+                auto asset = _refresh->item("options/[id={0}]/assetId", { GwtValue(optionId) });
+                result.name = _lut->item("assets/[id={0}]/name", { asset }).toString();
+                result.returnValue = _refresh->item("options/[id={0}]/return", { GwtValue(optionId) }).toInt();
+                auto seconds = _refresh->item("options/[id={0}]/optionSeconds", { GwtValue(optionId) }).toInt();
+                if (seconds >= 120) {
+                    result.expires = std::to_string(seconds / 60) + "m";
+                }
+                else {
+                    result.expires = std::to_string(seconds) + "s";
+                }
+                finish();
+            }
+            catch(...)
+            {
+                finish();
+                throw;
+            }
+            return result;
+        }
+
 
         void Controller::save() const
         {
