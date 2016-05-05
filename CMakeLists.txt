@@ -106,7 +106,9 @@ set(SOURCE_FILES
         src/api/GwtHttpRequestContext.cpp
         src/api/GwtHttpRequestContext.h
         src/viewmodel/ComboBoxModel.cpp
-        src/viewmodel/ComboBoxModel.h)
+        src/viewmodel/ComboBoxModel.h
+        src/model/OptionInfo.h
+        )
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
