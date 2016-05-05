@@ -24,7 +24,7 @@ Window {
     }
 
     Details {
-        anchors.fill: parent
+        anchors.centerIn: parent
         visible: root.mode == "details"
     }
 }
