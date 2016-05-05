@@ -92,7 +92,7 @@ namespace vantagefx {
 				fint("some_23"),
 				fint("return"),
 				fstr("some_24"),
-                fdbl("some_25"),
+                fdbl("price"),
                 fstd("some_26"),
                 fptr("openFrom"),
                 fint("optionStatus"),
