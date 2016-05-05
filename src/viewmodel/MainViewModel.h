@@ -30,7 +30,7 @@ namespace vantagefx {
             Q_PROPERTY(QString money READ money NOTIFY moneyChanged)
 
 			Q_PROPERTY(QString optionName READ optionName NOTIFY optionNameChanged)
-			Q_PROPERTY(QString optionReturn READ optionReturn NOTIFY optionReturnChanged)
+			Q_PROPERTY(int optionReturn READ optionReturn NOTIFY optionReturnChanged)
 			Q_PROPERTY(QString optionExpire READ optionExpire NOTIFY optionExpireChanged)
 
         public:
