@@ -227,11 +227,11 @@ namespace vantagefx {
                 else {
                     result.expires = std::to_string(seconds) + "s";
                 }
-                finish();
+                _state = Idle;
             }
             catch(...)
             {
-                finish();
+                _state = Idle;
                 throw;
             }
             return result;
