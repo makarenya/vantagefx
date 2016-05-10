@@ -81,7 +81,7 @@ int start(int argc, char **argv, fs::path ca_path)
 		io_service.run();
 	});
 
-	auto ctx = ssl::context(ssl::context::sslv23_client);
+	auto ctx = ssl::context(ssl::context::tlsv1_client);
 	SSL_CTX_set_cipher_list(ctx.native_handle(), "TLSv1:SSLv3:SSLv2");
 
 	auto cert_path = ca_path;

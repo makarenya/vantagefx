@@ -15,7 +15,7 @@ Window {
 
     Loading {
         anchors.fill: parent
-        visible: root.mode == ""
+        visible: root.mode == "" || root.mode == "purchasing"
     }
 
     List {

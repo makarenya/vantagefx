@@ -27,8 +27,23 @@ namespace vantagefx {
         }
 
         void MainViewModel::update() {
-            if (_controller.isError()) {
-                setMode("");
+			if (_mode == "purchasing") {
+				if (_controller.isReady()) {
+					_assetLimits[currentOption().assetId()] = std::chrono::steady_clock::now() + std::chrono::seconds(70);
+					_controller.finish();
+					_refreshTimeout = 49;
+					setMode("view");
+				}
+				if (_controller.isError()) {
+					qDebug(_controller.exception().what());
+					setMode("view");
+					_controller.finish();
+					_refreshTimeout = 49;
+				}
+			}
+			else if (_controller.isError()) {
+				qDebug(_controller.exception().what());
+				setMode("");
                 _controller.finish();
                 _controller.load();
             }
@@ -43,17 +58,18 @@ namespace vantagefx {
                     emit serversChanged();
 					setLoggedIn(_controller.isLoggedIn());
                     setFullName(_controller.fullName().c_str());
-                    _options.updateOptions(std::move(_controller.options()));
-                    _controller.finish();
+					auto options = std::move(_controller.options());
+					_controller.finish();
+					makePurchases(options);
                 }
 			}
             if (_mode == "view") {
                 if (_controller.isReady()) {
-                    _options.updateOptions(std::move(_controller.options()));
-                    setMoney(_controller.money());
-                    _controller.finish();
-					makePurchases();
-                    _refreshTimeout = 0;
+					setMoney(_controller.money());
+					auto options = std::move(_controller.options());
+					_controller.finish();
+					makePurchases(options);
+					_refreshTimeout = 0;
                 }
                 if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
                     _refreshTimeout = -1;
@@ -197,9 +213,33 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    void MainViewModel::makePurchases()
+	    void MainViewModel::makePurchases(std::map<int64_t, model::GwtOptionModel> &options)
         {
-        }
+			_options.updateOptions(options);
+			if (!_controller.isLoggedIn()) return;
+			for(auto opt: options) {
+				auto option = opt.second;
+				if (option.seconds() != 120) continue;
+				auto assetLimit = _assetLimits.find(option.assetId());
+				if (assetLimit != _assetLimits.end() && assetLimit->second > std::chrono::steady_clock::now()) continue;
+				if (option.rate("Put") > 70) {
+					setMode("purchasing");
+					setCurrentOption(option);
+					setDescription("Processing " + QString::fromStdString(option.name()) + "...");
+					_controller.buy(option.optionId(), 10000, _controller.rateId("Put"));
+					_refreshTimeout = -1;
+					return;
+				}
+				if (option.rate("Call") > 70) {
+					setMode("purchasing");
+					setCurrentOption(option);
+					setDescription("Processing " + QString::fromStdString(option.name()) + "...");
+					_controller.buy(option.optionId(), 10000, _controller.rateId("Call"));
+					_refreshTimeout = -1;
+					return;
+				}
+			}
+		}
 
 	    const QString &MainViewModel::money() const
         {

@@ -124,7 +124,7 @@ namespace vantagefx {
 
         private:
 
-			void makePurchases();
+			void makePurchases(std::map<int64_t, model::GwtOptionModel> &options);
 			
 			OptionsListModel _options;
             QString _mode;
@@ -143,6 +143,8 @@ namespace vantagefx {
 			QString _optionName;
 			int _optionReturn;
 			QString _optionExpire;
+
+			std::map<int, std::chrono::steady_clock::time_point> _assetLimits;
 
             Controller &_controller;
             int _refreshTimeout;
