@@ -81,7 +81,7 @@ namespace vantagefx {
             setMode("view");
         }
 
-        void MainViewModel::view(long long optionId)
+        void MainViewModel::view(int64_t optionId)
         {
 			_controller.wait();
             setMode("details");

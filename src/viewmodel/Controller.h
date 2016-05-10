@@ -47,7 +47,7 @@ namespace vantagefx {
 
 	        void finish();
 
-	        const std::map<int, model::GwtOptionModel> &options() const { return _options; }
+	        const std::map<int64_t, model::GwtOptionModel> &options() const { return _options; }
             const std::vector<std::string> &servers() const { return _servers; }
 			bool isLoggedIn() const { return _loggedIn; }
             const std::string &fullName() const { return _fullName; }
@@ -102,7 +102,7 @@ namespace vantagefx {
             int64_t _money;
 			int64_t _transactionId;
             std::map<std::string, std::string> _keys;
-            std::map<int, model::GwtOptionModel> _options;
+            std::map<int64_t, model::GwtOptionModel> _options;
             std::vector<std::string> _servers;
             boost::optional<std::exception> _e;
             std::atomic<State> _state;

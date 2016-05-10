@@ -25,7 +25,7 @@ namespace vantagefx {
 			return it->second;
 		}
 
-		void GwtOptionModel::setOptionId(int optionId) {
+		void GwtOptionModel::setOptionId(int64_t optionId) {
             _optionId = optionId;
         }
 

@@ -19,7 +19,7 @@ namespace vantagefx {
 
 			GwtOptionModel();
 
-			int optionId() const;
+			int64_t optionId() const;
 
             int assetId() const;
 
@@ -45,7 +45,7 @@ namespace vantagefx {
 
             int rate(const std::string &name) const;
 
-            void setOptionId(int optionId);
+            void setOptionId(int64_t optionId);
 
             void setAssetId(int assetId);
 
@@ -72,7 +72,7 @@ namespace vantagefx {
             void setRate(const std::string &name, int value);
 
         private:
-            long long _optionId;
+            int64_t _optionId;
             int _assetId;
             std::string _name;
             int _moneyBack;
@@ -109,7 +109,7 @@ namespace vantagefx {
 
         inline int GwtOptionModel::assetId() const { return _assetId; }
 
-        inline int GwtOptionModel::optionId() const { return _optionId; }
+        inline int64_t GwtOptionModel::optionId() const { return _optionId; }
     }
 }
 

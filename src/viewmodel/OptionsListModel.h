@@ -35,10 +35,10 @@ namespace vantagefx {
 			QString subMarket;
 			QString lineId;
 
-            int option30;
-            int option60;
-            int option120;
-            int option300;
+            int64_t option30;
+			int64_t option60;
+			int64_t option120;
+			int64_t option300;
         };
 
         class OptionsListModel : public QAbstractListModel
@@ -68,7 +68,7 @@ namespace vantagefx {
 
             QHash<int, QByteArray> roleNames() const override;
 
-            void updateOptions(std::map<int, model::GwtOptionModel> options);
+            void updateOptions(std::map<int64_t, model::GwtOptionModel> options);
 
         private:
 			static QVector<int> updateOption(OptionListItem &current, model::GwtOptionModel &item, int hi, int lo);

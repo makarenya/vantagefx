@@ -140,7 +140,7 @@ namespace vantagefx {
 
 			for (auto &opt : _refresh->query("options/[optionStatus={0}]", { _openId })) {
 				auto obj = opt.value.toObject();
-				auto id = obj->value("id").toInt();
+				auto id = obj->value("id").toLong();
 				auto &result = _options[id];
                 loadOption(opt.value, result);
             }

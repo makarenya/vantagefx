@@ -131,7 +131,7 @@ namespace vantagefx {
 			return inserted;
         }
 
-        void OptionsListModel::updateOptions(std::map<int, model::GwtOptionModel> options)
+        void OptionsListModel::updateOptions(std::map<int64_t, model::GwtOptionModel> options)
         {
 			for (auto &current : _items) {
 				current.option30 = -current.option30;
