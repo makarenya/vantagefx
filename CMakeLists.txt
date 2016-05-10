@@ -107,7 +107,6 @@ set(SOURCE_FILES
         src/api/GwtHttpRequestContext.h
         src/viewmodel/ComboBoxModel.cpp
         src/viewmodel/ComboBoxModel.h
-        src/model/OptionInfo.h
         )
 
 

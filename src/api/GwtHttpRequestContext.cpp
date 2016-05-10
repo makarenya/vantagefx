@@ -3,7 +3,8 @@
 //
 
 #include "GwtHttpRequestContext.h"
-#include <boost/lexical_cast.hpp>
+#include <iomanip>
+#include <sstream>
 
 namespace vantagefx {
     namespace api {
@@ -38,7 +39,7 @@ namespace vantagefx {
 
         GwtHttpRequestContext &GwtHttpRequestContext::operator<<(int value)
         {
-            _data.push_back(boost::lexical_cast<std::string>(value));
+            _data.push_back(std::to_string(value));
             return *this;
         }
 
@@ -50,7 +51,9 @@ namespace vantagefx {
 
         GwtHttpRequestContext &GwtHttpRequestContext::operator<<(double value)
         {
-            _data.push_back(boost::lexical_cast<std::string>(value));
+			std::stringstream str;
+			str << std::setprecision(5) << value;
+            _data.push_back(str.str());
             return *this;
         }
 

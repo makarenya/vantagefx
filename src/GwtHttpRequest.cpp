@@ -4,6 +4,7 @@
 
 #include "GwtHttpRequest.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace vantagefx {
 	using namespace api;
@@ -23,6 +24,10 @@ namespace vantagefx {
 		{
 			if (ec) {
 				handler(api::GwtObjectPtr(), boost::system::system_error(ec));
+				return;
+			}
+			if (!boost::algorithm::starts_with(response.body(), "//OK[")) {
+				handler(GwtObjectPtr(), std::runtime_error(response.body()));
 				return;
 			}
 			auto parser = api::makeResponseParser(response.body(), _bundle);
@@ -171,13 +176,15 @@ namespace vantagefx {
 		: GwtHttpRequest("Trading", "094DCA70134E3C91D91952E12643E178",
 			"com.optionfair.client.common.services.TradingService", "prepare2OpenPosition")
     {
+		std::stringstream str;
+		str << std::setprecision(5) << price;
         lngField(accountId);
         lngField(optionId);
         lngField(assetId);
         lngField(sum);
         dblField(price);
         dblField(price);
-        strField(boost::lexical_cast<std::string>(price));
+        strField(str.str());
         strField("");
         intField(positionType);
         strField("0");

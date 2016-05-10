@@ -26,6 +26,8 @@ namespace vantagefx {
             Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
             Q_PROPERTY(QString server READ server WRITE setServer NOTIFY serverChanged)
             Q_PROPERTY(ComboBoxModel *servers READ servers NOTIFY serversChanged)
+
+			Q_PROPERTY(bool loggedIn READ loggedIn NOTIFY loggedInChanged)
             Q_PROPERTY(QString fullName READ fullName NOTIFY fullNameChanged)
             Q_PROPERTY(QString money READ money NOTIFY moneyChanged)
 
@@ -46,6 +48,8 @@ namespace vantagefx {
             Q_INVOKABLE void processLogin();
             Q_INVOKABLE void cancelLogin();
             Q_INVOKABLE void view(long long optionId);
+			Q_INVOKABLE void buyHigh();
+			Q_INVOKABLE void buyLow();
 
             const QString &mode() const;
             void setMode(const QString &mode);
@@ -64,11 +68,17 @@ namespace vantagefx {
 
             ComboBoxModel *servers();
 
+			bool loggedIn() const;
+			void setLoggedIn(bool loggedIn);
+
             const QString &fullName() const;
             void setFullName(const QString &fullName);
 
             const QString &money() const;
             void setMoney(int64_t money);
+
+            const model::GwtOptionModel &currentOption() const;
+            void setCurrentOption(const model::GwtOptionModel &option);
 
 			const QString &optionName() const;
 			void setOptionName(const QString &optionName);
@@ -82,7 +92,7 @@ namespace vantagefx {
 
         public slots:
 
-            void update();
+	        void update();
 
         signals:
 
@@ -100,6 +110,8 @@ namespace vantagefx {
 
             void serversChanged(const ComboBoxModel *servers);
 
+			void loggedInChanged();
+
             void fullNameChanged(const QString &fullName);
 
             void moneyChanged(const QString &money);
@@ -112,16 +124,22 @@ namespace vantagefx {
 
         private:
 
-            OptionsListModel _options;
+			void makePurchases();
+			
+			OptionsListModel _options;
             QString _mode;
 			QString _description;
             QString _login;
             QString _password;
             QString _server;
             ComboBoxModel _servers;
+
+			bool _loggedIn;
             QString _fullName;
             QString _money;
 
+			model::GwtOptionModel _currentOption;
+			int64_t _optionId;
 			QString _optionName;
 			int _optionReturn;
 			QString _optionExpire;
@@ -143,7 +161,11 @@ namespace vantagefx {
 
         inline ComboBoxModel *MainViewModel::servers() { return &_servers; }
 
+		inline bool MainViewModel::loggedIn() const { return _loggedIn; }
+
         inline const QString &MainViewModel::fullName() const { return _fullName; }
+
+		inline const model::GwtOptionModel &MainViewModel::currentOption() const { return _currentOption; }
 
 		inline const QString &MainViewModel::optionName() const { return _optionName; }
 

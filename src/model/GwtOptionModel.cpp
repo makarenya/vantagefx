@@ -7,7 +7,18 @@
 namespace vantagefx {
     namespace model {
 
-		int GwtOptionModel::rate(const std::string &name) const
+	    GwtOptionModel::GwtOptionModel(): _optionId(0),
+	                                      _assetId(0),
+	                                      _moneyBack(0),
+	                                      _seconds(0),
+	                                      _returnValue(0),
+	                                      _rateLow(0),
+	                                      _price(0),
+	                                      _marketId(0),
+	                                      _close(0)
+	    {}
+
+	    int GwtOptionModel::rate(const std::string &name) const
 		{
 			auto it = _rates.find(name);
 			if (it == _rates.end()) return 0;
@@ -32,6 +43,10 @@ namespace vantagefx {
 
         void GwtOptionModel::setSeconds(int seconds) {
             _seconds = seconds;
+        }
+
+        void GwtOptionModel::setReturnValue(int returnValue) {
+            _returnValue = returnValue;
         }
 
         void GwtOptionModel::setRateLow(int rateLow) {

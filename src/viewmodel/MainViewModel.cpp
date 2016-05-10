@@ -11,6 +11,7 @@ namespace vantagefx {
                 : _mode(""),
                   _login("123301954"),
                   _password("eNJ0D"),
+				  _loggedIn(false),
                   _controller(controller),
                   _refreshTimeout(0)
         {
@@ -40,6 +41,7 @@ namespace vantagefx {
                     }
                     _servers.setComboList(servers);
                     emit serversChanged(&_servers);
+					setLoggedIn(_controller.isLoggedIn());
                     setFullName(_controller.fullName().c_str());
                     _options.updateOptions(std::move(_controller.options()));
                     _controller.finish();
@@ -50,6 +52,7 @@ namespace vantagefx {
                     _options.updateOptions(std::move(_controller.options()));
                     setMoney(_controller.money());
                     _controller.finish();
+					makePurchases();
                     _refreshTimeout = 0;
                 }
                 if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
@@ -69,7 +72,7 @@ namespace vantagefx {
 			setMode("");
             setDescription("Logging in...");
 			while (!_controller.auth(_login.toStdString(), _password.toStdString(), _server.toStdString())) {
-				QThread::sleep(10);
+				QCoreApplication::processEvents();
 			}
 		}
 
@@ -80,12 +83,33 @@ namespace vantagefx {
 
         void MainViewModel::view(long long optionId)
         {
+			_controller.wait();
             setMode("details");
             auto info = _controller.optionInfo(optionId);
-            setOptionName(info.name.c_str());
-            setOptionReturn(info.returnValue);
-            setOptionExpire(info.expires.c_str());
+            setCurrentOption(info);
+            setOptionName(info.name().c_str());
+            setOptionReturn(info.returnValue());
+            if (info.seconds() >= 120) {
+                setOptionExpire(QString::number(info.seconds() / 60) + "m");
+            }
+            else {
+                setOptionExpire(QString::number(info.seconds()) + "s");
+            }
         }
+
+        void MainViewModel::buyHigh()
+        {
+			setMode("");
+			setDescription("Process purchase...");
+			_controller.buy(currentOption().optionId(), 10000, _controller.rateId("Put"));
+		}
+
+        void MainViewModel::buyLow()
+        {
+			setMode("");
+			setDescription("Process purchase...");
+			_controller.buy(currentOption().optionId(), 10000, _controller.rateId("Call"));
+		}
 
         void MainViewModel::setMode(const QString &mode)
         {
@@ -124,7 +148,15 @@ namespace vantagefx {
 
 		}
 
-        void MainViewModel::setFullName(const QString &fullName) {
+		void MainViewModel::setLoggedIn(bool loggedIn)
+        {
+			if (_loggedIn == loggedIn) return;
+			_loggedIn = loggedIn;
+			emit loggedInChanged();
+        }
+
+        void MainViewModel::setFullName(const QString &fullName) 
+		{
             if (_fullName == fullName) return;
             _fullName = fullName;
             emit fullNameChanged(_fullName);
@@ -140,6 +172,11 @@ namespace vantagefx {
             if (value == _money) return;
             _money = value;
             emit moneyChanged(_money);
+        }
+
+        void MainViewModel::setCurrentOption(const model::GwtOptionModel &option)
+        {
+            _currentOption = option;
         }
 
         void MainViewModel::setOptionName(const QString &optionName) {
@@ -160,7 +197,11 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-        const QString &MainViewModel::money() const
+	    void MainViewModel::makePurchases()
+        {
+        }
+
+	    const QString &MainViewModel::money() const
         {
             return _money;
         }

@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 
 Rectangle {
   width: 140
-  height: 200
+  height: 220
   Text {
     x: 10
     y: 10
@@ -28,5 +28,23 @@ Rectangle {
     width: 120
     text: "Close"
     onClicked: root.cancelLogin()
+  }
+
+  Button {
+    x: 30
+    y: 150
+    width: 80
+    text: "High"
+    onClicked: root.buyHigh()
+    visible: root.loggedIn
+  }
+
+  Button {
+    x: 30
+    y: 180
+    width: 80
+    text: "Low"
+    onClicked: root.buyLow()
+    visible: root.loggedIn
   }
 }

@@ -9,7 +9,6 @@
 #include "src/GwtHttpRequest.h"
 #include "src/model/GwtOptionModel.h"
 #include <QtCore>
-#include "../model/OptionInfo.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -40,7 +39,7 @@ namespace vantagefx {
 
 			bool isError() const { return _state == Ready && !!_e; }
 
-			OptionInfo optionInfo(int64_t optionId);
+			model::GwtOptionModel optionInfo(int64_t optionId);
 
             const std::exception &exception() const { return *_e; }
 
@@ -50,14 +49,18 @@ namespace vantagefx {
 
 	        const std::map<int, model::GwtOptionModel> &options() const { return _options; }
             const std::vector<std::string> &servers() const { return _servers; }
+			bool isLoggedIn() const { return _loggedIn; }
             const std::string &fullName() const { return _fullName; }
             int64_t accountId() const { return _accountId; }
             const std::string &email() const { return _email; }
             int64_t money() const { return _money; }
+			int rateId(std::string name);
 
             void stop();
-
+	        void wait();
         private:
+
+            void loadOption(const api::GwtValue &value, model::GwtOptionModel &model);
 
             bool handleError(const boost::optional<std::exception> &e);
 
@@ -87,11 +90,12 @@ namespace vantagefx {
             int _instrumentTypeId;
             int _brandId;
 			api::GwtValue _openId;
-            std::map<std::string, std::string> _rates;
+            std::map<std::string, int> _rates;
             api::GwtObjectPtr _instrumentConfiguration;
             api::GwtObjectPtr _instrumentOptions;
             api::GwtObjectPtr _refresh;
             api::GwtObjectPtr _auth;
+			bool _loggedIn;
             std::string _fullName;
             int64_t _accountId;
             std::string _email;

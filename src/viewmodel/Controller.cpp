@@ -5,6 +5,7 @@
 #include "Controller.h"
 #include <boost/filesystem/path.hpp>
 #include <regex>
+#include <QApplication>
 
 namespace vantagefx {
     namespace viewmodel {
@@ -17,8 +18,9 @@ namespace vantagefx {
                 : _context(std::move(context)),
                   _instrumentTypeId(0),
                   _brandId(0),
+                  _loggedIn(false),
                   _money(-1),
-                  _state(Idle) { }
+				  _state(Idle) { }
 
         bool Controller::load() {
             using namespace api;
@@ -92,7 +94,7 @@ namespace vantagefx {
 
             for(auto &rate : _lut->query("lutTypes/[name='PositionType']/luts/*")) {
                 auto rateLut = rate.value.toObject();
-                _rates[rateLut->value("name").toString()] = rateLut->value("id").toString();
+                _rates[rateLut->value("name").toString()] = rateLut->value("id").toInt();
             }
 
             _servers.clear();
@@ -123,6 +125,7 @@ namespace vantagefx {
         void Controller::loggedIn(GwtObjectPtr &&auth, const boost::optional<std::exception> &e) {
             if (handleError(e)) return;
             _auth = std::move(auth);
+			_loggedIn = true;
             _fullName = _auth->item("account/fullName").toString();
             _accountId = _auth->item("account/accountId").toLong();
             _email = _auth->item("account/email").toString();
@@ -136,33 +139,10 @@ namespace vantagefx {
             _money = _refresh->item("money/value").toLong();
 
 			for (auto &opt : _refresh->query("options/[optionStatus={0}]", { _openId })) {
-
-                auto obj = opt.value.toObject();
-                auto id = obj->value("id").toInt();
-                auto asset = obj->value("assetId");
-                auto &result = _options[id];
-                result.setOptionId(id);
-                result.setAssetId(asset.toInt());
-                result.setMoneyBack(obj->value("return").toInt());
-                result.setSeconds(obj->value("optionSeconds").toInt());
-                result.setName(_lut->item("assets/[id={0}]/name", { asset }).toString());
-                result.setPrice(_refresh->item("assetUpdates/[assetId={0}]/targetPrice", { asset }).toDouble());
-                auto subMarket = _lut->item("assets/[id={0}]/subMarketId", { asset });
-                auto marketName = _lut->item("markets/[subMarkets/*/id = {0}]/name", { subMarket }).toString();
-				auto marketId = _lut->item("markets/[subMarkets/*/id = {0}]/id", { subMarket }).toInt();
-				auto subMarketName = _lut->item("markets/*/subMarkets/[id = {0}]/name", { subMarket }).toString();
-				result.setMarketId(marketId);
-                result.setMarket(marketName);
-                result.setSubMarket(subMarketName);
-                result.setClose(obj->item("closeDate/value").toLong());
-                auto rates = _refresh->item("positionsSentimentDto/map/[int()={0}]", { asset }).toObject();
-				if (rates) {
-					for (auto &pair : _rates) {
-						if (rates->has(pair.second)) {
-							result.setRate(pair.first, rates->item(pair.second + "/value").toInt());
-						}
-					}
-				}
+				auto obj = opt.value.toObject();
+				auto id = obj->value("id").toInt();
+				auto &result = _options[id];
+                loadOption(opt.value, result);
             }
             _state = Ready;
         }
@@ -179,7 +159,12 @@ namespace vantagefx {
 			_state = Ready;
 		}
 
-		bool Controller::handleError(const boost::system::error_code &ec) {
+	    int Controller::rateId(std::string name)
+        {
+			return _rates.at(name);
+        }
+
+	    bool Controller::handleError(const boost::system::error_code &ec) {
             if (!ec) return false;
             _e = boost::system::system_error(ec);
 			_state = Ready;
@@ -197,7 +182,7 @@ namespace vantagefx {
 	    {
 		    auto check = Idle;
 		    while(!_state.compare_exchange_strong(check, Busy)) {
-				QThread::sleep(10);
+				QCoreApplication::processEvents();
 				check = Idle;
 		    }
 			return true;
@@ -212,21 +197,42 @@ namespace vantagefx {
 		    }
 	    }
 
-        OptionInfo Controller::optionInfo(int64_t optionId)
+        void Controller::loadOption(const api::GwtValue &value, model::GwtOptionModel &model) {
+            auto obj = value.toObject();
+            auto id = obj->value("id").toInt();
+            auto asset = obj->value("assetId");
+            model.setOptionId(id);
+            model.setAssetId(asset.toInt());
+            model.setMoneyBack(obj->value("return").toInt());
+            model.setSeconds(obj->value("optionSeconds").toInt());
+            model.setReturnValue(obj->value("return").toInt());
+            model.setName(_lut->item("assets/[id={0}]/name", { asset }).toString());
+            model.setPrice(_refresh->item("assetUpdates/[assetId={0}]/targetPrice", { asset }).toDouble());
+            auto subMarket = _lut->item("assets/[id={0}]/subMarketId", { asset });
+            auto marketName = _lut->item("markets/[subMarkets/*/id = {0}]/name", { subMarket }).toString();
+            auto marketId = _lut->item("markets/[subMarkets/*/id = {0}]/id", { subMarket }).toInt();
+            auto subMarketName = _lut->item("markets/*/subMarkets/[id = {0}]/name", { subMarket }).toString();
+            model.setMarketId(marketId);
+            model.setMarket(marketName);
+            model.setSubMarket(subMarketName);
+            model.setClose(obj->item("closeDate/value").toLong());
+            auto rates = _refresh->item("positionsSentimentDto/map/[int()={0}]", { asset }).toObject();
+            if (rates) {
+                for (auto &pair : _rates) {
+					auto rate = rates->item("[int() = {0}]/value", { GwtValue(pair.second) });
+                    if (!rate.empty()) {
+                        model.setRate(pair.first, rate.toInt());
+                    }
+                }
+            }
+        }
+
+        model::GwtOptionModel Controller::optionInfo(int64_t optionId)
         {
-            OptionInfo result;
+            model::GwtOptionModel result;
             prepare();
             try {
-                auto asset = _refresh->item("options/[id={0}]/assetId", { GwtValue(optionId) });
-                result.name = _lut->item("assets/[id={0}]/name", { asset }).toString();
-                result.returnValue = _refresh->item("options/[id={0}]/return", { GwtValue(optionId) }).toInt();
-                auto seconds = _refresh->item("options/[id={0}]/optionSeconds", { GwtValue(optionId) }).toInt();
-                if (seconds >= 120) {
-                    result.expires = std::to_string(seconds / 60) + "m";
-                }
-                else {
-                    result.expires = std::to_string(seconds) + "s";
-                }
+                loadOption(_refresh->item("options/[id={0}]", { GwtValue(optionId) }), result);
                 _state = Idle;
             }
             catch(...)
@@ -237,8 +243,7 @@ namespace vantagefx {
             return result;
         }
 
-
-        void Controller::save() const
+		void Controller::save() const
         {
             _lut->saveXml(fs::path(DATA_DIR) / "lut.xml");
             _instrumentConfiguration->saveXml(fs::path(DATA_DIR) / "instrumentConfiguration.xml");
@@ -249,6 +254,12 @@ namespace vantagefx {
 
         void Controller::stop() {
             _context.stop();
+        }
+
+	    void Controller::wait()
+        {
+			prepare();
+			_state = Idle;
         }
     }
 }

@@ -8,7 +8,7 @@ Rectangle {
         y: 0
         width: parent.width
         height: 45
-        visible: root.fullName == ""
+        visible: !root.loggedIn
         Button {
             x: 10
             y: 10
@@ -21,7 +21,7 @@ Rectangle {
         y: 0
         width: parent.width
         height: 45
-        visible: root.fullName != ""
+        visible: root.loggedIn
         Text {
             x: 20
             y: 10
