@@ -40,7 +40,7 @@ namespace vantagefx {
                         servers.push_back(server.c_str());
                     }
                     _servers.setComboList(servers);
-                    emit serversChanged(&_servers);
+                    emit serversChanged();
 					setLoggedIn(_controller.isLoggedIn());
                     setFullName(_controller.fullName().c_str());
                     _options.updateOptions(std::move(_controller.options()));
@@ -115,21 +115,21 @@ namespace vantagefx {
         {
             if (_mode == mode) return;
             _mode = mode;
-            emit modeChanged(mode);
+            emit modeChanged();
         }
 
 		void MainViewModel::setDescription(const QString &description)
         {
 			if (_description == description) return;
 			_description = description;
-			emit descriptionChanged(description);
+			emit descriptionChanged();
         }
 
 		void MainViewModel::setLogin(const QString &login)
 		{
             if (_login == login) return;
             _login = login;
-            emit loginChanged(_login);
+            emit loginChanged();
 
 		}
 
@@ -137,14 +137,14 @@ namespace vantagefx {
 		{
             if (_password == password) return;
             _password = password;
-            emit passwordChanged(_password);
+            emit passwordChanged();
 		}
 
 		void MainViewModel::setServer(const QString &server)
 		{
             if (_server == server) return;
             _server = server;
-            emit serverChanged(_server);
+            emit serverChanged();
 
 		}
 
@@ -159,19 +159,19 @@ namespace vantagefx {
 		{
             if (_fullName == fullName) return;
             _fullName = fullName;
-            emit fullNameChanged(_fullName);
+            emit fullNameChanged();
         }
 
         void MainViewModel::setMoney(int64_t money) {
-            QString sub = QString::number(money % 100);
+	        auto sub = QString::number(money % 100);
             money /= 100;
-            QString ones = QString::number(money % 1000);
+	        auto ones = QString::number(money % 1000);
             money /= 1000;
             auto value = "$ " + ((money == 0) ? ones + "." + sub :
                          QString::number(money) + " " + ones + "." + sub);
             if (value == _money) return;
             _money = value;
-            emit moneyChanged(_money);
+            emit moneyChanged();
         }
 
         void MainViewModel::setCurrentOption(const model::GwtOptionModel &option)

@@ -96,25 +96,25 @@ namespace vantagefx {
 
         signals:
 
-            void modeChanged(QString mode);
+            void modeChanged();
 
-			void descriptionChanged(QString description);
+			void descriptionChanged();
 
-            void optionsChanged(const OptionsListModel *options);
+            void optionsChanged();
 
-            void loginChanged(const QString &login);
+            void loginChanged();
 
-            void passwordChanged(const QString &password);
+            void passwordChanged();
 
-            void serverChanged(const QString &server);
+            void serverChanged();
 
-            void serversChanged(const ComboBoxModel *servers);
+            void serversChanged();
 
 			void loggedInChanged();
 
-            void fullNameChanged(const QString &fullName);
+            void fullNameChanged();
 
-            void moneyChanged(const QString &money);
+            void moneyChanged();
 
 			void optionNameChanged();
 
