@@ -106,7 +106,8 @@ Rectangle {
                     height: 22
                     visible: model.option_30 > 0
                     text: "30"
-                    onClicked: root.view(model.option_30)
+                    checkable: true
+                    onClicked: root.selectOption(model.option_30, 30, checked)
                 }
 
                 Button {
@@ -116,7 +117,8 @@ Rectangle {
                     height: 22
                     visible: model.option_60 > 0
                     text: "60"
-                    onClicked: root.view(model.option_60)
+                    checkable: true
+                    onClicked: root.selectOption(model.option_60, 60, checked)
                 }
 
                 Button {
@@ -126,7 +128,8 @@ Rectangle {
                     height: 22
                     visible: model.option_120 > 0
                     text: "2m"
-                    onClicked: root.view(model.option_120)
+                    checkable: true
+                    onClicked: root.selectOption(model.option_120, 120, checked)
                 }
 
                 Button {
@@ -136,7 +139,8 @@ Rectangle {
                     height: 22
                     visible: model.option_300 > 0
                     text: "5m"
-                    onClicked: root.view(model.option_300)
+                    checkable: true
+                    onClicked: root.selectOption(model.option_300, 300, checked)
                 }
             }
         }

@@ -22,7 +22,14 @@ namespace vantagefx {
                 : _context(context),
                   _handler(handler),
                   _error(error)
-        {}
+        {
+            qDebug("Loading context created");
+        }
+
+        LoadingContext::~LoadingContext()
+        {
+            qDebug("Loading context free");
+        }
 
 	    void LoadingContext::send()
         {
@@ -114,7 +121,14 @@ namespace vantagefx {
                 : _context(context),
                   _handler(handler),
                   _error(error)
-        {}
+        {
+            qDebug("Refresh context created");
+        }
+
+        RefreshContext::~RefreshContext()
+        {
+            qDebug("Refresh context free");
+        }
 
 	    void RefreshContext::send(int instrumentTypeId)
         {
@@ -144,6 +158,12 @@ namespace vantagefx {
                   _handler(handler),
                   _error(error)
         {
+            qDebug("Auth context created");
+        }
+
+        AuthContext::~AuthContext()
+        {
+            qDebug("Auth context free");
         }
 
 	    void AuthContext::send(const std::string& login, const std::string& password, const std::string& server)
@@ -173,6 +193,12 @@ namespace vantagefx {
                   _handler(handler),
                   _error(error)
         {
+            qDebug("Purchase context created");
+        }
+
+        PurchaseContext::~PurchaseContext()
+        {
+            qDebug("Purchase context free");
         }
 
 	    void PurchaseContext::send(int64_t accountId, int64_t optionId, int assetId, 
@@ -198,6 +224,8 @@ namespace vantagefx {
                 _error(*e);
                 return;
             }
+			_optionId = data->value("option/id").toLong();
+			_optionSeconds = data->value("option/optionSeconds").toInt();
             _transactionId = data->value("transactionId").toLong();
             _handler(self);
         }

@@ -51,6 +51,7 @@ namespace vantagefx {
             Q_INVOKABLE void view(long long optionId);
 			Q_INVOKABLE void buyHigh();
 			Q_INVOKABLE void buyLow();
+			Q_INVOKABLE void selectOption(long long optionId, int seconds, bool checked);
 
             const QString &mode() const;
             void setMode(const QString &mode);
@@ -170,11 +171,13 @@ namespace vantagefx {
 			int _optionReturn;
 			QString _optionExpire;
 
-			std::map<int, std::chrono::steady_clock::time_point> _assetLimits;
+			std::map<int64_t, std::chrono::steady_clock::time_point> _optionsLimit;
 
 			VantageFxService &_service;
 			model::VantageFxModel _model;
             int _refreshTimeout;
+
+			std::set<int64_t> _selectedOptions;
         };
 
 

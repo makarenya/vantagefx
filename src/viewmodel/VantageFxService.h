@@ -34,6 +34,7 @@ namespace vantagefx {
 			typedef std::function<void(std::exception e)> Fail;
 
             LoadingContext(GwtHttpContext &context, Handler handler, Fail error);
+			~LoadingContext();
 			void send();
 
 			api::GwtObjectPtr lut() const { return _lut; }
@@ -70,6 +71,7 @@ namespace vantagefx {
 			typedef std::function<void(std::exception e)> Fail;
 			
             RefreshContext(GwtHttpContext &context, Handler handler, Fail error);
+			~RefreshContext();
 			void send(int instrumentTypeId);
 
 			api::GwtObjectPtr refresh() const { return _refresh; }
@@ -91,6 +93,7 @@ namespace vantagefx {
             typedef std::function<void(std::exception e)> Fail;
 
             AuthContext(GwtHttpContext &context, Handler handler, Fail error);
+			~AuthContext();
 			void send(const std::string &login, const std::string &password, const std::string &server);
 
 			api::GwtObjectPtr auth() const { return _auth; };
@@ -112,13 +115,18 @@ namespace vantagefx {
 			typedef std::function<void(std::exception e)> Fail;
 
             PurchaseContext(GwtHttpContext &context, Handler handler, Fail error);
+			~PurchaseContext();
 			void send(int64_t accountId, int64_t optionId, int assetId, int64_t money, 
 				      int64_t price, int positionType);
 
+			int64_t optionId() const { return _optionId; }
+			int optionSeconds() const { return _optionSeconds; }
 			int64_t transactionId() const { return _transactionId; }
 
         private:
 
+			int64_t _optionId;
+			int _optionSeconds;
 			int64_t _transactionId;
 			
 			void positionOpened(api::GwtObjectPtr &&data, const boost::optional<std::exception> &e);

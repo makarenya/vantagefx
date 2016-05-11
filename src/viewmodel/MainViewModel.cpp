@@ -128,7 +128,9 @@ namespace vantagefx {
 
 		void MainViewModel::purchased(PurchaseContextPtr ctx)
         {
-			_assetLimits[currentOption().assetId()] = std::chrono::steady_clock::now() + std::chrono::seconds(130);
+			using namespace std::chrono;
+			auto timePoint = steady_clock::now() + seconds(ctx->optionSeconds() + 10);
+			_optionsLimit[ctx->optionId()] = timePoint;
 			_refreshTimeout = 49;
 			setMode("view");
 		}
@@ -185,7 +187,13 @@ namespace vantagefx {
 			doPurchase(currentOption().optionId(), 10000, _model.rateId("Call"));
 		}
 
-        void MainViewModel::setMode(const QString &mode)
+	    void MainViewModel::selectOption(int64_t optionId, int seconds, bool checked)
+        {
+			if (checked) _selectedOptions.insert(optionId);
+			else _selectedOptions.erase(optionId);
+        }
+
+	    void MainViewModel::setMode(const QString &mode)
         {
             if (_mode == mode) return;
             _mode = mode;
@@ -270,9 +278,10 @@ namespace vantagefx {
 			_options.updateOptions(options);
 			if (!_model.isLoggedIn()) return;
 			for(auto option: options) {
-				if (option.seconds() != 120) continue;
-				auto assetLimit = _assetLimits.find(option.assetId());
-				if (assetLimit != _assetLimits.end() && assetLimit->second > std::chrono::steady_clock::now()) continue;
+				if (_selectedOptions.count(option.optionId()) == 0) continue;
+				auto optionLimit = _optionsLimit.find(option.optionId());
+				if (optionLimit != _optionsLimit.end() && optionLimit->second > std::chrono::steady_clock::now()) continue;
+
 				if (option.rate("Put") > 70) {
 					setMode("purchasing");
 					setCurrentOption(option);
