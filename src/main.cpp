@@ -5,7 +5,7 @@
 #include <thread>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/locale.hpp>
-#include "src/api/GwtRpcRequest.h>
+#include "src/api/GwtRpcRequest.h"
 #include "src/api/GwtType.h"
 #include "src/api/GwtBundle.h"
 #include "src/serialized/LutResolverInitPackage.h"
