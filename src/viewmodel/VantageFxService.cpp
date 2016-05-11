@@ -202,7 +202,7 @@ namespace vantagefx {
         }
 
 	    void PurchaseContext::send(int64_t accountId, int64_t optionId, int assetId, 
-			                       int64_t money, int64_t price, int positionType)
+			                       int64_t money, double price, int positionType)
         {
 			auto self = shared_from_this();
 			_context.gwt(GwtPrepare2OpenPositionRequest(accountId, optionId, assetId, money, price, positionType),
@@ -264,9 +264,11 @@ namespace vantagefx {
 		}
 
         PurchaseContextPtr VantageFxService::buy(int64_t accountId, int64_t optionId, int assetId, int64_t money,
-                                                 int64_t price, int positionType, PurchaseContext::Handler handler,
+                                                 double price, int positionType, PurchaseContext::Handler handler,
                                                  PurchaseContext::Fail error)
         {
+			auto msg = QString("buy(%1, %2, %3, %4, %L5, %6)").arg(accountId).arg(optionId).arg(assetId).arg(money).arg(price, 0, 'f').arg(positionType);
+			qDebug(msg.toStdString().c_str());
 			auto result = std::make_shared<PurchaseContext>(_context, handler, error);
 			result->send(accountId, optionId, assetId, money, price, positionType);
 			return result;

@@ -117,7 +117,7 @@ namespace vantagefx {
             PurchaseContext(GwtHttpContext &context, Handler handler, Fail error);
 			~PurchaseContext();
 			void send(int64_t accountId, int64_t optionId, int assetId, int64_t money, 
-				      int64_t price, int positionType);
+				      double price, int positionType);
 
 			int64_t optionId() const { return _optionId; }
 			int optionSeconds() const { return _optionSeconds; }
@@ -152,7 +152,7 @@ namespace vantagefx {
             AuthContextPtr auth(const std::string &login, const std::string &password,
                                 const std::string &server, AuthContext::Handler handler, AuthContext::Fail error);
 
-            PurchaseContextPtr buy(int64_t accountId, int64_t optionId, int assetId, int64_t money, int64_t price,
+            PurchaseContextPtr buy(int64_t accountId, int64_t optionId, int assetId, int64_t money, double price,
                                    int positionType, PurchaseContext::Handler handler, PurchaseContext::Fail error);
 
             void stop();
