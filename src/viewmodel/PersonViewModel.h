@@ -5,46 +5,23 @@
 #ifndef QT_SECOND_PERSONVIEWMODEL_H
 #define QT_SECOND_PERSONVIEWMODEL_H
 
-#include "src/model/PersonModel.h"
+#include "../model/PersonModel.h"
 
 #include <QAbstractListModel>
 
 class PersonViewModel : public QObject {
 Q_OBJECT
-    Q_PROPERTY(QString name
-                       READ
-                               name
-                       WRITE
-                               setName
-                       NOTIFY
-                       nameChanged)
-    Q_PROPERTY(QString surname
-                       READ
-                               surname
-                       WRITE
-                               setSurname
-                       NOTIFY
-                       surnameChanged)
-    Q_PROPERTY(QString phone
-                       READ
-                               phone
-                       WRITE
-                               setPhone
-                       NOTIFY
-                       phoneChanged)
-    Q_PROPERTY(int age
-                       READ
-                               age
-                       WRITE
-                               setAge
-                       NOTIFY
-                       ageChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+    Q_PROPERTY(QString surname READ surname WRITE setSurname NOTIFY surnameChanged)
+    Q_PROPERTY(QString phone READ phone WRITE setPhone NOTIFY phoneChanged)
+    Q_PROPERTY(int age READ age WRITE setAge NOTIFY ageChanged)
 
 private:
     PersonModel _personModel;
 
 public:
-    PersonViewModel(PersonModel personModel);
+
+	explicit PersonViewModel(PersonModel personModel);
 
     virtual ~PersonViewModel() { }
 

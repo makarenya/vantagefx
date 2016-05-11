@@ -6,8 +6,7 @@
 #define VANTAGEFX_CONTROLLER_H
 
 #include <memory>
-#include "src/GwtHttpRequest.h"
-#include "src/model/OptionModel.h"
+#include "../GwtHttpRequest.h"
 
 namespace vantagefx {
     namespace model {

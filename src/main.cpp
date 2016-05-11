@@ -2,16 +2,16 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <iostream>
-#include <src/api/GwtRpcRequest.h>
-#include <src/api/GwtType.h>
-#include <src/api/GwtBundle.h>
-#include "src/serialized/LutResolverInitPackage.h"
-#include "src/http/HttpRequest.h"
-#include "src/analyzer/GwtAnalyzer.h"
 #include <thread>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/locale.hpp>
-#include <src/viewmodel/MainViewModel.h>
+#include "src/api/GwtRpcRequest.h>
+#include "src/api/GwtType.h"
+#include "src/api/GwtBundle.h"
+#include "src/serialized/LutResolverInitPackage.h"
+#include "src/http/HttpRequest.h"
+#include "src/analyzer/GwtAnalyzer.h"
+#include "src/viewmodel/MainViewModel.h"
 #include "src/viewmodel/VantageFxService.h"
 
 #ifdef WINVER
