@@ -7,7 +7,8 @@
 
 #include <QtCore>
 #include "../api/GwtObject.h"
-#include "GwtOptionModel.h"
+#include "OptionModel.h"
+#include "AssetModel.h"
 
 namespace vantagefx {
     namespace model {
@@ -16,29 +17,32 @@ namespace vantagefx {
         public:
             void setLut(api::GwtObjectPtr lut);
             int instrumentTypeId() const;
-            QStringList servers() const;
+			const QStringList &servers() const;
             int rateId(QString name);
-            std::vector<GwtOptionModel> options() const;
-	        GwtOptionModel optionInfo(int64_t optionId) const;
-			
+
 			void setAccount(api::GwtObjectPtr auth);
 			int64_t accountId() const;
 			bool isLoggedIn() const;
-			QString userName() const;
+			const QString &userName() const;
 
 			void updateOptions(api::GwtObjectPtr refresh);
-			int assetId(int64_t optionId) const;
-	        int64_t currentPrice(int assetId) const;
-	        int64_t currentMoney() const;
+			const QMap<int64_t, OptionModel> &options() const;
+			OptionModel optionInfo(int64_t optionId) const;
+			int64_t currentMoney() const;
 
         private:
-			void loadOption(const api::GwtValue &value, GwtOptionModel &model) const;
-			
-			api::GwtObjectPtr _lut;
-			api::GwtObjectPtr _auth;
-			api::GwtObjectPtr _refresh;
-            QMap<QString, int> _rates;
-            api::GwtValue _openId;
+
+			int _openId;
+			int _instrumentTypeId;
+			QStringList _servers;
+			QMap<QString, int> _rates;
+			QMap<int, AssetModel> _assets;
+
+			int64_t _accountId;
+			QString _userName;
+
+			QMap<int64_t, OptionModel> _options;
+			int64_t _currentMoney;
         };
     }
 }

@@ -72,17 +72,20 @@ namespace vantagefx {
 			return cnt;
         }
 
-		QVector<int> OptionsListModel::updateOption(OptionListItem &current, model::GwtOptionModel &item, int hi, int lo)
+		QVector<int> OptionsListModel::updateOption(OptionListItem &current, model::OptionModel &item)
         {
 			QVector<int> roles;
-			if (item.name() != current.name.toStdString()) {
-				current.name = item.name().c_str();
+			if (item.asset().name() != current.name) {
+				current.name = item.asset().name();
 				roles.push_back(NameRole);
 			}
 			if (item.moneyBack() != current.moneyBack) {
 				current.moneyBack = item.moneyBack();
 				roles.push_back(MoneyBackRole);
 			}
+			auto lo = item.asset().rate("Call");
+			auto hi = item.asset().rate("Put");
+
 			if (lo != current.rateLow) {
 				current.rateLow = lo;
 				roles.push_back(RateLowRole);
@@ -114,15 +117,15 @@ namespace vantagefx {
 			return roles;
         }
 
-		OptionListItem OptionsListModel::createOption(model::GwtOptionModel &item, std::string lineId, int hi, int lo)
+		OptionListItem OptionsListModel::createOption(model::OptionModel &item, std::string lineId)
         {
 			OptionListItem inserted;
 			inserted.lineId = lineId.c_str();
-			inserted.assetId = item.assetId();
-			inserted.name = item.name().c_str();
+			inserted.assetId = item.asset().id();
+			inserted.name = item.asset().name();
 			inserted.moneyBack = item.moneyBack();
-			inserted.rateLow = lo;
-			inserted.rateHi = hi;
+			inserted.rateLow = item.asset().rate("Call");
+			inserted.rateHi = item.asset().rate("Put");
 			inserted.price = item.price();
 			if (item.seconds() == 30) inserted.option30 = item.optionId();
 			if (item.seconds() == 60) inserted.option60 = item.optionId();
@@ -131,7 +134,7 @@ namespace vantagefx {
 			return inserted;
         }
 
-        void OptionsListModel::updateOptions(const std::vector<model::GwtOptionModel> &options)
+        void OptionsListModel::updateOptions(const QMap<int64_t, model::OptionModel> &options)
         {
 			if (options.empty()) return;
 			for (auto &current : _items) {
@@ -142,24 +145,17 @@ namespace vantagefx {
 			}
 			for(auto item: options) {
 	            auto added = false;
-	            auto hi = item.rate("Put");
-	            auto lo = item.rate("Call");
-				if (hi == 0 && lo == 0) {
-					hi = 50;
-					lo = 50;
-				}
-
 				std::stringstream linestream;
-				linestream << std::setw(4) << std::setfill('0') << item.marketId() << "." 
-					<< std::setw(6) << std::setfill('0') << item.assetId();
+				linestream << std::setw(4) << std::setfill('0') << item.asset().marketId() << "." 
+					<< std::setw(6) << std::setfill('0') << item.asset().id();
 
 				auto lineId = linestream.str();
 
                 for (auto i = 0; i < _items.size(); ++i) {
                     auto &current = _items[i];
-                    if (item.assetId() == current.assetId) {
+                    if (item.asset().id() == current.assetId) {
 						added = true;
-						auto roles = updateOption(current, item, hi, lo);
+						auto roles = updateOption(current, item);
 						if (roles.size() > 0) {
 							dataChanged(index(i, 0), index(i, 0), roles);
 						}
@@ -167,7 +163,7 @@ namespace vantagefx {
                     }
                     else if (lineId.c_str() < current.lineId) {
 						added = true;
-						auto inserted = createOption(item, lineId, hi, lo);
+						auto inserted = createOption(item, lineId);
                         beginInsertRows(QModelIndex(), i, i);
                         _items.insert(i, inserted);
                         endInsertRows();
@@ -176,7 +172,7 @@ namespace vantagefx {
                 }
                 if (!added)
 				{
-					auto inserted = createOption(item, lineId, hi, lo);
+					auto inserted = createOption(item, lineId);
 					beginInsertRows(QModelIndex(), _items.size(), _items.size());
 					_items.push_back(inserted);
 					endInsertRows();

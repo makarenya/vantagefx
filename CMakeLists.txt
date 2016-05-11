@@ -101,13 +101,13 @@ set(SOURCE_FILES
         src/viewmodel/VantageFxService.h
         src/viewmodel/OptionsListModel.cpp
         src/viewmodel/OptionsListModel.h
-        src/model/GwtOptionModel.cpp
-        src/model/GwtOptionModel.h
+        src/model/OptionModel.cpp
+        src/model/OptionModel.h
         src/api/GwtHttpRequestContext.cpp
         src/api/GwtHttpRequestContext.h
         src/viewmodel/ComboBoxModel.cpp
         src/viewmodel/ComboBoxModel.h
-        src/model/VantageFxModel.cpp src/model/VantageFxModel.h)
+        src/model/VantageFxModel.cpp src/model/VantageFxModel.h src/model/AssetModel.cpp src/model/AssetModel.h src/model/CurrentSettings.cpp src/model/CurrentSettings.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

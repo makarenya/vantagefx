@@ -2,6 +2,7 @@
 // Created by alexx on 09.03.2016.
 //
 #include "MainViewModel.h"
+#include "../model/CurrentSettings.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -12,12 +13,16 @@ namespace vantagefx {
         MainViewModel::MainViewModel(VantageFxService &service)
                 : _mode(""),
 			      _description("Loading stuff..."),
-		          _login("123301954"),
-                  _password("eNJ0D"),
 				  _loggedIn(false),
                   _service(service),
                   _refreshTimeout(-1)
         {
+			model::CurrentSettings settings;
+			settings.load();
+			setLogin(settings.login());
+			setPassword(settings.password());
+			setServer(settings.server());
+
 			qRegisterMetaType<LoadingContextPtr>("LoadingContextPtr");
 			qRegisterMetaType<RefreshContextPtr>("RefreshContextPtr");
 			qRegisterMetaType<AuthContextPtr>("AuthContextPtr");
@@ -107,6 +112,12 @@ namespace vantagefx {
 			_model.setAccount(ctx->auth());
 			setLoggedIn(_model.isLoggedIn());
 			setFullName(_model.userName());
+
+			model::CurrentSettings settings;
+			settings.setLogin(login());
+			settings.setPassword(password());
+			settings.setServer(server());
+			settings.save();
 		}
 
 		void MainViewModel::authError(std::exception e)
@@ -119,8 +130,9 @@ namespace vantagefx {
 	    void MainViewModel::doPurchase(int64_t optionId, int64_t money, int positionType)
         {
 			auto accountId = _model.accountId();
-	        auto assetId = _model.assetId(optionId);
-			auto currentPrice = _model.currentPrice(assetId);
+			auto option = _model.optionInfo(optionId);
+	        auto assetId = option.asset().id();
+			auto currentPrice = option.asset().price();
 	        _service.buy(accountId, optionId, assetId, money, currentPrice, positionType,
 				         std::bind(&MainViewModel::purchasedSignal, this, _1),
 				         std::bind(&MainViewModel::purchaseErrorSignal, this, _1));
@@ -163,7 +175,7 @@ namespace vantagefx {
             setMode("details");
             auto info = _model.optionInfo(optionId);
             setCurrentOption(info);
-            setOptionName(info.name().c_str());
+            setOptionName(info.asset().name());
             setOptionReturn(info.returnValue());
             if (info.seconds() >= 120) {
                 setOptionExpire(QString::number(info.seconds() / 60) + "m");
@@ -249,7 +261,7 @@ namespace vantagefx {
             emit moneyChanged();
         }
 
-        void MainViewModel::setCurrentOption(const model::GwtOptionModel &option)
+        void MainViewModel::setCurrentOption(const model::OptionModel &option)
         {
             _currentOption = option;
         }
@@ -272,7 +284,7 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    void MainViewModel::makePurchases(std::vector<model::GwtOptionModel> &&options)
+	    void MainViewModel::makePurchases(const QMap<int64_t, model::OptionModel> &options)
         {
 			if (options.empty()) return;
 			_options.updateOptions(options);
@@ -282,18 +294,18 @@ namespace vantagefx {
 				auto optionLimit = _optionsLimit.find(option.optionId());
 				if (optionLimit != _optionsLimit.end() && optionLimit->second > std::chrono::steady_clock::now()) continue;
 
-				if (option.rate("Put") > 70) {
+				if (option.asset().rate("Put") > 70) {
 					setMode("purchasing");
 					setCurrentOption(option);
-					setDescription("Processing " + QString::fromStdString(option.name()) + "...");
+					setDescription("Processing " + option.asset().name() + "...");
 					doPurchase(option.optionId(), 10000, _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;
 				}
-				if (option.rate("Call") > 70) {
+				if (option.asset().rate("Call") > 70) {
 					setMode("purchasing");
 					setCurrentOption(option);
-					setDescription("Processing " + QString::fromStdString(option.name()) + "...");
+					setDescription("Processing " + option.asset().name() + "...");
 					doPurchase(option.optionId(), 10000, _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;

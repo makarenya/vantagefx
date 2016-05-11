@@ -79,8 +79,8 @@ namespace vantagefx {
             const QString &money() const;
             void setMoney(int64_t money);
 
-            const model::GwtOptionModel &currentOption() const;
-            void setCurrentOption(const model::GwtOptionModel &option);
+            const model::OptionModel &currentOption() const;
+            void setCurrentOption(const model::OptionModel &option);
 
 			const QString &optionName() const;
 			void setOptionName(const QString &optionName);
@@ -151,7 +151,7 @@ namespace vantagefx {
 			Q_SLOT void purchaseError(std::exception e);
 
 
-			void makePurchases(std::vector<model::GwtOptionModel> &&options);
+			void makePurchases(const QMap<int64_t, model::OptionModel> &options);
 			
 			OptionsListModel _options;
             QString _mode;
@@ -165,7 +165,7 @@ namespace vantagefx {
             QString _fullName;
             QString _money;
 
-			model::GwtOptionModel _currentOption;
+			model::OptionModel _currentOption;
 			int64_t _optionId;
 			QString _optionName;
 			int _optionReturn;
@@ -197,7 +197,7 @@ namespace vantagefx {
 
         inline const QString &MainViewModel::fullName() const { return _fullName; }
 
-		inline const model::GwtOptionModel &MainViewModel::currentOption() const { return _currentOption; }
+		inline const model::OptionModel &MainViewModel::currentOption() const { return _currentOption; }
 
 		inline const QString &MainViewModel::optionName() const { return _optionName; }
 

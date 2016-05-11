@@ -6,7 +6,7 @@
 #define VANTAGEFX_OPTIONSLISTMODEL_H
 
 #include <QtCore>
-#include "../model/GwtOptionModel.h"
+#include "../model/OptionModel.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -68,11 +68,11 @@ namespace vantagefx {
 
             QHash<int, QByteArray> roleNames() const override;
 
-            void updateOptions(const std::vector<model::GwtOptionModel> &options);
+            void updateOptions(const QMap<int64_t, model::OptionModel> &options);
 
         private:
-			static QVector<int> updateOption(OptionListItem &current, model::GwtOptionModel &item, int hi, int lo);
-			static OptionListItem createOption(model::GwtOptionModel &item, std::string lineId, int hi, int lo);
+			static QVector<int> updateOption(OptionListItem &current, model::OptionModel &item);
+			static OptionListItem createOption(model::OptionModel &item, std::string lineId);
             QList<OptionListItem> _items;
         };
     }

@@ -7,7 +7,7 @@
 
 #include <memory>
 #include "src/GwtHttpRequest.h"
-#include "src/model/GwtOptionModel.h"
+#include "src/model/OptionModel.h"
 
 namespace vantagefx {
     namespace model {
