@@ -12,7 +12,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/locale.hpp>
 #include <src/viewmodel/MainViewModel.h>
-#include "src/viewmodel/Controller.h"
+#include "src/viewmodel/VantageFxService.h"
 
 #ifdef WINVER
 #include <shellapi.h>
@@ -102,7 +102,7 @@ int start(int argc, char **argv, fs::path ca_path)
 	engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
 
 	GwtVantageFxBundle bundle;
-	Controller controller(GwtHttpContext(io_service, ctx, bundle));
+	VantageFxService controller(GwtHttpContext(io_service, ctx, bundle));
 	MainViewModel mainViewModel(controller);
 
     engine.rootContext()->setContextProperty("root", &mainViewModel);

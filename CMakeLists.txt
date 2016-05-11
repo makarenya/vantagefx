@@ -97,8 +97,8 @@ set(SOURCE_FILES
         src/http/Url.h
         src/GwtHttpRequest.cpp
         src/GwtHttpRequest.h
-        src/viewmodel/Controller.cpp
-        src/viewmodel/Controller.h
+        src/viewmodel/VantageFxService.cpp
+        src/viewmodel/VantageFxService.h
         src/viewmodel/OptionsListModel.cpp
         src/viewmodel/OptionsListModel.h
         src/model/GwtOptionModel.cpp
@@ -107,7 +107,7 @@ set(SOURCE_FILES
         src/api/GwtHttpRequestContext.h
         src/viewmodel/ComboBoxModel.cpp
         src/viewmodel/ComboBoxModel.h
-        )
+        src/model/VantageFxModel.cpp src/model/VantageFxModel.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

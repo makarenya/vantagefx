@@ -2,94 +2,153 @@
 // Created by alexx on 09.03.2016.
 //
 #include "MainViewModel.h"
-#include <QMessageBox>
 
 namespace vantagefx {
     namespace viewmodel {
 
-        MainViewModel::MainViewModel(Controller &controller)
+        using std::placeholders::_1;
+        using std::placeholders::_2;
+
+        MainViewModel::MainViewModel(VantageFxService &service)
                 : _mode(""),
-                  _login("123301954"),
+			      _description("Loading stuff..."),
+		          _login("123301954"),
                   _password("eNJ0D"),
 				  _loggedIn(false),
-                  _controller(controller),
-                  _refreshTimeout(0)
+                  _service(service),
+                  _refreshTimeout(-1)
         {
-			_controller.load();
-            setDescription("Loading stuff...");
-		
+			qRegisterMetaType<LoadingContextPtr>("LoadingContextPtr");
+			qRegisterMetaType<RefreshContextPtr>("RefreshContextPtr");
+			qRegisterMetaType<AuthContextPtr>("AuthContextPtr");
+			qRegisterMetaType<PurchaseContextPtr>("PurchaseContextPtr");
+			qRegisterMetaType<std::exception>("std::exception");
+
+			connect(this, &MainViewModel::loadedSignal, this, &MainViewModel::loaded);
+			connect(this, &MainViewModel::loadingErrorSignal, this, &MainViewModel::loadingError);
+			connect(this, &MainViewModel::refreshedSignal, this, &MainViewModel::refreshed);
+			connect(this, &MainViewModel::refreshErrorSignal, this, &MainViewModel::refreshError);
+			connect(this, &MainViewModel::authenticatedSignal, this, &MainViewModel::authenticated);
+			connect(this, &MainViewModel::authErrorSignal, this, &MainViewModel::authError);
+			connect(this, &MainViewModel::purchasedSignal, this, &MainViewModel::purchased);
+			connect(this, &MainViewModel::purchaseErrorSignal, this, &MainViewModel::purchaseError);
+
+			doLoad();
+
 			auto timer = new QTimer(this);
 			connect(timer, &QTimer::timeout, this, &MainViewModel::update);
 			timer->start(100);
 		}
 
-        MainViewModel::~MainViewModel() {
+		MainViewModel::~MainViewModel() {}
+
+		void MainViewModel::doLoad()
+        {
+			_service.load(std::bind(&MainViewModel::loadedSignal, this, _1),
+				          std::bind(&MainViewModel::loadingErrorSignal, this, _1));
+		}
+
+		void MainViewModel::loaded(LoadingContextPtr ctx)
+        {
+            _model.setLut(ctx->lut());
+			_servers.setComboList(_model.servers());
+			doRefresh();
         }
 
-        void MainViewModel::update() {
-			if (_mode == "purchasing") {
-				if (_controller.isReady()) {
-					_assetLimits[currentOption().assetId()] = std::chrono::steady_clock::now() + std::chrono::seconds(70);
-					_controller.finish();
-					_refreshTimeout = 49;
-					setMode("view");
-				}
-				if (_controller.isError()) {
-					qDebug(_controller.exception().what());
-					setMode("view");
-					_controller.finish();
-					_refreshTimeout = 49;
-				}
-			}
-			else if (_controller.isError()) {
-				qDebug(_controller.exception().what());
-				setMode("");
-                _controller.finish();
-                _controller.load();
-            }
-			if (_mode.isEmpty()) {
-				if (_controller.isReady()) {
-                    setMode("view");
-                    QStringList servers;
-                    for(auto server : _controller.servers()) {
-                        servers.push_back(server.c_str());
-                    }
-                    _servers.setComboList(servers);
-                    emit serversChanged();
-					setLoggedIn(_controller.isLoggedIn());
-                    setFullName(_controller.fullName().c_str());
-					auto options = std::move(_controller.options());
-					_controller.finish();
-					makePurchases(options);
-                }
-			}
-            if (_mode == "view") {
-                if (_controller.isReady()) {
-					setMoney(_controller.money());
-					auto options = std::move(_controller.options());
-					_controller.finish();
-					makePurchases(options);
-					_refreshTimeout = 0;
-                }
-                if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
-                    _refreshTimeout = -1;
-                    _controller.refresh();
-                }
-            }
+        void MainViewModel::loadingError(std::exception e)
+        {
+			qDebug(e.what());
+			doLoad();
         }
 
-		void MainViewModel::doLogin()
-		{
-            setMode("login");
+		void MainViewModel::doRefresh()
+        {
+			_refreshTimeout = -1;
+			_service.refresh(_model.instrumentTypeId(),
+				             std::bind(&MainViewModel::refreshedSignal, this, _1),
+				             std::bind(&MainViewModel::refreshErrorSignal, this, _1));
+		}
+		
+		void MainViewModel::refreshed(RefreshContextPtr ctx)
+        {
+            if (mode().isEmpty()) setMode("view");
+			_model.updateOptions(ctx->refresh());
+
+			setMoney(_model.currentMoney());
+			makePurchases(_model.options());
+
+			_refreshTimeout = 0;
+		}
+
+        void MainViewModel::refreshError(std::exception e)
+        {
+            qDebug(e.what());
+			doRefresh();
+			_refreshTimeout = 0;
 		}
 
 		void MainViewModel::processLogin()
 		{
 			setMode("");
-            setDescription("Logging in...");
-			while (!_controller.auth(_login.toStdString(), _password.toStdString(), _server.toStdString())) {
-				QCoreApplication::processEvents();
+			setDescription("Logging in...");
+			doAuth(_login, _password, _server);
+		}
+
+		void MainViewModel::doAuth(QString login, QString password, QString server)
+        {
+			_service.auth(login.toStdString(), password.toStdString(), server.toStdString(),
+				          std::bind(&MainViewModel::authenticatedSignal, this, _1),
+				          std::bind(&MainViewModel::authErrorSignal, this, _1));
+		}
+
+		void MainViewModel::authenticated(AuthContextPtr ctx)
+		{
+			_refreshTimeout = 40;
+			_model.setAccount(ctx->auth());
+			setLoggedIn(_model.isLoggedIn());
+			setFullName(_model.userName());
+		}
+
+		void MainViewModel::authError(std::exception e)
+        {
+			qDebug(e.what());
+			setMode("view");
+			_refreshTimeout = 40;
+		}
+
+	    void MainViewModel::doPurchase(int64_t optionId, int64_t money, int positionType)
+        {
+			auto accountId = _model.accountId();
+	        auto assetId = _model.assetId(optionId);
+			auto currentPrice = _model.currentPrice(assetId);
+	        _service.buy(accountId, optionId, assetId, money, currentPrice, positionType,
+				         std::bind(&MainViewModel::purchasedSignal, this, _1),
+				         std::bind(&MainViewModel::purchaseErrorSignal, this, _1));
+        }
+
+		void MainViewModel::purchased(PurchaseContextPtr ctx)
+        {
+			_assetLimits[currentOption().assetId()] = std::chrono::steady_clock::now() + std::chrono::seconds(130);
+			_refreshTimeout = 49;
+			setMode("view");
+		}
+
+		void MainViewModel::purchaseError(std::exception e)
+        {
+			qDebug(e.what());
+			setMode("view");
+			_refreshTimeout = 49;
+		}
+
+        void MainViewModel::update() {
+			if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
+				doRefresh();
 			}
+        }
+
+		void MainViewModel::doLogin()
+		{
+            setMode("login");
 		}
 
         void MainViewModel::cancelLogin()
@@ -99,9 +158,8 @@ namespace vantagefx {
 
         void MainViewModel::view(int64_t optionId)
         {
-			_controller.wait();
             setMode("details");
-            auto info = _controller.optionInfo(optionId);
+            auto info = _model.optionInfo(optionId);
             setCurrentOption(info);
             setOptionName(info.name().c_str());
             setOptionReturn(info.returnValue());
@@ -117,14 +175,14 @@ namespace vantagefx {
         {
 			setMode("");
 			setDescription("Process purchase...");
-			_controller.buy(currentOption().optionId(), 10000, _controller.rateId("Put"));
+			doPurchase(currentOption().optionId(), 10000, _model.rateId("Put"));
 		}
 
         void MainViewModel::buyLow()
         {
 			setMode("");
 			setDescription("Process purchase...");
-			_controller.buy(currentOption().optionId(), 10000, _controller.rateId("Call"));
+			doPurchase(currentOption().optionId(), 10000, _model.rateId("Call"));
 		}
 
         void MainViewModel::setMode(const QString &mode)
@@ -213,12 +271,12 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    void MainViewModel::makePurchases(std::map<int64_t, model::GwtOptionModel> &options)
+	    void MainViewModel::makePurchases(std::vector<model::GwtOptionModel> &&options)
         {
+			if (options.empty()) return;
 			_options.updateOptions(options);
-			if (!_controller.isLoggedIn()) return;
-			for(auto opt: options) {
-				auto option = opt.second;
+			if (!_model.isLoggedIn()) return;
+			for(auto option: options) {
 				if (option.seconds() != 120) continue;
 				auto assetLimit = _assetLimits.find(option.assetId());
 				if (assetLimit != _assetLimits.end() && assetLimit->second > std::chrono::steady_clock::now()) continue;
@@ -226,7 +284,7 @@ namespace vantagefx {
 					setMode("purchasing");
 					setCurrentOption(option);
 					setDescription("Processing " + QString::fromStdString(option.name()) + "...");
-					_controller.buy(option.optionId(), 10000, _controller.rateId("Put"));
+					doPurchase(option.optionId(), 10000, _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;
 				}
@@ -234,7 +292,7 @@ namespace vantagefx {
 					setMode("purchasing");
 					setCurrentOption(option);
 					setDescription("Processing " + QString::fromStdString(option.name()) + "...");
-					_controller.buy(option.optionId(), 10000, _controller.rateId("Call"));
+					doPurchase(option.optionId(), 10000, _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;
 				}

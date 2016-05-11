@@ -131,16 +131,16 @@ namespace vantagefx {
 			return inserted;
         }
 
-        void OptionsListModel::updateOptions(const std::map<int64_t, model::GwtOptionModel> &options)
+        void OptionsListModel::updateOptions(const std::vector<model::GwtOptionModel> &options)
         {
+			if (options.empty()) return;
 			for (auto &current : _items) {
 				current.option30 = -current.option30;
 				current.option60 = -current.option60;
 				current.option120 = -current.option120;
 				current.option300 = -current.option300;
 			}
-			for(auto pair: options) {
-				auto &item = pair.second;
+			for(auto item: options) {
 	            auto added = false;
 	            auto hi = item.rate("Put");
 	            auto lo = item.rate("Call");

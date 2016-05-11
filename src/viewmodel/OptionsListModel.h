@@ -68,7 +68,7 @@ namespace vantagefx {
 
             QHash<int, QByteArray> roleNames() const override;
 
-            void updateOptions(const std::map<int64_t, model::GwtOptionModel> &options);
+            void updateOptions(const std::vector<model::GwtOptionModel> &options);
 
         private:
 			static QVector<int> updateOption(OptionListItem &current, model::GwtOptionModel &item, int hi, int lo);

@@ -8,7 +8,8 @@
 #include <QtCore>
 #include "OptionsListModel.h"
 #include "ComboBoxModel.h"
-#include "Controller.h"
+#include "VantageFxService.h"
+#include "../model/VantageFxModel.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -36,7 +37,7 @@ namespace vantagefx {
 			Q_PROPERTY(QString optionExpire READ optionExpire NOTIFY optionExpireChanged)
 
         public:
-            explicit MainViewModel(Controller &controller);
+            explicit MainViewModel(VantageFxService &servie);
             MainViewModel(const MainViewModel &rhs) = delete;
             MainViewModel &operator=(const MainViewModel &rhs) = delete;
 
@@ -122,9 +123,34 @@ namespace vantagefx {
 
 			void optionExpireChanged();
 
-        private:
+		public:
 
-			void makePurchases(std::map<int64_t, model::GwtOptionModel> &options);
+			void doLoad();
+			Q_SIGNAL void loadedSignal(LoadingContextPtr ctx);
+			Q_SIGNAL void loadingErrorSignal(std::exception e);
+			Q_SLOT void loaded(LoadingContextPtr ctx);
+			Q_SLOT void loadingError(std::exception e);
+
+			void doRefresh();
+			Q_SIGNAL void refreshedSignal(RefreshContextPtr ctx);
+			Q_SIGNAL void refreshErrorSignal(std::exception e);
+			Q_SLOT void refreshed(RefreshContextPtr ctx);
+			Q_SLOT void refreshError(std::exception e);
+
+			void doAuth(QString login, QString password, QString server);
+			Q_SIGNAL void authenticatedSignal(AuthContextPtr ctx);
+			Q_SIGNAL void authErrorSignal(std::exception e);
+			Q_SLOT void authenticated(AuthContextPtr ctx);
+			Q_SLOT void authError(std::exception e);
+
+			void doPurchase(int64_t optionId, int64_t money, int positionType);
+			Q_SIGNAL void purchasedSignal(PurchaseContextPtr ctx);
+			Q_SIGNAL void purchaseErrorSignal(std::exception e);
+			Q_SLOT void purchased(PurchaseContextPtr ctx);
+			Q_SLOT void purchaseError(std::exception e);
+
+
+			void makePurchases(std::vector<model::GwtOptionModel> &&options);
 			
 			OptionsListModel _options;
             QString _mode;
@@ -146,7 +172,8 @@ namespace vantagefx {
 
 			std::map<int, std::chrono::steady_clock::time_point> _assetLimits;
 
-            Controller &_controller;
+			VantageFxService &_service;
+			model::VantageFxModel _model;
             int _refreshTimeout;
         };
 
