@@ -69,7 +69,8 @@ int start(int argc, char **argv, fs::path ca_path)
     using namespace vantagefx::analyzer;
     using namespace vantagefx::viewmodel;
 
-	if (argc >= 2 && (argv[1] == std::string("analyze") || argv[1] == std::string("find") 
+	QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
+	if (argc >= 2 && (argv[1] == std::string("analyze") || argv[1] == std::string("find")
 		|| argv[1] == std::string("values") || argv[1] == std::string("table"))) {
 		return analyze(argc, argv);
 	}

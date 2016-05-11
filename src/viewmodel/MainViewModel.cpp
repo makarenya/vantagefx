@@ -237,14 +237,7 @@ namespace vantagefx {
         }
 
         void MainViewModel::setMoney(int64_t money) {
-	        auto sub = QString::number(money % 100);
-            money /= 100;
-	        auto ones = QString::number(money % 1000);
-            money /= 1000;
-            auto value = "$ " + ((money == 0) ? ones + "." + sub :
-                         QString::number(money) + " " + ones + "." + sub);
-            if (value == _money) return;
-            _money = value;
+			_money = QString("$ %L1").arg(static_cast<double>(money / 100), 0, 'f', 2);
             emit moneyChanged();
         }
 
