@@ -87,7 +87,7 @@ namespace vantagefx {
 				}
 			}
 
-
+			_options.clear();
 			for (auto &opt : refresh->query("options/[optionStatus={0}]", { GwtValue(_openId) })) {
 				auto obj = opt.value.toObject();
 				auto id = obj->value("id").toLong();
