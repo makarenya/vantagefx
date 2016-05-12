@@ -141,8 +141,7 @@ namespace vantagefx {
 		void MainViewModel::purchased(PurchaseContextPtr ctx)
         {
 			using namespace std::chrono;
-			auto timePoint = steady_clock::now() + seconds(ctx->optionSeconds() + 10);
-			_optionsLimit[ctx->optionId()] = timePoint;
+			_model.updatePurchase(ctx->transaction());
 			_refreshTimeout = 49;
 			setMode("view");
 		}
@@ -291,9 +290,8 @@ namespace vantagefx {
 			if (!_model.isLoggedIn()) return;
 			for(auto option: options) {
 				if (_selectedOptions.count(option.optionId()) == 0) continue;
-				auto optionLimit = _optionsLimit.find(option.optionId());
-				if (optionLimit != _optionsLimit.end() && optionLimit->second > std::chrono::steady_clock::now()) continue;
-				int threshold = _options.threshold(option.asset().id());
+				if (option.isDelayed()) continue;
+				auto threshold = _options.threshold(option.asset().id());
 				if (std::abs(threshold) < 50) threshold = 71;
 
 				if (option.asset().rate("Put") >= std::abs(threshold)) {

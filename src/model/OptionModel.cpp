@@ -44,5 +44,15 @@ namespace vantagefx {
         void OptionModel::setClose(int64_t close) {
             _close = close;
         }
-    }
+
+		void OptionModel::updateDelay(int delay)
+		{
+			_delay = QDateTime::currentDateTime().addSecs(seconds() + delay);
+		}
+
+		bool OptionModel::isDelayed() const
+		{
+			return QDateTime::currentDateTime() < _delay;
+		}
+	}
 }

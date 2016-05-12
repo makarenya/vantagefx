@@ -15,7 +15,10 @@ namespace vantagefx {
 
         class VantageFxModel {
         public:
-            void setLut(api::GwtObjectPtr lut);
+
+			VantageFxModel();
+			
+			void setLut(api::GwtObjectPtr lut);
             int instrumentTypeId() const;
 			const QStringList &servers() const;
             int rateId(QString name);
@@ -29,7 +32,7 @@ namespace vantagefx {
 			const QMap<int64_t, OptionModel> &options() const;
 			OptionModel optionInfo(int64_t optionId) const;
 			int64_t currentMoney() const;
-
+	        void updatePurchase(api::GwtObjectPtr transaction);
         private:
 
 			int _openId;
@@ -37,6 +40,7 @@ namespace vantagefx {
 			QStringList _servers;
 			QMap<QString, int> _rates;
 			QMap<int, AssetModel> _assets;
+			QMap<int64_t, int64_t> _transactions;
 
 			int64_t _accountId;
 			QString _userName;

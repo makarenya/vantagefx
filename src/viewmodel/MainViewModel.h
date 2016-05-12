@@ -171,8 +171,6 @@ namespace vantagefx {
 			int _optionReturn;
 			QString _optionExpire;
 
-			std::map<int64_t, std::chrono::steady_clock::time_point> _optionsLimit;
-
 			VantageFxService &_service;
 			model::VantageFxModel _model;
             int _refreshTimeout;

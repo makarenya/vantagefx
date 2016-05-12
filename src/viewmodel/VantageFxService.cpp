@@ -224,9 +224,7 @@ namespace vantagefx {
                 _error(*e);
                 return;
             }
-			_optionId = data->item("option/id").toLong();
-			_optionSeconds = data->item("option/optionSeconds").toInt();
-            _transactionId = data->value("transactionId").toLong();
+			_transaction = std::move(data);
             _handler(self);
         }
 

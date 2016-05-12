@@ -48,6 +48,10 @@ namespace vantagefx {
 
             void setClose(int64_t close);
 
+			void updateDelay(int delay);
+
+			bool isDelayed() const;
+
         private:
             int64_t _optionId;
 			AssetModel *_asset;
@@ -56,12 +60,12 @@ namespace vantagefx {
 			int _returnValue;
             double _price;
             int64_t _close;
+			QDateTime _delay;
         };
 
         inline int64_t OptionModel::close() const { return _close; }
 
-
-        inline double OptionModel::price() const { return _price; }
+	    inline double OptionModel::price() const { return _price; }
 
         inline int OptionModel::seconds() const { return _seconds; }
 

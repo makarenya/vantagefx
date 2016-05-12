@@ -10,7 +10,14 @@ namespace vantagefx {
     namespace model {
         using namespace api;
 
-        void VantageFxModel::setLut(api::GwtObjectPtr lut) {
+	    VantageFxModel::VantageFxModel()
+				: _openId(0),
+	              _instrumentTypeId(0),
+	              _accountId(0),
+	              _currentMoney(0)
+	    {}
+
+	    void VantageFxModel::setLut(api::GwtObjectPtr lut) {
 			for (auto &rate : lut->query("lutTypes/[name='PositionType']/luts/*")) {
 				auto rateLut = rate.value.toObject();
 				_rates[QString::fromStdString(rateLut->value("name").toString())] = rateLut->value("id").toInt();
@@ -87,20 +94,26 @@ namespace vantagefx {
 				}
 			}
 
-			_options.clear();
+			QSet<int64_t> old;
+			for (auto it = _options.begin(); it != _options.end(); ++it) {
+				old.insert(it.key());
+			}
 			for (auto &opt : refresh->query("options/[optionStatus={0}]", { GwtValue(_openId) })) {
 				auto obj = opt.value.toObject();
 				auto id = obj->value("id").toLong();
-				auto &model = _options[id];
 				auto asset = obj->value("assetId");
 				if (!_assets.contains(asset.toInt())) continue;
-
+				old.remove(id);
+				auto &model = _options[id];
 				model.setOptionId(id);
 				model.setAsset(&_assets[asset.toInt()]);
 				model.setMoneyBack(obj->value("return").toInt());
 				model.setSeconds(obj->value("optionSeconds").toInt());
 				model.setReturnValue(obj->value("return").toInt());
 				model.setClose(obj->item("closeDate/value").toLong());
+			}
+			for(auto id : old) {
+				_options.remove(id);
 			}
 		}
 
@@ -137,6 +150,14 @@ namespace vantagefx {
 	    int64_t VantageFxModel::currentMoney() const
 	    {
 			return _currentMoney;
+		}
+
+	    void VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
+        {
+			using namespace std::chrono;
+			auto optionId = transaction->item("option/id").toLong();
+			auto transactionId = transaction->value("transactionId").toLong();
+			_options[optionId].updateDelay(10);
 		}
     }
 }

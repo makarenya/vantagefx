@@ -118,15 +118,11 @@ namespace vantagefx {
 			void send(int64_t accountId, int64_t optionId, int assetId, int64_t money, 
 				      double price, int positionType);
 
-			int64_t optionId() const { return _optionId; }
-			int optionSeconds() const { return _optionSeconds; }
-			int64_t transactionId() const { return _transactionId; }
+			api::GwtObjectPtr transaction() const { return _transaction; }
 
         private:
 
-			int64_t _optionId;
-			int _optionSeconds;
-			int64_t _transactionId;
+			api::GwtObjectPtr _transaction;
 			
 			void positionOpened(api::GwtObjectPtr &&data, const boost::optional<std::exception> &e);
 
