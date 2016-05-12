@@ -293,20 +293,22 @@ namespace vantagefx {
 				if (_selectedOptions.count(option.optionId()) == 0) continue;
 				auto optionLimit = _optionsLimit.find(option.optionId());
 				if (optionLimit != _optionsLimit.end() && optionLimit->second > std::chrono::steady_clock::now()) continue;
+				int threshold = _options.threshold(option.asset().id());
+				if (std::abs(threshold) < 50) threshold = 71;
 
-				if (option.asset().rate("Put") > 70) {
+				if (option.asset().rate("Put") >= std::abs(threshold)) {
 					setMode("purchasing");
 					setCurrentOption(option);
 					setDescription("Processing " + option.asset().name() + "...");
-					doPurchase(option.optionId(), 10000, _model.rateId("Put"));
+					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;
 				}
-				if (option.asset().rate("Call") > 70) {
+				if (option.asset().rate("Call") >= std::abs(threshold)) {
 					setMode("purchasing");
 					setCurrentOption(option);
 					setDescription("Processing " + option.asset().name() + "...");
-					doPurchase(option.optionId(), 10000, _model.rateId("Call"));
+					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;
 				}

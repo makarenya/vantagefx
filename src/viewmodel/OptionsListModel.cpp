@@ -29,6 +29,7 @@ namespace vantagefx {
             roles[Option60Role] = "option_60";
             roles[Option120Role] = "option_120";
             roles[Option300Role] = "option_300";
+            roles[ThresholdRole] = "threshold";
             return roles;
         }
 
@@ -61,9 +62,20 @@ namespace vantagefx {
                     return option.option120;
                 case Option300Role:
                     return option.option300;
+                case ThresholdRole:
+                    return option.threshold;
                 default:
                     return QVariant();
             }
+        }
+
+        bool OptionsListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+        {
+            if (!index.isValid()) return false;
+            if (index.row() > _items.size()) return false;
+            if (role != ThresholdRole) return false;
+            _items[index.row()].threshold = value.toInt();
+            return true;
         }
 
         int OptionsListModel::rowCount(const QModelIndex &parent) const
@@ -206,6 +218,13 @@ namespace vantagefx {
                     dataChanged(index(i, 0), index(i, 0), roles);
                 }
             }
+        }
+
+        int OptionsListModel::threshold(int assetId) {
+            for(auto item : _items) {
+                if (item.assetId == assetId) return item.threshold;
+            }
+            return 0;
         }
     }
 }

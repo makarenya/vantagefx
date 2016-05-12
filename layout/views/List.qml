@@ -99,8 +99,18 @@ Rectangle {
                     color: "#ff0000"
                 }
 
-                Button {
+                TextField {
+                    id: threshold
                     x: 320
+                    y: 0
+                    width: 50
+                    height: 22
+                    text: model.threshold
+                }
+                Binding { target: model; property: "threshold"; value: threshold.text }
+
+                Button {
+                    x: 380
                     y: 0
                     width: 50
                     height: 22
@@ -111,7 +121,7 @@ Rectangle {
                 }
 
                 Button {
-                    x: 380
+                    x: 440
                     y: 0
                     width: 50
                     height: 22
@@ -122,7 +132,7 @@ Rectangle {
                 }
 
                 Button {
-                    x: 440
+                    x: 500
                     y: 0
                     width: 50
                     height: 22
@@ -133,7 +143,7 @@ Rectangle {
                 }
 
                 Button {
-                    x: 500
+                    x: 560
                     y: 0
                     width: 50
                     height: 22
