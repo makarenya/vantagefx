@@ -41,12 +41,8 @@ set(SOURCE_FILES
         src/main.cpp
         src/model/MainModel.cpp
         src/model/MainModel.h
-        src/model/PersonModel.cpp
-        src/model/PersonModel.h
         src/viewmodel/MainViewModel.cpp
         src/viewmodel/MainViewModel.h
-        src/viewmodel/PersonViewModel.cpp
-        src/viewmodel/PersonViewModel.h
         src/api/GwtRpcResponse.cpp
         src/api/GwtRpcResponse.h
         src/api/GwtResponseData.h
