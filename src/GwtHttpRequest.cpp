@@ -23,7 +23,9 @@ namespace vantagefx {
 		send(std::move(request), [this, handler](http::HttpResponse &&response, const error_code &ec)
 		{
 			if (ec) {
-				handler(api::GwtObjectPtr(), boost::system::system_error(ec));
+				std::stringstream stream;
+				stream << ec;
+				handler(api::GwtObjectPtr(), boost::system::system_error(ec, stream.str()));
 				return;
 			}
 			if (!boost::algorithm::starts_with(response.body(), "//OK[")) {
