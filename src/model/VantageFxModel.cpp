@@ -154,7 +154,6 @@ namespace vantagefx {
 
 	    void VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
         {
-			using namespace std::chrono;
 			auto optionId = transaction->item("option/id").toLong();
 			auto transactionId = transaction->value("transactionId").toLong();
 			_options[optionId].updateDelay(10);
