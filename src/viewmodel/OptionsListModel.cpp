@@ -30,7 +30,11 @@ namespace vantagefx {
             roles[Option120Role] = "option_120";
             roles[Option300Role] = "option_300";
             roles[ThresholdRole] = "threshold";
-            return roles;
+			roles[Color30Role] = "color_30";
+			roles[Color60Role] = "color_60";
+			roles[Color120Role] = "color_120";
+			roles[Color300Role] = "color_300";
+			return roles;
         }
 
         QVariant OptionsListModel::data(const QModelIndex &index, int role) const
@@ -64,7 +68,15 @@ namespace vantagefx {
                     return option.option300;
                 case ThresholdRole:
                     return option.threshold;
-                default:
+				case Color30Role:
+					return option.color30;
+				case Color60Role:
+					return option.color60;
+				case Color120Role:
+					return option.color120;
+				case Color300Role:
+					return option.color300;
+				default:
                     return QVariant();
             }
         }
@@ -113,18 +125,26 @@ namespace vantagefx {
 			if (item.seconds() == 30) {
 				if (item.optionId() != -current.option30) roles.push_back(Option30Role);
 				current.option30 = item.optionId();
+				if (color(item) != current.color30) roles.push_back(Color30Role);
+				current.color30 = color(item);
 			}
 			if (item.seconds() == 60) {
 				if (item.optionId() != -current.option60) roles.push_back(Option60Role);
 				current.option60 = item.optionId();
+				if (color(item) != current.color60) roles.push_back(Color60Role);
+				current.color60 = color(item);
 			}
 			if (item.seconds() == 120) {
 				if (item.optionId() != -current.option120) roles.push_back(Option120Role);
 				current.option120 = item.optionId();
+				if (color(item) != current.color120) roles.push_back(Color120Role);
+				current.color120 = color(item);
 			}
 			if (item.seconds() == 300) {
 				if (item.optionId() != -current.option300) roles.push_back(Option300Role);
 				current.option300 = item.optionId();
+				if (color(item) != current.color300) roles.push_back(Color300Role);
+				current.color300 = color(item);
 			}
 			return roles;
         }
@@ -139,10 +159,22 @@ namespace vantagefx {
 			inserted.rateLow = item.asset().rate("Call");
 			inserted.rateHi = item.asset().rate("Put");
 			inserted.price = item.price();
-			if (item.seconds() == 30) inserted.option30 = item.optionId();
-			if (item.seconds() == 60) inserted.option60 = item.optionId();
-			if (item.seconds() == 120) inserted.option120 = item.optionId();
-			if (item.seconds() == 300) inserted.option300 = item.optionId();
+			if (item.seconds() == 30) {
+				inserted.option30 = item.optionId();
+				inserted.color30 = color(item);
+			}
+			if (item.seconds() == 60) {
+				inserted.option60 = item.optionId();
+				inserted.color60 = color(item);
+			}
+			if (item.seconds() == 120) {
+				inserted.option120 = item.optionId();
+				inserted.color120 = color(item);
+			}
+			if (item.seconds() == 300) {
+				inserted.option300 = item.optionId();
+				inserted.color300 = color(item);
+			}
 			return inserted;
         }
 
@@ -225,6 +257,24 @@ namespace vantagefx {
                 if (item.assetId == assetId) return item.threshold;
             }
             return 0;
+        }
+
+	    QString OptionsListModel::color(model::OptionModel& option)
+        {
+	        switch(option.status()) {
+			case model::OptionModel::Idle:
+				return "#FFFFFF";
+		    case model::OptionModel::Selected:
+				return "#0000FF";
+		    case model::OptionModel::Processing:
+				return "#000000";
+			case model::OptionModel::Successful:
+				return "#00FF00";
+			case model::OptionModel::Failed:
+				return "#FF0000";
+			default:
+				return "#FFFF00";
+			}
         }
     }
 }

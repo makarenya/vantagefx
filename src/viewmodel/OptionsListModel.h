@@ -42,7 +42,11 @@ namespace vantagefx {
 			int64_t option300;
 
 			int threshold;
-        };
+			QString color30;
+			QString color60;
+			QString color120;
+			QString color300;
+		};
 
         class OptionsListModel : public QAbstractListModel
         {
@@ -61,7 +65,11 @@ namespace vantagefx {
                 Option60Role,
                 Option120Role,
                 Option300Role,
-				ThresholdRole
+				ThresholdRole,
+				Color30Role,
+				Color60Role,
+				Color120Role,
+				Color300Role
             };
 
 	        explicit OptionsListModel(QObject *parent = 0);
@@ -69,7 +77,7 @@ namespace vantagefx {
 			Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
 			Q_INVOKABLE QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-			Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+			Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
             QHash<int, QByteArray> roleNames() const override;
 
@@ -78,6 +86,7 @@ namespace vantagefx {
 			int threshold(int assetId);
 
         private:
+	        static QString color(model::OptionModel &option);
 			static QVector<int> updateOption(OptionListItem &current, model::OptionModel &item);
 			static OptionListItem createOption(model::OptionModel &item, std::string lineId);
             QList<OptionListItem> _items;

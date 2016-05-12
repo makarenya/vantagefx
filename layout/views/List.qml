@@ -116,30 +116,43 @@ Rectangle {
                     height: 22
                     visible: model.option_30 > 0
                     text: "30"
-                    checkable: true
                     onClicked: root.selectOption(model.option_30, 30, checked)
                 }
 
-                Button {
+                Rectangle {
                     x: 440
+                    y: 4
+                    width: 14
+                    height: 14
+                    border {
+                        width: 1
+                        color: "#000000"
+                    }
+                    visible: model.option_30 > 0
+                    color: model.color_30
+                }
+
+                Button {
+                    x: 470
                     y: 0
                     width: 50
                     height: 22
                     visible: model.option_60 > 0
                     text: "60"
-                    checkable: true
                     onClicked: root.selectOption(model.option_60, 60, checked)
                 }
 
-                Button {
-                    x: 500
-                    y: 0
-                    width: 50
-                    height: 22
-                    visible: model.option_120 > 0
-                    text: "2m"
-                    checkable: true
-                    onClicked: root.selectOption(model.option_120, 120, checked)
+                Rectangle {
+                    x: 530
+                    y: 4
+                    width: 14
+                    height: 14
+                    border {
+                        width: 1
+                        color: "#000000"
+                    }
+                    visible: model.option_60 > 0
+                    color: model.color_60
                 }
 
                 Button {
@@ -147,10 +160,45 @@ Rectangle {
                     y: 0
                     width: 50
                     height: 22
+                    visible: model.option_120 > 0
+                    text: "2m"
+                    onClicked: root.selectOption(model.option_120, 120, checked)
+                }
+
+                Rectangle {
+                    x: 620
+                    y: 4
+                    width: 14
+                    height: 14
+                    border {
+                        width: 1
+                        color: "#000000"
+                    }
+                    visible: model.option_120 > 0
+                    color: model.color_120
+                }
+
+                Button {
+                    x: 650
+                    y: 0
+                    width: 50
+                    height: 22
                     visible: model.option_300 > 0
                     text: "5m"
-                    checkable: true
                     onClicked: root.selectOption(model.option_300, 300, checked)
+                }
+
+                Rectangle {
+                    x: 710
+                    y: 4
+                    width: 14
+                    height: 14
+                    border {
+                        width: 1
+                        color: "#000000"
+                    }
+                    visible: model.option_300 > 0
+                    color: model.color_300
                 }
             }
         }

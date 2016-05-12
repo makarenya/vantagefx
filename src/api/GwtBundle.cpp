@@ -663,7 +663,7 @@ namespace vantagefx {
                 fstr("serialuid"),//2 [rO0ABXcEAAAAAA==]
                 flng("accountId"),//ISw
                 fint("some_2"),//0
-                flng("some_3"),//Po
+                flng("bet"),//Po
                 flng("some_4"),//A
                 fdbl("some_5"),//0.000000e+00
                 fint("some_6"),//0

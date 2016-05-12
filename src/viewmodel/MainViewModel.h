@@ -174,8 +174,6 @@ namespace vantagefx {
 			VantageFxService &_service;
 			model::VantageFxModel _model;
             int _refreshTimeout;
-
-			std::set<int64_t> _selectedOptions;
         };
 
 

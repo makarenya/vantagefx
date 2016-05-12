@@ -107,7 +107,15 @@ set(SOURCE_FILES
         src/api/GwtHttpRequestContext.h
         src/viewmodel/ComboBoxModel.cpp
         src/viewmodel/ComboBoxModel.h
-        src/model/VantageFxModel.cpp src/model/VantageFxModel.h src/model/AssetModel.cpp src/model/AssetModel.h src/model/CurrentSettings.cpp src/model/CurrentSettings.h)
+        src/model/VantageFxModel.cpp
+		src/model/VantageFxModel.h
+		src/model/AssetModel.cpp
+		src/model/AssetModel.h
+		src/model/CurrentSettings.cpp
+		src/model/CurrentSettings.h
+		src/model/TransactionModel.cpp
+		src/model/TransactionModel.h
+		)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

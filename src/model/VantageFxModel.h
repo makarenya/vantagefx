@@ -9,6 +9,7 @@
 #include "../api/GwtObject.h"
 #include "OptionModel.h"
 #include "AssetModel.h"
+#include "TransactionModel.h"
 
 namespace vantagefx {
     namespace model {
@@ -30,22 +31,24 @@ namespace vantagefx {
 
 			void updateOptions(api::GwtObjectPtr refresh);
 			const QMap<int64_t, OptionModel> &options() const;
-			OptionModel optionInfo(int64_t optionId) const;
+			OptionModel &optionInfo(int64_t optionId);
 			int64_t currentMoney() const;
 	        void updatePurchase(api::GwtObjectPtr transaction);
         private:
 
 			int _openId;
+            int _positionClosed;
 			int _instrumentTypeId;
 			QStringList _servers;
 			QMap<QString, int> _rates;
 			QMap<int, AssetModel> _assets;
-			QMap<int64_t, int64_t> _transactions;
 
 			int64_t _accountId;
 			QString _userName;
 
 			QMap<int64_t, OptionModel> _options;
+			QMap<int64_t, TransactionModel> _openedTransactions;
+
 			int64_t _currentMoney;
         };
     }

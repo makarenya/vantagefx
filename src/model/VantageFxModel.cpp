@@ -23,6 +23,7 @@ namespace vantagefx {
 				_rates[QString::fromStdString(rateLut->value("name").toString())] = rateLut->value("id").toInt();
 			}
 			auto typeSuper = lut->item("lutTypes/[name='InstrumentTypeSuper']/luts/[name='ShortTerm']/id");
+			_positionClosed = lut->item("lutTypes/[name='PositionStatus']/luts/[name='Closed']/id").toInt();
 			_instrumentTypeId = lut->item("superRels/[instrumentTypeSuperId={0}]/instrumentTypeId", { typeSuper }).toInt();
 
 			_openId = lut->item("lutTypes/[name='OptionStatus']/luts/[name='Open']/id").toInt();
@@ -115,13 +116,26 @@ namespace vantagefx {
 			for(auto id : old) {
 				_options.remove(id);
 			}
+
+			for(auto &pos : refresh->query("positionUpdates/[positionStatus={0}]", { GwtValue(_positionClosed) })) {
+				auto obj = pos.value.toObject();
+				auto id = obj->value("transactionId").toLong();
+				auto returned = obj->value("returned").toLong();
+				if (!_openedTransactions.contains(id)) continue;
+				auto &transaction = _openedTransactions[id];
+                transaction.setReturned(returned);
+                if (_options.contains(transaction.optionId())) {
+                    auto &option = _options[transaction.optionId()];
+                    option.closePosition(returned);
+                }
+			}
 		}
 
 		const QMap<int64_t, OptionModel> &VantageFxModel::options() const {
 			return _options;
         }
 
-	    OptionModel VantageFxModel::optionInfo(int64_t optionId) const
+	    OptionModel &VantageFxModel::optionInfo(int64_t optionId)
 	    {
 			return _options[optionId];
 		}
@@ -156,7 +170,16 @@ namespace vantagefx {
         {
 			auto optionId = transaction->item("option/id").toLong();
 			auto transactionId = transaction->value("transactionId").toLong();
-			_options[optionId].updateDelay(10);
+			auto bet = transaction->value("bet").toLong();
+			auto &option = _options[optionId];
+			auto expiryDate = QDateTime::currentDateTime().addSecs(option.seconds() + 15);
+			option.updateDelay(expiryDate.addSecs(10));
+			option.bet(bet);
+			auto &item = _openedTransactions[transactionId];
+			item.setTransactionId(transactionId);
+			item.setOptionId(optionId);
+			item.setExpiryDate(expiryDate);
+			item.setAsset(_options[optionId].asset());
 		}
     }
 }

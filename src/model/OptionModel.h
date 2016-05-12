@@ -18,6 +18,15 @@ namespace vantagefx {
         {
         public:
 
+			enum OptionStatus {
+				Idle,
+				Selected,
+				Processing,
+				Successful,
+				Failed,
+				Returned
+			};
+
 			OptionModel();
 
 			int64_t optionId() const;
@@ -48,9 +57,19 @@ namespace vantagefx {
 
             void setClose(int64_t close);
 
-			void updateDelay(int delay);
+			void updateDelay(const QDateTime &delay);
 
 			bool isDelayed() const;
+
+			void closePosition(int64_t returned);
+
+			OptionStatus status() const;
+
+            void setChecked(bool checked);
+
+            bool checked() const;
+
+			void bet(int64_t money);
 
         private:
             int64_t _optionId;
@@ -61,6 +80,9 @@ namespace vantagefx {
             double _price;
             int64_t _close;
 			QDateTime _delay;
+            bool _checked;
+			OptionStatus _result;
+			int64_t _bet;
         };
 
         inline int64_t OptionModel::close() const { return _close; }
@@ -76,6 +98,8 @@ namespace vantagefx {
         inline AssetModel &OptionModel::asset() const { return *_asset; }
 
         inline int64_t OptionModel::optionId() const { return _optionId; }
+
+        inline bool OptionModel::checked() const { return _checked; }
     }
 }
 

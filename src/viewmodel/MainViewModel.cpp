@@ -140,17 +140,16 @@ namespace vantagefx {
 
 		void MainViewModel::purchased(PurchaseContextPtr ctx)
         {
-			using namespace std::chrono;
 			_model.updatePurchase(ctx->transaction());
-			_refreshTimeout = 49;
-			setMode("view");
+			_options.updateOptions(_model.options());
+			_refreshTimeout = 20;
 		}
 
 		void MainViewModel::purchaseError(std::exception e)
         {
 			qDebug(e.what());
 			setMode("view");
-			_refreshTimeout = 49;
+			_refreshTimeout = 20;
 		}
 
         void MainViewModel::update() {
@@ -200,8 +199,9 @@ namespace vantagefx {
 
 	    void MainViewModel::selectOption(int64_t optionId, int seconds, bool checked)
         {
-			if (checked) _selectedOptions.insert(optionId);
-			else _selectedOptions.erase(optionId);
+			auto &option = _model.optionInfo(optionId);
+			option.setChecked(!option.checked());
+			_options.updateOptions(_model.options());
         }
 
 	    void MainViewModel::setMode(const QString &mode)
@@ -289,23 +289,17 @@ namespace vantagefx {
 			_options.updateOptions(options);
 			if (!_model.isLoggedIn()) return;
 			for(auto option: options) {
-				if (_selectedOptions.count(option.optionId()) == 0) continue;
+				if (!option.checked()) continue;
 				if (option.isDelayed()) continue;
 				auto threshold = _options.threshold(option.asset().id());
 				if (std::abs(threshold) < 50) threshold = 71;
 
 				if (option.asset().rate("Put") >= std::abs(threshold)) {
-					setMode("purchasing");
-					setCurrentOption(option);
-					setDescription("Processing " + option.asset().name() + "...");
 					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;
 				}
 				if (option.asset().rate("Call") >= std::abs(threshold)) {
-					setMode("purchasing");
-					setCurrentOption(option);
-					setDescription("Processing " + option.asset().name() + "...");
 					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;
