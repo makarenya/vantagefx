@@ -11,7 +11,8 @@ namespace vantagefx {
         using namespace api;
 
 	    VantageFxModel::VantageFxModel()
-				: _openId(0),
+				: _openId(0), 
+			      _positionClosed(0),
 	              _instrumentTypeId(0),
 	              _accountId(0),
 	              _currentMoney(0)
@@ -111,7 +112,6 @@ namespace vantagefx {
 				model.setMoneyBack(obj->value("return").toInt());
 				model.setSeconds(obj->value("optionSeconds").toInt());
 				model.setReturnValue(obj->value("return").toInt());
-				model.setClose(obj->item("closeDate/value").toLong());
 			}
 			for(auto id : old) {
 				_options.remove(id);
@@ -122,12 +122,16 @@ namespace vantagefx {
 				auto id = obj->value("transactionId").toLong();
 				auto returned = obj->value("returned").toLong();
 				if (!_openedTransactions.contains(id)) continue;
-				auto &transaction = _openedTransactions[id];
-                transaction.setReturned(returned);
-                if (_options.contains(transaction.optionId())) {
+				auto transaction = std::move(_openedTransactions[id]);
+                transaction.close(returned);
+				_openedTransactions.remove(id);
+				if (_options.contains(transaction.optionId())) {
                     auto &option = _options[transaction.optionId()];
-                    option.closePosition(returned);
+					if (transaction.isWon()) option.closeSuccess();
+					else if (transaction.isLoose()) option.closeFail();
+					else option.closeReturn();
                 }
+				_closedTransactions.push_back(std::move(transaction));
 			}
 		}
 
@@ -173,13 +177,82 @@ namespace vantagefx {
 			auto bet = transaction->value("bet").toLong();
 			auto &option = _options[optionId];
 			auto expiryDate = QDateTime::currentDateTime().addSecs(option.seconds() + 15);
-			option.updateDelay(expiryDate.addSecs(10));
-			option.bet(bet);
 			auto &item = _openedTransactions[transactionId];
 			item.setTransactionId(transactionId);
+			item.setBet(bet);
 			item.setOptionId(optionId);
 			item.setExpiryDate(expiryDate);
 			item.setAsset(_options[optionId].asset());
+			item.setOptionSeconds(option.seconds());
+			option.openTransaction();
+		}
+
+		struct HourInfo
+	    {
+			int wins;
+			int fails;
+			int draws;
+
+			HourInfo()
+				: wins(0), 
+				  fails(0), 
+				  draws(0) { }
+	    };
+
+	    void VantageFxModel::flushTransactions()
+	    {
+			QMap<QString, QList<HourInfo>> info;
+			for(auto &transaction :_closedTransactions) {
+				auto &name = transaction.asset().name();
+				if (!info.contains(name)) {
+					info[name] = QList<HourInfo>({ HourInfo(), HourInfo(), HourInfo(), HourInfo(), HourInfo() });
+				}
+				auto index = 0;
+				switch(transaction.optionSeconds()) {
+					case 60: index = 1; break;
+					case 120: index = 2; break;
+					case 300: index = 3; break;
+					default: break;
+				}
+				if (transaction.isWon()) {
+					info[name][index].wins++;
+					info[name][4].wins++;
+				}
+				else if (transaction.isLoose()) {
+					info[name][index].fails++;
+					info[name][4].fails++;
+				}
+				else {
+					info[name][index].draws++;
+					info[name][4].draws++;
+				}
+		    }
+			_closedTransactions.clear();
+
+			auto docs = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+			auto statistics = QDir(docs.filePath("vantagefx"));
+			if (!statistics.exists()) statistics.mkdir(statistics.path());
+
+			for(auto it = info.begin(); it != info.end(); ++it) {
+				QFile file(statistics.filePath(it.key() + ".csv"));
+				file.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text);
+				QTextStream stream(&file);
+				if (file.size() == 0) {
+					stream << "Hour;30s;60s;2m;5m;Total" << endl;
+				}
+				auto now = QDateTime::currentDateTime().addSecs(-1000);
+				auto date = QString("%1-%2 %3")
+					.arg(now.date().month(), 2, 10, QChar('0'))
+					.arg(now.date().day(), 2, 10, QChar('0'))
+					.arg(now.time().hour(), 2, 10, QChar('0'));
+				stream << date;
+				for(auto item : it.value()) {
+					stream << ";";
+					if (item.wins != 0 || item.fails != 0 || item.draws != 0) {
+						stream << item.wins << ":" << item.fails << ":" << item.draws;
+					}
+				}
+			}
 		}
     }
 }

@@ -90,6 +90,12 @@ namespace vantagefx {
             return true;
         }
 
+		void OptionsListModel::select(long long optionId)
+		{
+			
+			qDebug() << "selected " << optionId;
+		}
+
         int OptionsListModel::rowCount(const QModelIndex &parent) const
         {
             auto cnt = _items.size();
@@ -107,15 +113,12 @@ namespace vantagefx {
 				current.moneyBack = item.moneyBack();
 				roles.push_back(MoneyBackRole);
 			}
-			auto lo = item.asset().rate("Call");
-			auto hi = item.asset().rate("Put");
-
-			if (lo != current.rateLow) {
-				current.rateLow = lo;
+			if (item.lowRateValue() != current.rateLow) {
+				current.rateLow = item.lowRateValue();
 				roles.push_back(RateLowRole);
 			}
-			if (hi != current.rateHi) {
-				current.rateHi = hi;
+			if (item.highRateValue() != current.rateHi) {
+				current.rateHi = item.highRateValue();
 				roles.push_back(RateHiRole);
 			}
 			if (item.price() != current.price) {
@@ -156,8 +159,8 @@ namespace vantagefx {
 			inserted.assetId = item.asset().id();
 			inserted.name = item.asset().name();
 			inserted.moneyBack = item.moneyBack();
-			inserted.rateLow = item.asset().rate("Call");
-			inserted.rateHi = item.asset().rate("Put");
+			inserted.rateLow = item.lowRateValue();
+			inserted.rateHi = item.highRateValue();
 			inserted.price = item.price();
 			if (item.seconds() == 30) {
 				inserted.option30 = item.optionId();
@@ -265,7 +268,7 @@ namespace vantagefx {
 			case model::OptionModel::Idle:
 				return "#FFFFFF";
 		    case model::OptionModel::Selected:
-				return "#0000FF";
+				return "#1882d7";
 		    case model::OptionModel::Processing:
 				return "#000000";
 			case model::OptionModel::Successful:

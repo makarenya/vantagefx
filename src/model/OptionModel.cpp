@@ -3,6 +3,7 @@
 //
 
 #include "OptionModel.h"
+#include "TransactionModel.h"
 
 namespace vantagefx {
     namespace model {
@@ -14,13 +15,22 @@ namespace vantagefx {
 	              _seconds(0),
 			      _returnValue(0),
 	              _price(0),
-	              _close(0),
-			      _checked(false),
-			      _result(Processing), 
-			      _bet(0)
+			      _checked(false), 
+			      _status(Idle),
+			      _openTime()
 			{}
 
-		void OptionModel::setOptionId(int64_t optionId)
+	    int OptionModel::lowRateValue() const
+	    {
+			return asset().rateValue("Call");
+		}
+
+	    int OptionModel::highRateValue() const
+	    {
+			return asset().rateValue("Put");
+		}
+
+	    void OptionModel::setOptionId(int64_t optionId)
 		{
             _optionId = optionId;
         }
@@ -50,43 +60,46 @@ namespace vantagefx {
             _price = price;
         }
 
-        void OptionModel::setClose(int64_t close)
+        void OptionModel::setClose(QDateTime close)
 		{
             _close = close;
         }
 
-		void OptionModel::updateDelay(const QDateTime &delay)
+		void OptionModel::setChecked(bool checked)
 		{
-			_delay = delay;
+			_checked = checked;
 		}
 
-		bool OptionModel::isDelayed() const
-		{
-			return QDateTime::currentDateTime() < _delay;
-		}
-
-		void OptionModel::closePosition(int64_t returned) 
-		{
-			if (returned == _bet) _result = Returned;
-			else if (returned > _bet) _result = Successful;
-			else _result = Failed;
-		}
-
-        void OptionModel::setChecked(bool checked)
-		{
-            _checked = checked;
-        }
-
-	    void OptionModel::bet(int64_t money)
+		void OptionModel::openTransaction()
 	    {
-			_bet = money;
-			_result = Processing;
+			_status = Processing;
+			_openTime = QDateTime::currentDateTime().addSecs(seconds() + 10);
 	    }
+
+	    void OptionModel::closeSuccess()
+	    {
+			_status = Successful;
+			_openTime = QDateTime::currentDateTime().addSecs(10);
+	    }
+
+	    void OptionModel::closeFail()
+	    {
+			_status = Failed;
+			_openTime = QDateTime::currentDateTime().addSecs(10);
+		}
+
+	    void OptionModel::closeReturn()
+	    {
+			_status = Returned;
+			_openTime = QDateTime::currentDateTime().addSecs(10);
+		}
 
 	    OptionModel::OptionStatus OptionModel::status() const
 	    {
-			if (isDelayed()) return _result;
-			return _checked ? Selected : Idle;
+			if (_openTime <= QDateTime::currentDateTime()) {
+				return checked() ? Selected : Idle;
+			}
+			return _status;
 	    }
     }
 }

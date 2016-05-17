@@ -174,6 +174,7 @@ namespace vantagefx {
 			VantageFxService &_service;
 			model::VantageFxModel _model;
             int _refreshTimeout;
+			int _lastHour;
         };
 
 

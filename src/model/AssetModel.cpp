@@ -48,7 +48,7 @@ namespace vantagefx {
 		    _rates[name] = value;
 	    }
 
-	    int AssetModel::rate(const QString& name) const
+	    int AssetModel::rateValue(const QString& name) const
 	    {
 		    if (!_rates.contains(name)) return 50;
 		    return _rates[name];

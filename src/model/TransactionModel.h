@@ -23,19 +23,31 @@ namespace vantagefx {
             void setAsset(const AssetModel &asset);
             const AssetModel & asset() const;
 
+			void setOptionSeconds(int seconds);
+			int optionSeconds() const;
+
             void setExpiryDate(const QDateTime &expiryDate);
             const QDateTime &expiryDate() const;
 
-            void setReturned(int64_t returned);
-            int64_t returned() const;
+			void setBet(int64_t bet);
+			int64_t bet() const;
 
+            int64_t returned() const;
+			void close(int64_t returned);
+	        bool isOpened() const;
+	        bool isWon() const;
+	        bool isLoose() const;
+			bool isParity() const;
         private:
 
             int64_t _transactionId;
             int64_t _optionId;
             const AssetModel *_asset;
+			int _optionSeconds;
             QDateTime _expiryDate;
+			int64_t _bet;
             int64_t _returned;
+			bool _opened;
         };
 
         inline int64_t TransactionModel::transactionId() const { return _transactionId; }
@@ -44,10 +56,22 @@ namespace vantagefx {
 
         inline const AssetModel &TransactionModel::asset() const { return *_asset; }
 
+		inline int TransactionModel::optionSeconds() const { return _optionSeconds; }
+
         inline const QDateTime &TransactionModel::expiryDate() const { return _expiryDate; }
 
+		inline int64_t TransactionModel::bet() const { return _bet; }
+
         inline int64_t TransactionModel::returned() const { return _returned; }
-    }
+
+		inline bool TransactionModel::isOpened() const { return _opened; }
+
+		inline bool TransactionModel::isWon() const { return _returned > _bet; }
+
+		inline bool TransactionModel::isLoose() const { return _returned == 0; }
+
+		inline bool TransactionModel::isParity() const { return _returned == _bet; }
+	}
 }
 
 

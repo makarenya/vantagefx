@@ -266,7 +266,7 @@ namespace vantagefx {
                                                  PurchaseContext::Fail error)
         {
 			auto msg = QString("buy(%1, %2, %3, %4, %L5, %6)").arg(accountId).arg(optionId).arg(assetId).arg(money).arg(price, 0, 'f').arg(positionType);
-			qDebug(msg.toStdString().c_str());
+			qDebug() << msg;
 			auto result = std::make_shared<PurchaseContext>(_context, handler, error);
 			result->send(accountId, optionId, assetId, money, price, positionType);
 			return result;

@@ -41,7 +41,11 @@ namespace vantagefx {
 
             double price() const;
 
-            int64_t close() const;
+			int lowRateValue() const;
+
+			int highRateValue() const;
+
+			QDateTime close() const;
 
             void setOptionId(int64_t optionId);
 
@@ -55,37 +59,32 @@ namespace vantagefx {
 
             void setPrice(double price);
 
-            void setClose(int64_t close);
-
-			void updateDelay(const QDateTime &delay);
-
-			bool isDelayed() const;
-
-			void closePosition(int64_t returned);
+            void setClose(QDateTime close);
 
 			OptionStatus status() const;
 
-            void setChecked(bool checked);
-
+			void setChecked(bool checked);
             bool checked() const;
 
-			void bet(int64_t money);
-
-        private:
+			void openTransaction();
+			void closeSuccess();
+			void closeFail();
+			void closeReturn();
+		
+		private:
             int64_t _optionId;
 			AssetModel *_asset;
             int _moneyBack;
             int _seconds;
 			int _returnValue;
             double _price;
-            int64_t _close;
-			QDateTime _delay;
+            QDateTime _close;
             bool _checked;
-			OptionStatus _result;
-			int64_t _bet;
+			OptionStatus _status;
+			QDateTime _openTime;
         };
 
-        inline int64_t OptionModel::close() const { return _close; }
+        inline QDateTime OptionModel::close() const { return _close; }
 
 	    inline double OptionModel::price() const { return _price; }
 

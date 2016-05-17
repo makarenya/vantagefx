@@ -15,7 +15,8 @@ namespace vantagefx {
 			      _description("Loading stuff..."),
 				  _loggedIn(false),
                   _service(service),
-                  _refreshTimeout(-1)
+                  _refreshTimeout(-1),
+			      _lastHour(-1)
         {
 			model::CurrentSettings settings;
 			settings.load();
@@ -62,7 +63,7 @@ namespace vantagefx {
 
         void MainViewModel::loadingError(std::exception e)
         {
-			qDebug(e.what());
+			qDebug() << e.what();
 			doLoad();
         }
 
@@ -87,7 +88,7 @@ namespace vantagefx {
 
         void MainViewModel::refreshError(std::exception e)
         {
-            qDebug(e.what());
+            qDebug() << e.what();
 			doRefresh();
 			_refreshTimeout = 0;
 		}
@@ -122,7 +123,7 @@ namespace vantagefx {
 
 		void MainViewModel::authError(std::exception e)
         {
-			qDebug(e.what());
+			qDebug() << e.what();
 			setMode("view");
 			_refreshTimeout = 40;
 		}
@@ -147,7 +148,7 @@ namespace vantagefx {
 
 		void MainViewModel::purchaseError(std::exception e)
         {
-			qDebug(e.what());
+			qDebug() << e.what();
 			setMode("view");
 			_refreshTimeout = 20;
 		}
@@ -156,6 +157,11 @@ namespace vantagefx {
 			if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
 				doRefresh();
 			}
+	        auto hour = QDateTime::currentDateTime().time().hour();
+			if (_lastHour >= 0 && hour != _lastHour) {
+				_model.flushTransactions();
+			}
+			_lastHour = hour;
         }
 
 		void MainViewModel::doLogin()
@@ -289,17 +295,16 @@ namespace vantagefx {
 			_options.updateOptions(options);
 			if (!_model.isLoggedIn()) return;
 			for(auto option: options) {
-				if (!option.checked()) continue;
-				if (option.isDelayed()) continue;
+				if (option.status() != model::OptionModel::Selected) continue;
 				auto threshold = _options.threshold(option.asset().id());
 				if (std::abs(threshold) < 50) threshold = 71;
 
-				if (option.asset().rate("Put") >= std::abs(threshold)) {
+				if (option.highRateValue() >= std::abs(threshold)) {
 					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;
 				}
-				if (option.asset().rate("Call") >= std::abs(threshold)) {
+				if (option.lowRateValue() >= std::abs(threshold)) {
 					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;

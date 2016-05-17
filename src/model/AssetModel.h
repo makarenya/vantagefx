@@ -33,7 +33,7 @@ namespace vantagefx {
             const QString &subMarketName() const;
 
 	        void setRate(const QString &name, int value);
-	        int rate(const QString& name) const;
+	        int rateValue(const QString& name) const;
 
         private:
             int _id;

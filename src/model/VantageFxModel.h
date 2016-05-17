@@ -34,6 +34,7 @@ namespace vantagefx {
 			OptionModel &optionInfo(int64_t optionId);
 			int64_t currentMoney() const;
 	        void updatePurchase(api::GwtObjectPtr transaction);
+	        void flushTransactions();
         private:
 
 			int _openId;
@@ -48,6 +49,7 @@ namespace vantagefx {
 
 			QMap<int64_t, OptionModel> _options;
 			QMap<int64_t, TransactionModel> _openedTransactions;
+			QList<TransactionModel> _closedTransactions;
 
 			int64_t _currentMoney;
         };
