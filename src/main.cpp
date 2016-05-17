@@ -43,14 +43,6 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpC
 	}
 	LocalFree(argv);
 
-	auto paths = QCoreApplication::libraryPaths();
-	paths.append(".");
-	paths.append("imageformats");
-	paths.append("platforms");
-	paths.append("sqldrivers");
-	QCoreApplication::setLibraryPaths(paths);
-
-
 	return start(argc, &args[0], module.parent_path() / "ca.cer");
 }
 #else
@@ -61,6 +53,14 @@ int main(int argc, char** argv)
 #endif
 
 int analyze(int argc, char **argv);
+
+#ifdef USE_STATIC_QT
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+Q_IMPORT_PLUGIN(QtQuick2Plugin)
+Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
+Q_IMPORT_PLUGIN(QtQuickControlsPlugin)
+Q_IMPORT_PLUGIN(QtQuickLayoutsPlugin)
+#endif
 
 int start(int argc, char **argv, fs::path ca_path)
 {
@@ -99,8 +99,6 @@ int start(int argc, char **argv, fs::path ca_path)
 	QCoreApplication::setLibraryPaths(paths);
 	
 	QQmlApplicationEngine engine;
-
-	engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
 
 	GwtVantageFxBundle bundle;
 	VantageFxService controller(GwtHttpContext(io_service, ctx, bundle));

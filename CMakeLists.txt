@@ -27,15 +27,99 @@ add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data/")
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-
 # Find the QtWidgets library
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5Qml REQUIRED)
+find_package(Qt5Gui REQUIRED)
 find_package(Qt5Xml REQUIRED)
+find_package(Qt5OpenGLExtensions REQUIRED)
 find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem regex atomic system locale)
 find_package(OpenSSL 1.0.2 REQUIRED)
+
+if(MSVC)
+	#Статическая сборка Qt
+	find_library(PRCE_REL qtpcre)
+	find_library(PRCE_DEB qtpcred)
+    set(PRCELIB optimized ${PRCE_REL} debug ${PRCE_DEB})
+
+    find_library(HARFBUZZLIB_REL qtharfbuzzng)
+    find_library(HARFBUZZLIB_DEB qtharfbuzzngd)
+    set(HARFBUZZLIB optimized ${HARFBUZZLIB_REL} debug ${HARFBUZZLIB_DEB})
+
+    find_library(FREETYPE_REL qtfreetype)
+    find_library(FREETYPE_DEB qtfreetyped)
+    set(FREETYPELIB optimized ${FREETYPE_REL} debug ${FREETYPE_DEB})
+
+	find_library(TRANSLATOR_REL translator)
+	find_library(TRANSLATOR_DEB translatord)
+    set(TRANSLATORLIB optimized ${TRANSLATOR_REL} debug ${TRANSLATOR_DEB})
+
+	find_library(PREPROCESSOR_REL preprocessor)
+	find_library(PREPROCESSOR_DEB preprocessord)
+    set(PREPROCESSORLIB optimized ${PREPROCESSOR_REL} debug ${PREPROCESSOR_DEB})
+
+	find_library(Qt5PlatformSupport_REL Qt5PlatformSupport)
+	find_library(Qt5PlatformSupport_DEB Qt5PlatformSupportd)
+    set(Qt5PlatformSupportLIB optimized ${Qt5PlatformSupport_REL} debug ${Qt5PlatformSupport_DEB})
+
+	find_library(Qt5DBus_REL Qt5DBus)
+	find_library(Qt5DBus_DEB Qt5DBusd)
+    set(Qt5DBusLIB optimized ${Qt5DBus_REL} debug ${Qt5DBus_DEB})
+
+	set(Qt5Quick2PluginLIB 
+		optimized "${CMAKE_PREFIX_PATH}/qml/QtQuick.2/qtquick2plugin.lib" 
+		debug "${CMAKE_PREFIX_PATH}/qml/QtQuick.2/qtquick2plugind.lib")
+
+	set(windowpluginLIB
+		optimized "${CMAKE_PREFIX_PATH}/qml/QtQuick/Window.2/windowplugin.lib"
+		debug "${CMAKE_PREFIX_PATH}/qml/QtQuick/Window.2/windowplugind.lib")
+
+	set(qtquickcontrolspluginLIB
+		optimized "${CMAKE_PREFIX_PATH}/qml/QtQuick/Controls/qtquickcontrolsplugin.lib"
+		debug "${CMAKE_PREFIX_PATH}/qml/QtQuick/Controls/qtquickcontrolsplugind.lib")
+
+	set(qquicklayoutspluginLIB
+		optimized "${CMAKE_PREFIX_PATH}/qml/QtQuick/Layouts/qquicklayoutsplugin.lib"
+		debug "${CMAKE_PREFIX_PATH}/qml/QtQuick/Layouts/qquicklayoutsplugind.lib")
+
+
+    set(STATIC_QT_LIBRARIES 
+		Qt5::QWindowsIntegrationPlugin 
+		Qt5::QQmlNativeDebugConnectorFactory 
+		Qt5::QQmlDebugServerFactory 
+		Qt5::QQmlInspectorServiceFactory
+		Qt5::QQmlProfilerServiceFactory
+		Qt5::QQmlDebuggerServiceFactory
+		Qt5::QTcpServerConnectionFactory
+		Qt5::QLocalClientConnectionFactory
+		${Qt5Quick2PluginLIB}
+		${windowpluginLIB}
+		${qtquickcontrolspluginLIB}
+		${qquicklayoutspluginLIB}
+		Qt5::Gui_GLESv2
+		Qt5::Gui_EGL
+		d3d9
+		dxguid
+		${TRANSLATORLIB}
+		${PREPROCESSORLIB}
+		${Qt5PlatformSupportLIB}
+		${Qt5DBusLIB}
+		${HARFBUZZLIB} 
+		${FREETYPELIB}
+		${PRCELIB} 
+		crypt32
+		Iphlpapi
+		Imm32
+		Winmm
+		)
+    
+    ADD_DEFINITIONS(-DUSE_STATIC_QT)
+else()
+	set(STATIC_QT_LIBRARIES "")
+endif()
+
 
 set(SOURCE_FILES
         src/main.cpp
@@ -117,7 +201,7 @@ set(SOURCE_FILES
 qt5_add_resources(RESOURCES layout/qml.qrc)
 add_executable(vantagefx ${SOURCE_FILES} ${RESOURCES})
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
+target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml Qt5::Network Qt5::Gui ${STATIC_QT_LIBRARIES} ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 if(WIN32)
     target_link_libraries(vantagefx wsock32 ws2_32 Shell32 Winhttp)
     add_definitions(-D_WIN32_WINNT=0x0501)
