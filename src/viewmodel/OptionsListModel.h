@@ -6,6 +6,7 @@
 #define VANTAGEFX_OPTIONSLISTMODEL_H
 
 #include <QtCore>
+#include <QColor>
 #include "../model/OptionModel.h"
 
 namespace vantagefx {
@@ -19,11 +20,9 @@ namespace vantagefx {
 				  rateHi(0),
 				  rateLow(0),
 				  price(0.0),
-				  option30(0),
-				  option60(0),
-				  option120(0),
-				  option300(0),
-				  threshold(71)
+				  threshold(71),
+				  ids({ 0, 0, 0, 0 }),
+				  statuses({ model::OptionModel::Idle, model::OptionModel::Idle, model::OptionModel::Idle, model::OptionModel::Idle })
 			{}
 
             int assetId;
@@ -35,17 +34,28 @@ namespace vantagefx {
 			QString market;
 			QString subMarket;
 			QString lineId;
-
-            int64_t option30;
-			int64_t option60;
-			int64_t option120;
-			int64_t option300;
-
 			int threshold;
-			QString color30;
-			QString color60;
-			QString color120;
-			QString color300;
+
+            QVector<int64_t> ids;
+			QVector<model::OptionModel::OptionStatus> statuses;
+
+			QColor optionColor(int i)
+			{
+				switch (statuses[i]) {
+				case model::OptionModel::Idle:
+					return QColor(Qt::white);
+				case model::OptionModel::Selected:
+					return QColor("#1882d7");
+				case model::OptionModel::Processing:
+					return QColor(Qt::black);
+				case model::OptionModel::Successful:
+					return QColor(Qt::green);
+				case model::OptionModel::Failed:
+					return QColor(Qt::red);
+				default:
+					return QColor(Qt::yellow);
+				}
+			}
 		};
 
         class OptionsListModel : public QAbstractListModel
@@ -83,15 +93,16 @@ namespace vantagefx {
 
             QHash<int, QByteArray> roleNames() const override;
 
-            void updateOptions(const QMap<int64_t, model::OptionModel> &options);
+            void updateOptions(QMap<int64_t, model::OptionModel> &options);
+			void updateOption(model::OptionModel &item);
 
 			int threshold(int assetId);
 
         private:
-	        static QString color(model::OptionModel &option);
 			static QVector<int> updateOption(OptionListItem &current, model::OptionModel &item);
 			static OptionListItem createOption(model::OptionModel &item, std::string lineId);
             QList<OptionListItem> _items;
+			QMap<int64_t, model::OptionModel> *_options;
         };
     }
 }

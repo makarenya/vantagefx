@@ -151,7 +151,7 @@ namespace vantagefx {
 			Q_SLOT void purchaseError(std::exception e);
 
 
-			void makePurchases(const QMap<int64_t, model::OptionModel> &options);
+			void makePurchases(QMap<int64_t, model::OptionModel> &options);
 			
 			OptionsListModel _options;
             QString _mode;

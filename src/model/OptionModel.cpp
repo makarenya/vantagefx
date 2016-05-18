@@ -70,6 +70,11 @@ namespace vantagefx {
 			_checked = checked;
 		}
 
+		void OptionModel::toggle()
+	    {
+			_checked = !_checked;
+	    }
+
 		void OptionModel::openTransaction()
 	    {
 			_status = Processing;

@@ -135,7 +135,7 @@ namespace vantagefx {
 			}
 		}
 
-		const QMap<int64_t, OptionModel> &VantageFxModel::options() const {
+		QMap<int64_t, OptionModel> &VantageFxModel::options() {
 			return _options;
         }
 
@@ -170,7 +170,7 @@ namespace vantagefx {
 			return _currentMoney;
 		}
 
-	    void VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
+		OptionModel &VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
         {
 			auto optionId = transaction->item("option/id").toLong();
 			auto transactionId = transaction->value("transactionId").toLong();
@@ -185,6 +185,7 @@ namespace vantagefx {
 			item.setAsset(_options[optionId].asset());
 			item.setOptionSeconds(option.seconds());
 			option.openTransaction();
+			return option;
 		}
 
 		struct HourInfo

@@ -37,6 +37,8 @@ namespace vantagefx {
 
             int seconds() const;
 
+			int index() const;
+
 			int returnValue() const;
 
             double price() const;
@@ -64,6 +66,7 @@ namespace vantagefx {
 			OptionStatus status() const;
 
 			void setChecked(bool checked);
+			void toggle();
             bool checked() const;
 
 			void openTransaction();
@@ -89,6 +92,16 @@ namespace vantagefx {
 	    inline double OptionModel::price() const { return _price; }
 
         inline int OptionModel::seconds() const { return _seconds; }
+
+		inline int OptionModel::index() const
+        {
+			switch(_seconds) {
+			case 60: return 1;
+			case 120: return 2;
+			case 300: return 3;
+			default: return 0;
+			}
+        }
 
 		inline int OptionModel::returnValue() const { return _returnValue; }
 

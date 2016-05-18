@@ -30,10 +30,10 @@ namespace vantagefx {
 			const QString &userName() const;
 
 			void updateOptions(api::GwtObjectPtr refresh);
-			const QMap<int64_t, OptionModel> &options() const;
+			QMap<int64_t, OptionModel> &options();
 			OptionModel &optionInfo(int64_t optionId);
 			int64_t currentMoney() const;
-	        void updatePurchase(api::GwtObjectPtr transaction);
+	        OptionModel &updatePurchase(api::GwtObjectPtr transaction);
 	        void flushTransactions();
         private:
 

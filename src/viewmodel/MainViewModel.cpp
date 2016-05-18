@@ -141,8 +141,8 @@ namespace vantagefx {
 
 		void MainViewModel::purchased(PurchaseContextPtr ctx)
         {
-			_model.updatePurchase(ctx->transaction());
-			_options.updateOptions(_model.options());
+			auto &option = _model.updatePurchase(ctx->transaction());
+			_options.updateOption(option);
 			_refreshTimeout = 20;
 		}
 
@@ -289,7 +289,7 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    void MainViewModel::makePurchases(const QMap<int64_t, model::OptionModel> &options)
+	    void MainViewModel::makePurchases(QMap<int64_t, model::OptionModel> &options)
         {
 			if (options.empty()) return;
 			_options.updateOptions(options);

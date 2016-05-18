@@ -11,9 +11,9 @@ namespace vantagefx {
     namespace viewmodel {
 
         OptionsListModel::OptionsListModel(QObject *parent)
-                : QAbstractListModel(parent)
-        {
-        }
+                : QAbstractListModel(parent), 
+			      _options(nullptr)
+        {}
 		
 		QHash<int, QByteArray> OptionsListModel::roleNames() const
         {
@@ -59,23 +59,23 @@ namespace vantagefx {
                 case PriceRole:
                     return option.price;
                 case Option30Role:
-                    return option.option30;
+                    return option.ids[0];
                 case Option60Role:
-                    return option.option60;
-                case Option120Role:
-                    return option.option120;
-                case Option300Role:
-                    return option.option300;
-                case ThresholdRole:
+					return option.ids[1];
+				case Option120Role:
+					return option.ids[2];
+				case Option300Role:
+					return option.ids[3];
+				case ThresholdRole:
                     return option.threshold;
 				case Color30Role:
-					return option.color30;
+					return option.optionColor(0);
 				case Color60Role:
-					return option.color60;
+					return option.optionColor(1);
 				case Color120Role:
-					return option.color120;
+					return option.optionColor(2);
 				case Color300Role:
-					return option.color300;
+					return option.optionColor(3);
 				default:
                     return QVariant();
             }
@@ -92,8 +92,19 @@ namespace vantagefx {
 
 		void OptionsListModel::select(long long optionId)
 		{
-			
-			qDebug() << "selected " << optionId;
+			for(auto i = 0; i < _items.size(); ++i) {
+				auto &item = _items[i];
+				for(auto j = 0; j < 4; ++j) {
+					auto currentId = item.ids[j];
+					if (currentId == optionId) {
+						auto &option = (*_options)[currentId];
+						option.toggle();
+						auto status = option.status();
+						dataChanged(index(i), index(i), updateOption(item, option));
+						return;
+					}
+				}
+			}
 		}
 
         int OptionsListModel::rowCount(const QModelIndex &parent) const
@@ -125,29 +136,13 @@ namespace vantagefx {
 				current.price = item.price();
 				roles.push_back(PriceRole);
 			}
-			if (item.seconds() == 30) {
-				if (item.optionId() != -current.option30) roles.push_back(Option30Role);
-				current.option30 = item.optionId();
-				if (color(item) != current.color30) roles.push_back(Color30Role);
-				current.color30 = color(item);
+			if (item.optionId() != current.ids[item.index()]) {
+				current.ids[item.index()] = item.optionId();
+				roles.push_back(Option30Role + item.index());
 			}
-			if (item.seconds() == 60) {
-				if (item.optionId() != -current.option60) roles.push_back(Option60Role);
-				current.option60 = item.optionId();
-				if (color(item) != current.color60) roles.push_back(Color60Role);
-				current.color60 = color(item);
-			}
-			if (item.seconds() == 120) {
-				if (item.optionId() != -current.option120) roles.push_back(Option120Role);
-				current.option120 = item.optionId();
-				if (color(item) != current.color120) roles.push_back(Color120Role);
-				current.color120 = color(item);
-			}
-			if (item.seconds() == 300) {
-				if (item.optionId() != -current.option300) roles.push_back(Option300Role);
-				current.option300 = item.optionId();
-				if (color(item) != current.color300) roles.push_back(Color300Role);
-				current.color300 = color(item);
+			if (item.status() != current.statuses[item.index()]) {
+				current.statuses[item.index()] = item.status();
+				roles.push_back(Color30Role + item.index());
 			}
 			return roles;
         }
@@ -162,35 +157,22 @@ namespace vantagefx {
 			inserted.rateLow = item.lowRateValue();
 			inserted.rateHi = item.highRateValue();
 			inserted.price = item.price();
-			if (item.seconds() == 30) {
-				inserted.option30 = item.optionId();
-				inserted.color30 = color(item);
-			}
-			if (item.seconds() == 60) {
-				inserted.option60 = item.optionId();
-				inserted.color60 = color(item);
-			}
-			if (item.seconds() == 120) {
-				inserted.option120 = item.optionId();
-				inserted.color120 = color(item);
-			}
-			if (item.seconds() == 300) {
-				inserted.option300 = item.optionId();
-				inserted.color300 = color(item);
-			}
+			inserted.ids[item.index()] = item.optionId();
+			inserted.statuses[item.index()] = item.status();
 			return inserted;
         }
 
-        void OptionsListModel::updateOptions(const QMap<int64_t, model::OptionModel> &options)
+        void OptionsListModel::updateOptions(QMap<int64_t, model::OptionModel> &options)
         {
+			_options = &options;
 			if (options.empty()) return;
+			QSet<int64_t> removed;
 			for (auto &current : _items) {
-				current.option30 = -current.option30;
-				current.option60 = -current.option60;
-				current.option120 = -current.option120;
-				current.option300 = -current.option300;
+				for (auto &item : current.ids) {
+					if (item != 0) removed.insert(item);
+				}
 			}
-			for(auto item: options) {
+			for(auto &item: options) {
 	            auto added = false;
 				std::stringstream linestream;
 				linestream << std::setw(4) << std::setfill('0') << item.asset().marketId() << "." 
@@ -203,6 +185,7 @@ namespace vantagefx {
                     if (item.asset().id() == current.assetId) {
 						added = true;
 						auto roles = updateOption(current, item);
+						removed.remove(item.optionId());
 						if (roles.size() > 0) {
 							dataChanged(index(i, 0), index(i, 0), roles);
 						}
@@ -228,23 +211,18 @@ namespace vantagefx {
             for (auto i = 0; i < _items.size(); ++i) {
                 auto &current = _items[i];
                 QVector<int> roles;
-                if (current.option30 < 0) {
-                    current.option30 = 0;
-                    roles.push_back(Option30Role);
-                }
-                if (current.option60 < 0) {
-                    current.option60 = 0;
-                    roles.push_back(Option60Role);
-                }
-                if (current.option120 < 0) {
-                    current.option120 = 0;
-                    roles.push_back(Option120Role);
-                }
-                if (current.option300 < 0) {
-                    current.option300 = 0;
-                    roles.push_back(Option300Role);
-                }
-				if (roles.size() == 4) {
+				auto empty = 0;
+				for(auto j = 0; j < 4; ++j) {
+					if (removed.contains(current.ids[j])) {
+						current.ids[j] = 0;
+						roles.push_back(Option30Role + j);
+					}
+					if (current.ids[j] == 0) {
+						empty++;
+					}
+				}
+				
+				if (empty == 4) {
 					beginRemoveRows(QModelIndex(), i, i);
 					_items.removeAt(i--);
 					endRemoveRows();
@@ -255,29 +233,23 @@ namespace vantagefx {
             }
         }
 
-        int OptionsListModel::threshold(int assetId) {
+		void OptionsListModel::updateOption(model::OptionModel &item)
+		{
+			for (auto i = 0; i < _items.size(); ++i) {
+				auto &current = _items[i];
+				for (auto j = 0; j < 4; ++j) {
+					if (current.ids[item.index()] == item.optionId()) {
+						dataChanged(index(i), index(i), updateOption(current, item));
+					}
+				}
+			}
+		}
+
+		int OptionsListModel::threshold(int assetId) {
             for(auto item : _items) {
                 if (item.assetId == assetId) return item.threshold;
             }
             return 0;
-        }
-
-	    QString OptionsListModel::color(model::OptionModel& option)
-        {
-	        switch(option.status()) {
-			case model::OptionModel::Idle:
-				return "#FFFFFF";
-		    case model::OptionModel::Selected:
-				return "#1882d7";
-		    case model::OptionModel::Processing:
-				return "#000000";
-			case model::OptionModel::Successful:
-				return "#00FF00";
-			case model::OptionModel::Failed:
-				return "#FF0000";
-			default:
-				return "#FFFF00";
-			}
         }
     }
 }
