@@ -235,7 +235,10 @@ namespace vantagefx {
 			if (!statistics.exists()) statistics.mkdir(statistics.path());
 
 			for(auto it = info.begin(); it != info.end(); ++it) {
-				QFile file(statistics.filePath(it.key() + ".csv"));
+				QString name = it.key();
+				name.replace("/", "-");
+				auto path = statistics.filePath(name + ".csv");
+				QFile file(path);
 				file.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text);
 				QTextStream stream(&file);
 				if (file.size() == 0) {
@@ -250,7 +253,7 @@ namespace vantagefx {
 				for(auto item : it.value()) {
 					stream << ";";
 					if (item.wins != 0 || item.fails != 0 || item.draws != 0) {
-						stream << item.wins << ":" << item.fails << ":" << item.draws;
+						stream << item.wins << " " << item.fails << " " << item.draws;
 					}
 				}
 			}
