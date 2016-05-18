@@ -15,25 +15,77 @@ ColumnLayout {
     height: 30
   }
 
-  ListView {
-    id: view
+  Rectangle {
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.leftMargin: 10
+    anchors.rightMargin: 10
+    Layout.preferredHeight: 30
+
+    Text {
+      y: 4
+      width: 80
+      text: "First bet"
+      renderType: Text.NativeRendering
+      horizontalAlignment: Text.AlignRight
+    }
+
+    TextField {
+      id: firstBet
+      x: 90
+      width: 40
+      height: 22
+      text: root.firstBet
+    }
+
+    Binding { target: root; property: "firstBet"; value: parseInt(firstBet.text) }
+
+    Text {
+      x: 140
+      y: 4
+      width: 80
+      text: "Bet growth"
+      renderType: Text.NativeRendering
+      horizontalAlignment: Text.AlignRight
+    }
+
+    TextField {
+      id: betGrowth
+      x: 230
+      width: 40
+      height: 22
+      text: root.betGrowth
+    }
+
+    Binding { target: root; property: "betGrowth"; value: parseInt(betGrowth.text) }
+
+    Text {
+      x: 300
+      y: 4
+      width: 100
+      text: "Current bet: " + root.currentBet
+      renderType: Text.NativeRendering
+    }
+  }
+
+  Rectangle {
     Layout.fillHeight: true
     anchors.left: parent.left
     anchors.right: parent.right
-    spacing: 10
-    model: root.options
-    anchors {
-      fill: parent
-      leftMargin: 10
-      topMargin: 46
-      rightMargin: 10
-      bottomMargin: 10
-    }
 
-    delegate: OptionLine {
-      anchors.left: parent.left
-      anchors.right: parent.right
-      height: 20
+    ListView {
+      id: view
+      spacing: 10
+      anchors.fill: parent
+      anchors.leftMargin: 10
+      anchors.rightMargin: 10
+      model: root.options
+
+      delegate: OptionLine {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 20
+      }
     }
   }
 }

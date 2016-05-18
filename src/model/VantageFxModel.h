@@ -33,7 +33,7 @@ namespace vantagefx {
 			QMap<int64_t, OptionModel> &options();
 			OptionModel &optionInfo(int64_t optionId);
 			int64_t currentMoney() const;
-	        OptionModel &updatePurchase(api::GwtObjectPtr transaction);
+	        TransactionModel &updatePurchase(api::GwtObjectPtr transaction);
 	        void flushTransactions();
         private:
 

@@ -170,7 +170,7 @@ namespace vantagefx {
 			return _currentMoney;
 		}
 
-		OptionModel &VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
+		TransactionModel &VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
         {
 			auto optionId = transaction->item("option/id").toLong();
 			auto transactionId = transaction->value("transactionId").toLong();
@@ -185,7 +185,7 @@ namespace vantagefx {
 			item.setAsset(_options[optionId].asset());
 			item.setOptionSeconds(option.seconds());
 			option.openTransaction();
-			return option;
+			return item;
 		}
 
 		struct HourInfo

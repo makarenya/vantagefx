@@ -14,8 +14,11 @@ namespace vantagefx {
                 : _mode(""),
 			      _description("Loading stuff..."),
 				  _loggedIn(false),
-                  _service(service),
-                  _refreshTimeout(-1),
+                  _firstBet(10),
+                  _betGrowth(115),
+			      _currentBet(10),
+			      _service(service),
+			      _refreshTimeout(-1),
 			      _lastHour(-1)
         {
 			model::CurrentSettings settings;
@@ -141,8 +144,14 @@ namespace vantagefx {
 
 		void MainViewModel::purchased(PurchaseContextPtr ctx)
         {
-			auto &option = _model.updatePurchase(ctx->transaction());
-			_options.updateOption(option);
+			auto &transaction = _model.updatePurchase(ctx->transaction());
+			_options.updateOption(_model.optionInfo(transaction.optionId()));
+			if (transaction.isWon()) {
+				setCurrentBet(firstBet());
+			}
+			if (transaction.isLoose()) {
+				setCurrentBet(currentBet() + currentBet() * betGrowth() / 100);
+			}
 			_refreshTimeout = 20;
 		}
 
@@ -193,14 +202,14 @@ namespace vantagefx {
         {
 			setMode("");
 			setDescription("Process purchase...");
-			doPurchase(currentOption().optionId(), 10000, _model.rateId("Put"));
+			doPurchase(currentOption().optionId(), _currentBet * 100, _model.rateId("Put"));
 		}
 
         void MainViewModel::buyLow()
         {
 			setMode("");
 			setDescription("Process purchase...");
-			doPurchase(currentOption().optionId(), 10000, _model.rateId("Call"));
+			doPurchase(currentOption().optionId(), _currentBet * 100, _model.rateId("Call"));
 		}
 
 	    void MainViewModel::selectOption(int64_t optionId, int seconds, bool checked)
@@ -300,12 +309,12 @@ namespace vantagefx {
 				if (std::abs(threshold) < 50) threshold = 71;
 
 				if (option.highRateValue() >= std::abs(threshold)) {
-					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
+					doPurchase(option.optionId(), _currentBet * 100, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;
 				}
 				if (option.lowRateValue() >= std::abs(threshold)) {
-					doPurchase(option.optionId(), 10000, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
+					doPurchase(option.optionId(), _currentBet * 100, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;
 				}
@@ -316,5 +325,26 @@ namespace vantagefx {
         {
             return _money;
         }
-    }
+
+		void MainViewModel::setFirstBet(int firstBet)
+		{
+			if (_firstBet == firstBet) return;
+			_firstBet = firstBet;
+			emit firstBetChanged();
+		}
+
+		void MainViewModel::setBetGrowth(int betGrowth)
+		{
+			if (_betGrowth == betGrowth) return;
+			_betGrowth = betGrowth;
+			emit betGrowthChanged();
+		}
+
+		void MainViewModel::setCurrentBet(int currentBet)
+		{
+			if (_currentBet == currentBet) return;
+			_currentBet = currentBet;
+			emit currentBetChanged();
+		}
+	}
 }

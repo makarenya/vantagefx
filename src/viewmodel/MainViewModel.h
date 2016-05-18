@@ -36,6 +36,10 @@ namespace vantagefx {
 			Q_PROPERTY(int optionReturn READ optionReturn NOTIFY optionReturnChanged)
 			Q_PROPERTY(QString optionExpire READ optionExpire NOTIFY optionExpireChanged)
 
+			Q_PROPERTY(int firstBet READ firstBet WRITE setFirstBet NOTIFY firstBetChanged)
+			Q_PROPERTY(int betGrowth READ betGrowth WRITE setBetGrowth NOTIFY betGrowthChanged)
+			Q_PROPERTY(int currentBet READ currentBet NOTIFY currentBetChanged)
+
         public:
             explicit MainViewModel(VantageFxService &servie);
             MainViewModel(const MainViewModel &rhs) = delete;
@@ -91,6 +95,17 @@ namespace vantagefx {
 			const QString &optionExpire() const;
 			void setOptionExpire(const QString &optionExpire);
 
+            int firstBet() const;
+
+            void setFirstBet(int firstBet);
+
+            int betGrowth() const;
+
+            void setBetGrowth(int betGrowth);
+
+            int currentBet() const;
+
+            void setCurrentBet(int currentBet);
 
         public slots:
 
@@ -123,6 +138,12 @@ namespace vantagefx {
 			void optionReturnChanged();
 
 			void optionExpireChanged();
+
+			void firstBetChanged();
+
+			void betGrowthChanged();
+
+			void currentBetChanged();
 
 		public:
 
@@ -171,12 +192,15 @@ namespace vantagefx {
 			int _optionReturn;
 			QString _optionExpire;
 
+			int _firstBet;
+			int _betGrowth;
+			int _currentBet;
+
 			VantageFxService &_service;
 			model::VantageFxModel _model;
             int _refreshTimeout;
 			int _lastHour;
         };
-
 
         inline const QString &MainViewModel::mode() const { return _mode; }
 
@@ -201,6 +225,12 @@ namespace vantagefx {
 		inline int MainViewModel::optionReturn() const { return _optionReturn; }
 
 		inline const QString &MainViewModel::optionExpire() const { return _optionExpire; }
+
+        inline int MainViewModel::firstBet() const { return _firstBet; }
+
+        inline int MainViewModel::betGrowth() const { return _betGrowth; }
+
+        inline int MainViewModel::currentBet() const { return _currentBet; }
     }
 }
 
