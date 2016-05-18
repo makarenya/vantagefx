@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+        <file>views/OptionLine.qml</file>
+        <file>views/LoginArea.qml</file>
         <file>views/Login.qml</file>
         <file>views/Loading.qml</file>
         <file>views/List.qml</file>
