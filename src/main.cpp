@@ -22,15 +22,11 @@ using namespace vantagefx::api;
 using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
 
-int start(int argc, char **argv, fs::path module_dir);
+int start(int argc, char **argv);
 
 #ifdef GUI_MAIN
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
-	std::vector<wchar_t> buf(MAX_PATH);
-	GetModuleFileNameW(hInstance, &buf[0], static_cast<int>(buf.size()));
-	fs::path module = std::wstring(buf.begin(), buf.end());
-
     int argc;
 	auto argv = CommandLineToArgvW(GetCommandLine(), &argc);
 	std::vector<std::vector<char>> items(argc);
@@ -43,12 +39,12 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpC
 	}
 	LocalFree(argv);
 
-	return start(argc, &args[0], module.parent_path() / "ca.cer");
+	return start(argc, &args[0]);
 }
 #else
 int main(int argc, char** argv)
 {
-	return start(argc, argv, fs::path(DATA_DIR) / "ca.cer");
+	return start(argc, argv);
 }
 #endif
 
@@ -62,12 +58,19 @@ Q_IMPORT_PLUGIN(QtQuickControlsPlugin)
 Q_IMPORT_PLUGIN(QtQuickLayoutsPlugin)
 #endif
 
-int start(int argc, char **argv, fs::path ca_path)
+int start(int argc, char **argv)
 {
 	using namespace vantagefx;
 	using namespace vantagefx::http;
     using namespace vantagefx::analyzer;
     using namespace vantagefx::viewmodel;
+
+	QApplication app(argc, argv);
+
+	fs::path cert_path = fs::path(DATA_DIR) / "ca.cer";
+	if (!fs::exists(cert_path)) {
+		cert_path = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
+	}
 
 	QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
 	if (argc >= 2 && (argv[1] == std::string("analyze") || argv[1] == std::string("find")
@@ -78,36 +81,27 @@ int start(int argc, char **argv, fs::path ca_path)
 	asio::io_service io_service;
 	asio::io_service::work work(io_service);
 
-	std::thread worker([&io_service]() {
-		io_service.run();
-	});
-
 	auto ctx = ssl::context(ssl::context::tlsv1_client);
 	SSL_CTX_set_cipher_list(ctx.native_handle(), "TLSv1:SSLv3:SSLv2");
-
-	auto cert_path = ca_path;
 
 	ctx.load_verify_file(cert_path.string());
 	ctx.set_options(ssl::context::default_workarounds);
 
+	std::thread worker([&io_service]() {
+		io_service.run();
+	});
 
-	QApplication app(argc, argv);
-
-	auto paths = QCoreApplication::libraryPaths();
-	paths.append(".");
-	paths.append("platforms");
-	QCoreApplication::setLibraryPaths(paths);
-	
 	QQmlApplicationEngine engine;
+	engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
 
 	GwtVantageFxBundle bundle;
 	VantageFxService controller(GwtHttpContext(io_service, ctx, bundle));
 	MainViewModel mainViewModel(controller);
-
-    engine.rootContext()->setContextProperty("root", &mainViewModel);
+	
+	engine.rootContext()->setContextProperty("root", &mainViewModel);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
-    auto code = app.exec();
+	
+	auto code = app.exec();
     controller.stop();
     io_service.stop();
     worker.join();
