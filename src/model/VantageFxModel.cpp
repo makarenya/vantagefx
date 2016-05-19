@@ -67,7 +67,7 @@ namespace vantagefx {
 			return _rates[name];
 		}
 
-		void VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
+		int VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
 		{
 			_currentMoney = refresh->item("money/value").toLong();
 
@@ -117,6 +117,8 @@ namespace vantagefx {
 				_options.remove(id);
 			}
 
+			auto result = 0;
+
 			for(auto &pos : refresh->query("positionUpdates/[positionStatus={0}]", { GwtValue(_positionClosed) })) {
 				auto obj = pos.value.toObject();
 				auto id = obj->value("transactionId").toLong();
@@ -127,12 +129,20 @@ namespace vantagefx {
 				_openedTransactions.remove(id);
 				if (_options.contains(transaction.optionId())) {
                     auto &option = _options[transaction.optionId()];
-					if (transaction.isWon()) option.closeSuccess();
-					else if (transaction.isLoose()) option.closeFail();
+					if (transaction.isWon())
+					{
+						option.closeSuccess();
+						++result;
+					}
+					else if (transaction.isLoose()){
+						option.closeFail();
+						--result;
+					}
 					else option.closeReturn();
                 }
 				_closedTransactions.push_back(std::move(transaction));
 			}
+			return result;
 		}
 
 		QMap<int64_t, OptionModel> &VantageFxModel::options() {
@@ -170,7 +180,7 @@ namespace vantagefx {
 			return _currentMoney;
 		}
 
-		TransactionModel &VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
+		std::tuple<OptionModel &, TransactionModel &> VantageFxModel::updatePurchase(api::GwtObjectPtr transaction)
         {
 			auto optionId = transaction->item("option/id").toLong();
 			auto transactionId = transaction->value("transactionId").toLong();
@@ -185,7 +195,7 @@ namespace vantagefx {
 			item.setAsset(_options[optionId].asset());
 			item.setOptionSeconds(option.seconds());
 			option.openTransaction();
-			return item;
+			return std::make_tuple(std::ref(option), std::ref(item));
 		}
 
 		struct HourInfo

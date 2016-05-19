@@ -36,8 +36,8 @@ namespace vantagefx {
 			Q_PROPERTY(int optionReturn READ optionReturn NOTIFY optionReturnChanged)
 			Q_PROPERTY(QString optionExpire READ optionExpire NOTIFY optionExpireChanged)
 
-			Q_PROPERTY(int firstBet READ firstBet WRITE setFirstBet NOTIFY firstBetChanged)
-			Q_PROPERTY(int betGrowth READ betGrowth WRITE setBetGrowth NOTIFY betGrowthChanged)
+			Q_PROPERTY(int firstBet READ firstBet NOTIFY firstBetChanged)
+			Q_PROPERTY(int betGrowth READ betGrowth NOTIFY betGrowthChanged)
 			Q_PROPERTY(int currentBet READ currentBet NOTIFY currentBetChanged)
 
         public:
@@ -56,6 +56,7 @@ namespace vantagefx {
 			Q_INVOKABLE void buyHigh();
 			Q_INVOKABLE void buyLow();
 			Q_INVOKABLE void selectOption(long long optionId, int seconds, bool checked);
+			Q_INVOKABLE void setBet(int firstBet, int betGrowth);
 
             const QString &mode() const;
             void setMode(const QString &mode);

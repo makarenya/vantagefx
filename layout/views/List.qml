@@ -38,8 +38,6 @@ ColumnLayout {
       text: root.firstBet
     }
 
-    Binding { target: root; property: "firstBet"; value: parseInt(firstBet.text) }
-
     Text {
       x: 140
       y: 4
@@ -57,10 +55,16 @@ ColumnLayout {
       text: root.betGrowth
     }
 
-    Binding { target: root; property: "betGrowth"; value: parseInt(betGrowth.text) }
+    Button {
+      x: 300
+      width: 80
+      height: 22
+      text: "Update bet"
+      onClicked: root.setBet(parseInt(firstBet.text), parseInt(betGrowth.text));
+    }
 
     Text {
-      x: 300
+      x: 390
       y: 4
       width: 100
       text: "Current bet: " + root.currentBet

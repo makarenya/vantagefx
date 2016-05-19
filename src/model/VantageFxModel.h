@@ -29,11 +29,11 @@ namespace vantagefx {
 			bool isLoggedIn() const;
 			const QString &userName() const;
 
-			void updateOptions(api::GwtObjectPtr refresh);
+			int updateOptions(api::GwtObjectPtr refresh);
 			QMap<int64_t, OptionModel> &options();
 			OptionModel &optionInfo(int64_t optionId);
 			int64_t currentMoney() const;
-	        TransactionModel &updatePurchase(api::GwtObjectPtr transaction);
+	        std::tuple<OptionModel &, TransactionModel &> updatePurchase(api::GwtObjectPtr transaction);
 	        void flushTransactions();
         private:
 

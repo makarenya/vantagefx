@@ -81,7 +81,15 @@ namespace vantagefx {
 		void MainViewModel::refreshed(RefreshContextPtr ctx)
         {
             if (mode().isEmpty()) setMode("view");
-			_model.updateOptions(ctx->refresh());
+			auto result =  _model.updateOptions(ctx->refresh());
+			if (result > 0) {
+				setCurrentBet(firstBet());
+			}
+			if (result < 0) {
+				auto newBet = currentBet() + currentBet() * betGrowth() / 100;
+				if (newBet >= 500) newBet = firstBet();
+				setCurrentBet(newBet);
+			}
 
 			setMoney(_model.currentMoney());
 			makePurchases(_model.options());
@@ -144,14 +152,8 @@ namespace vantagefx {
 
 		void MainViewModel::purchased(PurchaseContextPtr ctx)
         {
-			auto &transaction = _model.updatePurchase(ctx->transaction());
-			_options.updateOption(_model.optionInfo(transaction.optionId()));
-			if (transaction.isWon()) {
-				setCurrentBet(firstBet());
-			}
-			if (transaction.isLoose()) {
-				setCurrentBet(currentBet() + currentBet() * betGrowth() / 100);
-			}
+			auto result = _model.updatePurchase(ctx->transaction());
+			_options.updateOption(std::get<0>(result));
 			_refreshTimeout = 20;
 		}
 
@@ -217,6 +219,15 @@ namespace vantagefx {
 			auto &option = _model.optionInfo(optionId);
 			option.setChecked(!option.checked());
 			_options.updateOptions(_model.options());
+        }
+
+	    void MainViewModel::setBet(int firstBet, int betGrowth)
+        {
+			if (_firstBet == currentBet()) {
+				setCurrentBet(_firstBet);
+			}
+			setFirstBet(firstBet);
+			setBetGrowth(betGrowth);
         }
 
 	    void MainViewModel::setMode(const QString &mode)
