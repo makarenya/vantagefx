@@ -87,9 +87,12 @@ namespace vantagefx {
 			}
 			if (result < 0) {
 				auto newBet = currentBet() + currentBet() * betGrowth() / 100;
-				if (newBet >= 500) newBet = firstBet();
+				if (currentBet() == 500) newBet = firstBet();
+				else if (newBet > 500) newBet = 500;
+
 				setCurrentBet(newBet);
 			}
+
 
 			setMoney(_model.currentMoney());
 			makePurchases(_model.options());
