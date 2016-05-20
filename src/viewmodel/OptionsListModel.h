@@ -12,18 +12,21 @@
 namespace vantagefx {
     namespace viewmodel {
 
-        struct OptionListItem {
+        struct OptionItem {
 
-			OptionListItem() 
-				: assetId(0),
-				  moneyBack(0),
-				  rateHi(0),
-				  rateLow(0),
-				  price(0.0),
-				  threshold(71),
-				  ids({ 0, 0, 0, 0 }),
-				  statuses({ model::OptionModel::Idle, model::OptionModel::Idle, model::OptionModel::Idle, model::OptionModel::Idle })
-			{}
+            OptionItem();
+
+            int64_t id;
+            model::OptionModel::OptionStatus status;
+            int bet;
+
+            QColor color() const;
+        };
+
+
+        struct AssetListItem {
+
+			AssetListItem();
 
             int assetId;
             QString name;
@@ -36,26 +39,7 @@ namespace vantagefx {
 			QString lineId;
 			int threshold;
 
-            QVector<int64_t> ids;
-			QVector<model::OptionModel::OptionStatus> statuses;
-
-			QColor optionColor(int i)
-			{
-				switch (statuses[i]) {
-				case model::OptionModel::Idle:
-					return QColor(Qt::white);
-				case model::OptionModel::Selected:
-					return QColor("#1882d7");
-				case model::OptionModel::Processing:
-					return QColor(Qt::black);
-				case model::OptionModel::Successful:
-					return QColor(Qt::green);
-				case model::OptionModel::Failed:
-					return QColor(Qt::red);
-				default:
-					return QColor(Qt::yellow);
-				}
-			}
+            QVector<OptionItem> options;
 		};
 
         class OptionsListModel : public QAbstractListModel
@@ -99,9 +83,9 @@ namespace vantagefx {
 			int threshold(int assetId);
 
         private:
-			static QVector<int> updateOption(OptionListItem &current, model::OptionModel &item);
-			static OptionListItem createOption(model::OptionModel &item, std::string lineId);
-            QList<OptionListItem> _items;
+			static QVector<int> updateOption(AssetListItem &current, model::OptionModel &item);
+			static AssetListItem createOption(model::OptionModel &item, std::string lineId);
+            QList<AssetListItem> _items;
 			QMap<int64_t, model::OptionModel> *_options;
         };
     }

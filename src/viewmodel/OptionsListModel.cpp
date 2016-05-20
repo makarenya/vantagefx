@@ -10,6 +10,40 @@
 namespace vantagefx {
     namespace viewmodel {
 
+        OptionItem::OptionItem()
+                : id(0),
+                  status(model::OptionModel::Idle),
+                  bet(0)
+        {}
+
+        QColor OptionItem::color() const
+        {
+            switch (status) {
+                case model::OptionModel::Idle:
+                    return QColor(Qt::white);
+                case model::OptionModel::Selected:
+                    return QColor("#1882d7");
+                case model::OptionModel::Processing:
+                    return QColor(Qt::black);
+                case model::OptionModel::Successful:
+                    return QColor(Qt::green);
+                case model::OptionModel::Failed:
+                    return QColor(Qt::red);
+                default:
+                    return QColor(Qt::yellow);
+            }
+        }
+
+		AssetListItem::AssetListItem()
+				: assetId(0),
+				  moneyBack(0),
+				  rateHi(0),
+				  rateLow(0),
+				  price(0.0),
+				  threshold(71),
+                  options({ OptionItem(), OptionItem(), OptionItem(), OptionItem() })
+		{}
+
         OptionsListModel::OptionsListModel(QObject *parent)
                 : QAbstractListModel(parent), 
 			      _options(nullptr)
@@ -59,23 +93,23 @@ namespace vantagefx {
                 case PriceRole:
                     return option.price;
                 case Option30Role:
-                    return option.ids[0];
+                    return option.options[0].id;
                 case Option60Role:
-					return option.ids[1];
+					return option.options[1].id;
 				case Option120Role:
-					return option.ids[2];
+					return option.options[2].id;
 				case Option300Role:
-					return option.ids[3];
+					return option.options[3].id;
 				case ThresholdRole:
                     return option.threshold;
 				case Color30Role:
-					return option.optionColor(0);
+					return option.options[0].color();
 				case Color60Role:
-					return option.optionColor(1);
+					return option.options[1].color();
 				case Color120Role:
-					return option.optionColor(2);
+					return option.options[2].color();
 				case Color300Role:
-					return option.optionColor(3);
+					return option.options[3].color();
 				default:
                     return QVariant();
             }
@@ -95,11 +129,10 @@ namespace vantagefx {
 			for(auto i = 0; i < _items.size(); ++i) {
 				auto &item = _items[i];
 				for(auto j = 0; j < 4; ++j) {
-					auto currentId = item.ids[j];
+					auto currentId = item.options[j].id;
 					if (currentId == optionId) {
 						auto &option = (*_options)[currentId];
 						option.toggle();
-						auto status = option.status();
 						dataChanged(index(i), index(i), updateOption(item, option));
 						return;
 					}
@@ -113,7 +146,7 @@ namespace vantagefx {
 			return cnt;
         }
 
-		QVector<int> OptionsListModel::updateOption(OptionListItem &current, model::OptionModel &item)
+		QVector<int> OptionsListModel::updateOption(AssetListItem &current, model::OptionModel &item)
         {
 			QVector<int> roles;
 			if (item.asset().name() != current.name) {
@@ -136,20 +169,20 @@ namespace vantagefx {
 				current.price = item.price();
 				roles.push_back(PriceRole);
 			}
-			if (item.optionId() != current.ids[item.index()]) {
-				current.ids[item.index()] = item.optionId();
+			if (item.optionId() != current.options[item.index()].id) {
+				current.options[item.index()].id = item.optionId();
 				roles.push_back(Option30Role + item.index());
 			}
-			if (item.status() != current.statuses[item.index()]) {
-				current.statuses[item.index()] = item.status();
+			if (item.status() != current.options[item.index()].status) {
+				current.options[item.index()].status = item.status();
 				roles.push_back(Color30Role + item.index());
 			}
 			return roles;
         }
 
-		OptionListItem OptionsListModel::createOption(model::OptionModel &item, std::string lineId)
+		AssetListItem OptionsListModel::createOption(model::OptionModel &item, std::string lineId)
         {
-			OptionListItem inserted;
+			AssetListItem inserted;
 			inserted.lineId = lineId.c_str();
 			inserted.assetId = item.asset().id();
 			inserted.name = item.asset().name();
@@ -157,8 +190,8 @@ namespace vantagefx {
 			inserted.rateLow = item.lowRateValue();
 			inserted.rateHi = item.highRateValue();
 			inserted.price = item.price();
-			inserted.ids[item.index()] = item.optionId();
-			inserted.statuses[item.index()] = item.status();
+			inserted.options[item.index()].id = item.optionId();
+            inserted.options[item.index()].status = item.status();
 			return inserted;
         }
 
@@ -168,8 +201,8 @@ namespace vantagefx {
 			if (options.empty()) return;
 			QSet<int64_t> removed;
 			for (auto &current : _items) {
-				for (auto &item : current.ids) {
-					if (item != 0) removed.insert(item);
+				for (auto &item : current.options) {
+					if (item.id != 0) removed.insert(item.id);
 				}
 			}
 			for(auto &item: options) {
@@ -213,11 +246,11 @@ namespace vantagefx {
                 QVector<int> roles;
 				auto empty = 0;
 				for(auto j = 0; j < 4; ++j) {
-					if (removed.contains(current.ids[j])) {
-						current.ids[j] = 0;
+					if (removed.contains(current.options[j].id)) {
+						current.options[j].id = 0;
 						roles.push_back(Option30Role + j);
 					}
-					if (current.ids[j] == 0) {
+					if (current.options[j].id == 0) {
 						empty++;
 					}
 				}
@@ -238,7 +271,7 @@ namespace vantagefx {
 			for (auto i = 0; i < _items.size(); ++i) {
 				auto &current = _items[i];
 				for (auto j = 0; j < 4; ++j) {
-					if (current.ids[item.index()] == item.optionId()) {
+					if (current.options[item.index()].id == item.optionId()) {
 						dataChanged(index(i), index(i), updateOption(current, item));
 					}
 				}
@@ -251,5 +284,6 @@ namespace vantagefx {
             }
             return 0;
         }
-    }
+
+	}
 }
