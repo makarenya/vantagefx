@@ -53,107 +53,43 @@ Rectangle {
 
     Binding { target: model; property: "threshold"; value: threshold.text }
 
-    Rectangle {
-      Layout.preferredWidth: 70
-      height: 20
+    Repeater {
+      model: options
 
-      Button {
-        width: 50
+      delegate: Rectangle {
+        Layout.preferredWidth: 90
         height: 20
-        visible: model.option_30 > 0
-        text: "30"
-        onClicked: root.options.select(model.option_30)
-      }
 
-      Rectangle {
-        anchors.right: parent.right
-        y: 3
-        width: 14
-        height: 14
-        border {
-          width: 1
-          color: "#000000"
+        Button {
+          width: 50
+          height: 20
+          visible: model.id > 0
+          text: model.name
+          onClicked: root.options.select(model.id)
         }
-        visible: model.option_30 > 0
-        color: model.color_30
-      }
-    }
 
-    Rectangle {
-      Layout.preferredWidth: 70
-      height: 20
+        Rectangle {
+          anchors.right: parent.right
+          y: 1
+          width: 30
+          height: 18
+          border {
+            width: 1
+            color: "#000000"
+          }
+          visible: model.id > 0
+          color: model.color
 
-      Button {
-        width: 50
-        height: 20
-        visible: model.option_60 > 0
-        text: "60"
-        onClicked: root.options.select(model.option_60)
-      }
-
-      Rectangle {
-        anchors.right: parent.right
-        y: 3
-        width: 14
-        height: 14
-        border {
-          width: 1
-          color: "#000000"
+          Text {
+            width: 30
+            height: 18
+            text: model.bet
+            renderType: Text.NativeRendering
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            color: Qt.colorEqual(model.color, "#ffffff") ? "black" : "white"
+          }
         }
-        visible: model.option_60 > 0
-        color: model.color_60
-      }
-    }
-
-    Rectangle {
-      Layout.preferredWidth: 70
-      height: 20
-
-      Button {
-        width: 50
-        height: 20
-        visible: model.option_120 > 0
-        text: "2m"
-        onClicked: root.options.select(model.option_120)
-      }
-
-      Rectangle {
-        anchors.right: parent.right
-        y: 3
-        width: 14
-        height: 14
-        border {
-          width: 1
-          color: "#000000"
-        }
-        visible: model.option_120 > 0
-        color: model.color_120
-      }
-    }
-
-    Rectangle {
-      Layout.preferredWidth: 70
-      height: 20
-
-      Button {
-        width: 50
-        height: 20
-        visible: model.option_300 > 0
-        text: "5m"
-        onClicked: root.options.select(model.option_300)
-      }
-
-      Rectangle {
-        anchors.right: parent.right
-        y: 3
-        width: 14
-        height: 14
-        border {
-          width: 1
-          color: "#000000"
-        }
-        visible: model.option_300 > 0
-        color: model.color_300
       }
     }
 

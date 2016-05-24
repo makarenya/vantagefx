@@ -5,7 +5,7 @@ import "views"
 
 Window {
     visible: true
-    width: 760
+    width: 800
     height: 520
 
     Login {

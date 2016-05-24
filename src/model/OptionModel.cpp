@@ -15,7 +15,8 @@ namespace vantagefx {
 	              _seconds(0),
 			      _returnValue(0),
 	              _price(0),
-			      _checked(false), 
+			      _checked(false),
+			      _currentBet(10), 
 			      _status(Idle),
 			      _openTime()
 			{}
@@ -65,7 +66,12 @@ namespace vantagefx {
             _close = close;
         }
 
-		void OptionModel::setChecked(bool checked)
+	    void OptionModel::setCurrentBet(int bet)
+	    {
+			_currentBet = bet;
+	    }
+
+	    void OptionModel::setChecked(bool checked)
 		{
 			_checked = checked;
 		}

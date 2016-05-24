@@ -22,7 +22,7 @@ namespace vantagefx {
 
             Q_PROPERTY(QString mode READ mode NOTIFY modeChanged);
 			Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
-            Q_PROPERTY(OptionsListModel *options READ options NOTIFY optionsChanged)
+            Q_PROPERTY(AssetListModel *options READ options NOTIFY optionsChanged)
             Q_PROPERTY(QString login READ login WRITE setLogin NOTIFY loginChanged)
             Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
             Q_PROPERTY(QString server READ server WRITE setServer NOTIFY serverChanged)
@@ -38,7 +38,6 @@ namespace vantagefx {
 
 			Q_PROPERTY(int firstBet READ firstBet NOTIFY firstBetChanged)
 			Q_PROPERTY(int betGrowth READ betGrowth NOTIFY betGrowthChanged)
-			Q_PROPERTY(int currentBet READ currentBet NOTIFY currentBetChanged)
 
         public:
             explicit MainViewModel(VantageFxService &servie);
@@ -47,14 +46,12 @@ namespace vantagefx {
 
             virtual ~MainViewModel();
 
-            OptionsListModel *options() { return &_options; }
+            AssetListModel *options() { return &_options; }
 
             Q_INVOKABLE void doLogin();
             Q_INVOKABLE void processLogin();
             Q_INVOKABLE void cancelLogin();
             Q_INVOKABLE void view(long long optionId);
-			Q_INVOKABLE void buyHigh();
-			Q_INVOKABLE void buyLow();
 			Q_INVOKABLE void selectOption(long long optionId, int seconds, bool checked);
 			Q_INVOKABLE void setBet(int firstBet, int betGrowth);
 
@@ -98,15 +95,7 @@ namespace vantagefx {
 
             int firstBet() const;
 
-            void setFirstBet(int firstBet);
-
             int betGrowth() const;
-
-            void setBetGrowth(int betGrowth);
-
-            int currentBet() const;
-
-            void setCurrentBet(int currentBet);
 
         public slots:
 
@@ -144,8 +133,6 @@ namespace vantagefx {
 
 			void betGrowthChanged();
 
-			void currentBetChanged();
-
 		public:
 
 			void doLoad();
@@ -175,7 +162,7 @@ namespace vantagefx {
 
 			void makePurchases(QMap<int64_t, model::OptionModel> &options);
 			
-			OptionsListModel _options;
+			AssetListModel _options;
             QString _mode;
 			QString _description;
             QString _login;
@@ -188,14 +175,9 @@ namespace vantagefx {
             QString _money;
 
 			model::OptionModel _currentOption;
-			int64_t _optionId;
 			QString _optionName;
 			int _optionReturn;
 			QString _optionExpire;
-
-			int _firstBet;
-			int _betGrowth;
-			int _currentBet;
 
 			VantageFxService &_service;
 			model::VantageFxModel _model;
@@ -227,11 +209,9 @@ namespace vantagefx {
 
 		inline const QString &MainViewModel::optionExpire() const { return _optionExpire; }
 
-        inline int MainViewModel::firstBet() const { return _firstBet; }
+        inline int MainViewModel::firstBet() const { return _model.firstBet(); }
 
-        inline int MainViewModel::betGrowth() const { return _betGrowth; }
-
-        inline int MainViewModel::currentBet() const { return _currentBet; }
+        inline int MainViewModel::betGrowth() const { return _model.betGrowth(); }
     }
 }
 

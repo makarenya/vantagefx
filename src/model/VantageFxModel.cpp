@@ -15,7 +15,9 @@ namespace vantagefx {
 			      _positionClosed(0),
 	              _instrumentTypeId(0),
 	              _accountId(0),
-	              _currentMoney(0)
+	              _currentMoney(0),
+			      _firstBet(10),
+			      _betGrowth(115)
 	    {}
 
 	    void VantageFxModel::setLut(api::GwtObjectPtr lut) {
@@ -67,7 +69,29 @@ namespace vantagefx {
 			return _rates[name];
 		}
 
-		int VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
+		void VantageFxModel::setFirstBet(int firstBet)
+		{
+			for(auto &opt : _options) {
+				if (opt.currentBet() == _firstBet) {
+					opt.setCurrentBet(firstBet);
+				}
+			}
+			_firstBet = firstBet;
+		}
+
+		int VantageFxModel::firstBet() const {
+			return _firstBet;
+		}
+
+		void VantageFxModel::setBetGrowth(int betGrowth) {
+			_betGrowth = betGrowth;
+		}
+
+		int VantageFxModel::betGrowth() const {
+			return _betGrowth;
+		}
+
+		void VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
 		{
 			_currentMoney = refresh->item("money/value").toLong();
 
@@ -117,8 +141,6 @@ namespace vantagefx {
 				_options.remove(id);
 			}
 
-			auto result = 0;
-
 			for(auto &pos : refresh->query("positionUpdates/[positionStatus={0}]", { GwtValue(_positionClosed) })) {
 				auto obj = pos.value.toObject();
 				auto id = obj->value("transactionId").toLong();
@@ -127,22 +149,27 @@ namespace vantagefx {
 				auto transaction = std::move(_openedTransactions[id]);
                 transaction.close(returned);
 				_openedTransactions.remove(id);
+
 				if (_options.contains(transaction.optionId())) {
                     auto &option = _options[transaction.optionId()];
 					if (transaction.isWon())
 					{
 						option.closeSuccess();
-						++result;
+						option.setCurrentBet(firstBet());
 					}
 					else if (transaction.isLoose()){
 						option.closeFail();
-						--result;
+
+						auto newBet = option.currentBet() + option.currentBet() * betGrowth() / 100;
+						if (option.currentBet() == 500) newBet = firstBet();
+						else if (newBet > 500) newBet = 500;
+						option.setCurrentBet(newBet);
 					}
 					else option.closeReturn();
                 }
+
 				_closedTransactions.push_back(std::move(transaction));
 			}
-			return result;
 		}
 
 		QMap<int64_t, OptionModel> &VantageFxModel::options() {
@@ -268,6 +295,6 @@ namespace vantagefx {
 				}
 			}
 		}
-    }
+	}
 }
 

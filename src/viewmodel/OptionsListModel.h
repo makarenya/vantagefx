@@ -19,30 +19,114 @@ namespace vantagefx {
             int64_t id;
             model::OptionModel::OptionStatus status;
             int bet;
+			int seconds;
 
+			QString name() const;
             QColor color() const;
         };
 
+		class OptionsListModel : public QAbstractListModel
+		{
+			Q_OBJECT
 
-        struct AssetListItem {
+		public:
 
-			AssetListItem();
+			enum RoleNames
+			{
+				IdRole = Qt::UserRole + 1,
+				StatusRole,
+				NameRole,
+				ColorRole,
+				BetRole
+			};
 
-            int assetId;
-            QString name;
-            int moneyBack;
-            int rateHi;
-            int rateLow;
-            double price;
-			QString market;
-			QString subMarket;
-			QString lineId;
-			int threshold;
+			explicit OptionsListModel(QObject *parent);
+			int rowCount(const QModelIndex &parent) const override;
+			QVariant data(const QModelIndex &index, int role) const override;
+			QHash<int, QByteArray> roleNames() const override;
+			const OptionItem &option(int index) const;
+			void updateOption(model::OptionModel &item);
+			void ids(QSet<int64_t> &list);
+			bool remove(QSet<int64_t> &list);
 
-            QVector<OptionItem> options;
+			void setAssetId(int assetId);
+
+			int assetId() const;
+
+			void setName(QString name);
+
+			QString name() const;
+
+			void setMoneyBack(int moneyBack);
+
+			int moneyBack() const;
+
+			void setRateHi(int rateHi);
+
+			int rateHi() const;
+
+			void setRateLow(int rateLow);
+
+			int rateLow() const;
+
+			void setPrice(double price);
+
+			double price() const;
+
+			void setMarket(QString market);
+
+			QString market() const;
+
+			void setSubMarket(QString subMarket);
+
+			QString subMarket() const;
+
+			void setLineId(QString lineId);
+
+			QString lineId() const;
+
+			void setThreshold(int threshold);
+
+			int threshold() const;
+
+		private:
+
+			int _assetId;
+			QString _name;
+			int _moneyBack;
+			int _rateHi;
+			int _rateLow;
+			double _price;
+			QString _market;
+			QString _subMarket;
+			QString _lineId;
+			int _threshold;
+
+			QVector<OptionItem> _options;
 		};
 
-        class OptionsListModel : public QAbstractListModel
+		inline int OptionsListModel::assetId() const { return _assetId; }
+
+		inline QString OptionsListModel::name() const { return _name; }
+
+		inline int OptionsListModel::moneyBack() const { return _moneyBack; }
+
+		inline int OptionsListModel::rateHi() const { return _rateHi; }
+
+		inline int OptionsListModel::rateLow() const { return _rateLow; }
+
+		inline double OptionsListModel::price() const { return _price; }
+
+		inline QString OptionsListModel::market() const { return _market; }
+
+		inline QString OptionsListModel::subMarket() const { return _subMarket; }
+
+		inline QString OptionsListModel::lineId() const { return _lineId; }
+
+		inline int OptionsListModel::threshold() const { return _threshold; }
+
+
+        class AssetListModel : public QAbstractListModel
         {
             Q_OBJECT
 
@@ -55,18 +139,11 @@ namespace vantagefx {
                 RateLowRole,
                 RateHiRole,
                 PriceRole,
-                Option30Role,
-                Option60Role,
-                Option120Role,
-                Option300Role,
 				ThresholdRole,
-				Color30Role,
-				Color60Role,
-				Color120Role,
-				Color300Role
+				OptionsRole
             };
 
-	        explicit OptionsListModel(QObject *parent = nullptr);
+	        explicit AssetListModel(QObject *parent = nullptr);
 
 			Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -83,9 +160,9 @@ namespace vantagefx {
 			int threshold(int assetId);
 
         private:
-			static QVector<int> updateOption(AssetListItem &current, model::OptionModel &item);
-			static AssetListItem createOption(model::OptionModel &item, std::string lineId);
-            QList<AssetListItem> _items;
+			static QVector<int> updateOption(OptionsListModel *current, model::OptionModel &item);
+			OptionsListModel *createOption(model::OptionModel &item, std::string lineId);
+            QList<OptionsListModel *> _items;
 			QMap<int64_t, model::OptionModel> *_options;
         };
     }

@@ -62,14 +62,6 @@ ColumnLayout {
       text: "Update bet"
       onClicked: root.setBet(parseInt(firstBet.text), parseInt(betGrowth.text));
     }
-
-    Text {
-      x: 390
-      y: 4
-      width: 100
-      text: "Current bet: " + root.currentBet
-      renderType: Text.NativeRendering
-    }
   }
 
   Rectangle {

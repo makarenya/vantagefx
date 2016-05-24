@@ -14,9 +14,6 @@ namespace vantagefx {
                 : _mode(""),
 			      _description("Loading stuff..."),
 				  _loggedIn(false),
-                  _firstBet(10),
-                  _betGrowth(115),
-			      _currentBet(10),
 			      _service(service),
 			      _refreshTimeout(-1),
 			      _lastHour(-1)
@@ -81,19 +78,7 @@ namespace vantagefx {
 		void MainViewModel::refreshed(RefreshContextPtr ctx)
         {
             if (mode().isEmpty()) setMode("view");
-			auto result =  _model.updateOptions(ctx->refresh());
-			if (result > 0) {
-				setCurrentBet(firstBet());
-			}
-			if (result < 0) {
-				auto newBet = currentBet() + currentBet() * betGrowth() / 100;
-				if (currentBet() == 500) newBet = firstBet();
-				else if (newBet > 500) newBet = 500;
-
-				setCurrentBet(newBet);
-			}
-
-
+			_model.updateOptions(ctx->refresh());
 			setMoney(_model.currentMoney());
 			makePurchases(_model.options());
 
@@ -203,20 +188,6 @@ namespace vantagefx {
             }
         }
 
-        void MainViewModel::buyHigh()
-        {
-			setMode("");
-			setDescription("Process purchase...");
-			doPurchase(currentOption().optionId(), _currentBet * 100, _model.rateId("Put"));
-		}
-
-        void MainViewModel::buyLow()
-        {
-			setMode("");
-			setDescription("Process purchase...");
-			doPurchase(currentOption().optionId(), _currentBet * 100, _model.rateId("Call"));
-		}
-
 	    void MainViewModel::selectOption(int64_t optionId, int seconds, bool checked)
         {
 			auto &option = _model.optionInfo(optionId);
@@ -226,11 +197,11 @@ namespace vantagefx {
 
 	    void MainViewModel::setBet(int firstBet, int betGrowth)
         {
-			if (_firstBet == currentBet()) {
-				setCurrentBet(_firstBet);
-			}
-			setFirstBet(firstBet);
-			setBetGrowth(betGrowth);
+			_model.setFirstBet(firstBet);
+			_model.setBetGrowth(betGrowth);
+            _options.updateOptions(_model.options());
+			emit firstBetChanged();
+			emit betGrowthChanged();
         }
 
 	    void MainViewModel::setMode(const QString &mode)
@@ -323,12 +294,12 @@ namespace vantagefx {
 				if (std::abs(threshold) < 50) threshold = 71;
 
 				if (option.highRateValue() >= std::abs(threshold)) {
-					doPurchase(option.optionId(), _currentBet * 100, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
+					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
 					_refreshTimeout = -1;
 					return;
 				}
 				if (option.lowRateValue() >= std::abs(threshold)) {
-					doPurchase(option.optionId(), _currentBet * 100, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
+					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
 					_refreshTimeout = -1;
 					return;
 				}
@@ -339,26 +310,5 @@ namespace vantagefx {
         {
             return _money;
         }
-
-		void MainViewModel::setFirstBet(int firstBet)
-		{
-			if (_firstBet == firstBet) return;
-			_firstBet = firstBet;
-			emit firstBetChanged();
-		}
-
-		void MainViewModel::setBetGrowth(int betGrowth)
-		{
-			if (_betGrowth == betGrowth) return;
-			_betGrowth = betGrowth;
-			emit betGrowthChanged();
-		}
-
-		void MainViewModel::setCurrentBet(int currentBet)
-		{
-			if (_currentBet == currentBet) return;
-			_currentBet = currentBet;
-			emit currentBetChanged();
-		}
 	}
 }

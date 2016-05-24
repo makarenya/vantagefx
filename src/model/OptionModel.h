@@ -47,6 +47,8 @@ namespace vantagefx {
 
 			int highRateValue() const;
 
+			int currentBet() const;
+
 			QDateTime close() const;
 
             void setOptionId(int64_t optionId);
@@ -62,6 +64,8 @@ namespace vantagefx {
             void setPrice(double price);
 
             void setClose(QDateTime close);
+
+			void setCurrentBet(int bet);
 
 			OptionStatus status() const;
 
@@ -83,6 +87,7 @@ namespace vantagefx {
             double _price;
             QDateTime _close;
             bool _checked;
+			int _currentBet;
 			OptionStatus _status;
 			QDateTime _openTime;
         };
@@ -112,6 +117,8 @@ namespace vantagefx {
         inline int64_t OptionModel::optionId() const { return _optionId; }
 
         inline bool OptionModel::checked() const { return _checked; }
+
+		inline int OptionModel::currentBet() const { return _currentBet; }
     }
 }
 

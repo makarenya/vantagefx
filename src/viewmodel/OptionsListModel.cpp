@@ -16,6 +16,14 @@ namespace vantagefx {
                   bet(0)
         {}
 
+		QString OptionItem::name() const
+		{
+			if (seconds >= 120) {
+				return QString("%1m").arg(seconds / 60);
+			}
+			return QString("%1").arg(seconds);
+		}
+
         QColor OptionItem::color() const
         {
             switch (status) {
@@ -34,22 +42,156 @@ namespace vantagefx {
             }
         }
 
-		AssetListItem::AssetListItem()
-				: assetId(0),
-				  moneyBack(0),
-				  rateHi(0),
-				  rateLow(0),
-				  price(0.0),
-				  threshold(71),
-                  options({ OptionItem(), OptionItem(), OptionItem(), OptionItem() })
-		{}
+	    OptionsListModel::OptionsListModel(QObject *parent)
+			: QAbstractListModel(parent),
+			  _assetId(0),
+			  _moneyBack(0),
+			  _rateHi(0),
+			  _rateLow(0),
+			  _price(0.0),
+			  _threshold(71),
+			  _options({ OptionItem(), OptionItem(), OptionItem(), OptionItem() })
+        {}
 
-        OptionsListModel::OptionsListModel(QObject *parent)
+	    int OptionsListModel::rowCount(const QModelIndex &parent) const
+        {
+			return _options.size();
+        }
+
+	    QVariant OptionsListModel::data(const QModelIndex &index, int role) const
+        {
+			if (!index.isValid()) return QVariant();
+			if (index.row() >= _options.size() || index.column() != 0) return QVariant();
+			switch(role) {
+			case IdRole: return _options[index.row()].id;
+			case StatusRole: return _options[index.row()].status;
+			case NameRole: return _options[index.row()].name();
+			case ColorRole: return _options[index.row()].color();
+			case BetRole: return _options[index.row()].bet;
+			}
+			return QVariant();
+        }
+
+	    QHash<int, QByteArray> OptionsListModel::roleNames() const
+		{
+			QHash<int, QByteArray> result;
+			result[IdRole] = "id";
+			result[StatusRole] = "status";
+			result[NameRole] = "name";
+			result[ColorRole] = "color";
+			result[BetRole] = "bet";
+			return result;
+		}
+
+		const OptionItem &OptionsListModel::option(int index) const
+		{
+			return _options[index];
+		}
+
+	    void OptionsListModel::updateOption(model::OptionModel &item)
+        {
+	        auto i = item.index();
+			auto &result = _options[i];
+			QVector<int> roles;
+			if (result.id != item.optionId()) {
+				result.id = item.optionId();
+				roles.push_back(IdRole);
+			}
+			if (result.seconds != item.seconds()) {
+				result.seconds = item.seconds();
+				roles.push_back(NameRole);
+			}
+			if (result.status != item.status()) {
+				result.status = item.status();
+				roles.push_back(StatusRole);
+				roles.push_back(ColorRole);
+			}
+			if (result.bet != item.currentBet()) {
+				result.bet = item.currentBet();
+				roles.push_back(BetRole);
+			}
+			dataChanged(index(i), index(i), roles);
+        }
+
+	    void OptionsListModel::ids(QSet<int64_t> &list)
+        {
+			for (auto &item : _options) {
+				if (item.id != 0) list.insert(item.id);
+			}
+        }
+
+	    bool OptionsListModel::remove(QSet<int64_t>& list)
+        {
+	        auto empty = 0;
+			for (auto j = 0; j < _options.size(); ++j) {
+				auto &option = _options[j];
+				if (list.contains(_options[j].id)) {
+					option.id = 0;
+					option.status = model::OptionModel::Idle;
+					option.bet = 0;
+					dataChanged(index(j), index(j), { IdRole, StatusRole, ColorRole, BetRole });
+				}
+				if (_options[j].id == 0) empty++;
+			}
+			return empty == _options.size();
+        }
+
+	    void OptionsListModel::setAssetId(int assetId)
+        {
+	        _assetId = assetId;
+        }
+
+	    void OptionsListModel::setName(QString name)
+        {
+	        _name = name;
+        }
+
+	    void OptionsListModel::setMoneyBack(int moneyBack)
+        {
+	        _moneyBack = moneyBack;
+        }
+
+	    void OptionsListModel::setRateHi(int rateHi)
+        {
+	        _rateHi = rateHi;
+        }
+
+	    void OptionsListModel::setRateLow(int rateLow)
+        {
+	        _rateLow = rateLow;
+        }
+
+	    void OptionsListModel::setPrice(double price)
+        {
+	        _price = price;
+        }
+
+	    void OptionsListModel::setMarket(QString market)
+        {
+	        _market = market;
+        }
+
+	    void OptionsListModel::setSubMarket(QString subMarket)
+        {
+	        _subMarket = subMarket;
+        }
+
+	    void OptionsListModel::setLineId(QString lineId)
+        {
+	        _lineId = lineId;
+        }
+
+	    void OptionsListModel::setThreshold(int threshold)
+        {
+	        _threshold = threshold;
+        }
+
+	    AssetListModel::AssetListModel(QObject *parent)
                 : QAbstractListModel(parent), 
 			      _options(nullptr)
         {}
 		
-		QHash<int, QByteArray> OptionsListModel::roleNames() const
+		QHash<int, QByteArray> AssetListModel::roleNames() const
         {
             QHash<int, QByteArray> roles;
             roles[Qt::DisplayRole] = "display";
@@ -59,19 +201,12 @@ namespace vantagefx {
             roles[RateLowRole] = "low";
             roles[RateHiRole] = "high";
             roles[PriceRole] = "price";
-            roles[Option30Role] = "option_30";
-            roles[Option60Role] = "option_60";
-            roles[Option120Role] = "option_120";
-            roles[Option300Role] = "option_300";
             roles[ThresholdRole] = "threshold";
-			roles[Color30Role] = "color_30";
-			roles[Color60Role] = "color_60";
-			roles[Color120Role] = "color_120";
-			roles[Color300Role] = "color_300";
+			roles[OptionsRole] = "options";
 			return roles;
         }
 
-        QVariant OptionsListModel::data(const QModelIndex &index, int role) const
+        QVariant AssetListModel::data(const QModelIndex &index, int role) const
         {
             if (!index.isValid()) return QVariant();
             if (index.row() > _items.size()) return QVariant();
@@ -81,129 +216,96 @@ namespace vantagefx {
             switch(role) {
                 case Qt::DisplayRole:
                 case NameRole:
-                    return option.name;
+                    return option->name();
                 case AssetIdRole:
-                    return option.assetId;
+                    return option->assetId();
                 case MoneyBackRole:
-                    return option.moneyBack;
+                    return option->moneyBack();
                 case RateLowRole:
-                    return option.rateLow;
+                    return option->rateLow();
                 case RateHiRole:
-                    return option.rateHi;
+                    return option->rateHi();
                 case PriceRole:
-                    return option.price;
-                case Option30Role:
-                    return option.options[0].id;
-                case Option60Role:
-					return option.options[1].id;
-				case Option120Role:
-					return option.options[2].id;
-				case Option300Role:
-					return option.options[3].id;
+                    return option->price();
 				case ThresholdRole:
-                    return option.threshold;
-				case Color30Role:
-					return option.options[0].color();
-				case Color60Role:
-					return option.options[1].color();
-				case Color120Role:
-					return option.options[2].color();
-				case Color300Role:
-					return option.options[3].color();
+                    return option->threshold();
+				case OptionsRole:
+					return QVariant::fromValue(option);
 				default:
                     return QVariant();
             }
         }
 
-        bool OptionsListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+        bool AssetListModel::setData(const QModelIndex &index, const QVariant &value, int role)
         {
             if (!index.isValid()) return false;
             if (index.row() > _items.size()) return false;
             if (role != ThresholdRole) return false;
-            _items[index.row()].threshold = value.toInt();
+            _items[index.row()]->setThreshold(value.toInt());
             return true;
         }
 
-		void OptionsListModel::select(long long optionId)
+		void AssetListModel::select(long long optionId)
 		{
-			for(auto i = 0; i < _items.size(); ++i) {
-				auto &item = _items[i];
-				for(auto j = 0; j < 4; ++j) {
-					auto currentId = item.options[j].id;
-					if (currentId == optionId) {
-						auto &option = (*_options)[currentId];
-						option.toggle();
-						dataChanged(index(i), index(i), updateOption(item, option));
-						return;
-					}
-				}
-			}
+			auto &option = (*_options)[optionId];
+			option.toggle();
+			updateOption(option);
 		}
 
-        int OptionsListModel::rowCount(const QModelIndex &parent) const
+        int AssetListModel::rowCount(const QModelIndex &parent) const
         {
             auto cnt = _items.size();
 			return cnt;
         }
 
-		QVector<int> OptionsListModel::updateOption(AssetListItem &current, model::OptionModel &item)
+		QVector<int> AssetListModel::updateOption(OptionsListModel *current, model::OptionModel &item)
         {
 			QVector<int> roles;
-			if (item.asset().name() != current.name) {
-				current.name = item.asset().name();
+			if (item.asset().name() != current->name()) {
+				current->setName(item.asset().name());
 				roles.push_back(NameRole);
 			}
-			if (item.moneyBack() != current.moneyBack) {
-				current.moneyBack = item.moneyBack();
+			if (item.moneyBack() != current->moneyBack()) {
+				current->setMoneyBack(item.moneyBack());
 				roles.push_back(MoneyBackRole);
 			}
-			if (item.lowRateValue() != current.rateLow) {
-				current.rateLow = item.lowRateValue();
+			if (item.lowRateValue() != current->rateLow()) {
+				current->setRateLow(item.lowRateValue());
 				roles.push_back(RateLowRole);
 			}
-			if (item.highRateValue() != current.rateHi) {
-				current.rateHi = item.highRateValue();
+			if (item.highRateValue() != current->rateHi()) {
+				current->setRateHi(item.highRateValue());
 				roles.push_back(RateHiRole);
 			}
-			if (item.price() != current.price) {
-				current.price = item.price();
+			if (item.price() != current->price()) {
+				current->setPrice(item.price());
 				roles.push_back(PriceRole);
 			}
-			if (item.optionId() != current.options[item.index()].id) {
-				current.options[item.index()].id = item.optionId();
-				roles.push_back(Option30Role + item.index());
-			}
-			if (item.status() != current.options[item.index()].status) {
-				current.options[item.index()].status = item.status();
-				roles.push_back(Color30Role + item.index());
-			}
+			current->updateOption(item);
 			return roles;
         }
 
-		AssetListItem OptionsListModel::createOption(model::OptionModel &item, std::string lineId)
+		OptionsListModel *AssetListModel::createOption(model::OptionModel &item, std::string lineId)
         {
-			AssetListItem inserted;
-			inserted.lineId = lineId.c_str();
-			inserted.assetId = item.asset().id();
-			inserted.name = item.asset().name();
-			inserted.moneyBack = item.moneyBack();
-			inserted.rateLow = item.lowRateValue();
-			inserted.rateHi = item.highRateValue();
-			inserted.price = item.price();
-			inserted.options[item.index()].id = item.optionId();
-            inserted.options[item.index()].status = item.status();
+	        auto inserted = new OptionsListModel(this);
+			inserted->setLineId(lineId.c_str());
+			inserted->setAssetId(item.asset().id());
+			inserted->setName(item.asset().name());
+			inserted->setMoneyBack(item.moneyBack());
+			inserted->setRateLow(item.lowRateValue());
+			inserted->setRateHi(item.highRateValue());
+			inserted->setPrice(item.price());
+			inserted->updateOption(item);
 			return inserted;
         }
 
-        void OptionsListModel::updateOptions(QMap<int64_t, model::OptionModel> &options)
+        void AssetListModel::updateOptions(QMap<int64_t, model::OptionModel> &options)
         {
 			_options = &options;
 			if (options.empty()) return;
 			QSet<int64_t> removed;
 			for (auto &current : _items) {
-				for (auto &item : current.options) {
-					if (item.id != 0) removed.insert(item.id);
-				}
+				current->ids(removed);
 			}
 			for(auto &item: options) {
 	            auto added = false;
@@ -215,7 +317,7 @@ namespace vantagefx {
 
                 for (auto i = 0; i < _items.size(); ++i) {
                     auto &current = _items[i];
-                    if (item.asset().id() == current.assetId) {
+                    if (item.asset().id() == current->assetId()) {
 						added = true;
 						auto roles = updateOption(current, item);
 						removed.remove(item.optionId());
@@ -224,7 +326,7 @@ namespace vantagefx {
 						}
 						break;
                     }
-                    else if (lineId.c_str() < current.lineId) {
+                    else if (lineId.c_str() < current->lineId()) {
 						added = true;
 						auto inserted = createOption(item, lineId);
                         beginInsertRows(QModelIndex(), i, i);
@@ -244,19 +346,9 @@ namespace vantagefx {
             for (auto i = 0; i < _items.size(); ++i) {
                 auto &current = _items[i];
                 QVector<int> roles;
-				auto empty = 0;
-				for(auto j = 0; j < 4; ++j) {
-					if (removed.contains(current.options[j].id)) {
-						current.options[j].id = 0;
-						roles.push_back(Option30Role + j);
-					}
-					if (current.options[j].id == 0) {
-						empty++;
-					}
-				}
-				
-				if (empty == 4) {
+				if (current->remove(removed)) {
 					beginRemoveRows(QModelIndex(), i, i);
+					delete _items[i];
 					_items.removeAt(i--);
 					endRemoveRows();
 				}
@@ -266,24 +358,21 @@ namespace vantagefx {
             }
         }
 
-		void OptionsListModel::updateOption(model::OptionModel &item)
+		void AssetListModel::updateOption(model::OptionModel &item)
 		{
 			for (auto i = 0; i < _items.size(); ++i) {
-				auto &current = _items[i];
-				for (auto j = 0; j < 4; ++j) {
-					if (current.options[item.index()].id == item.optionId()) {
-						dataChanged(index(i), index(i), updateOption(current, item));
-					}
+				if (_items[i]->option(item.index()).id == item.optionId())
+				{
+					_items[i]->updateOption(item);
 				}
 			}
 		}
 
-		int OptionsListModel::threshold(int assetId) {
+		int AssetListModel::threshold(int assetId) {
             for(auto item : _items) {
-                if (item.assetId == assetId) return item.threshold;
+                if (item->assetId() == assetId) return item->threshold();
             }
             return 0;
         }
-
 	}
 }
