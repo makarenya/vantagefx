@@ -22,7 +22,9 @@ namespace vantagefx {
 			int seconds;
 
 			QString name() const;
-            QColor color() const;
+            QColor background() const;
+			QColor border() const;
+			QColor foreground() const;
         };
 
 		class OptionsListModel : public QAbstractListModel
@@ -34,9 +36,11 @@ namespace vantagefx {
 			enum RoleNames
 			{
 				IdRole = Qt::UserRole + 1,
-				StatusRole,
 				NameRole,
-				ColorRole,
+				StatusRole,
+				BackgroundRole,
+				BorderRole,
+				ForegroundRole,
 				BetRole
 			};
 

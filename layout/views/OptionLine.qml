@@ -75,10 +75,10 @@ Rectangle {
           height: 18
           border {
             width: 1
-            color: "#000000"
+            color: model.border
           }
           visible: model.id > 0
-          color: model.color
+          color: model.background
 
           Text {
             width: 30
@@ -87,7 +87,7 @@ Rectangle {
             renderType: Text.NativeRendering
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            color: Qt.colorEqual(model.color, "#ffffff") ? "black" : "white"
+            color: model.foreground
           }
         }
       }

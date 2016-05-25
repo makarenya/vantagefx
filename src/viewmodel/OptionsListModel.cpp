@@ -13,8 +13,9 @@ namespace vantagefx {
         OptionItem::OptionItem()
                 : id(0),
                   status(model::OptionModel::Idle),
-                  bet(0)
-        {}
+                  bet(0), 
+				  seconds(0)
+                {}
 
 		QString OptionItem::name() const
 		{
@@ -24,25 +25,61 @@ namespace vantagefx {
 			return QString("%1").arg(seconds);
 		}
 
-        QColor OptionItem::color() const
+        QColor OptionItem::background() const
         {
             switch (status) {
                 case model::OptionModel::Idle:
                     return QColor(Qt::white);
                 case model::OptionModel::Selected:
-                    return QColor("#1882d7");
+                    return QColor("#e4f0fa");
                 case model::OptionModel::Processing:
-                    return QColor(Qt::black);
+					return QColor("#565656");
                 case model::OptionModel::Successful:
-                    return QColor(Qt::green);
+					return QColor("#5bff5b");
                 case model::OptionModel::Failed:
-                    return QColor(Qt::red);
+					return QColor("#ff2828");
                 default:
-                    return QColor(Qt::yellow);
+					return QColor("#f7ff28");
             }
         }
 
-	    OptionsListModel::OptionsListModel(QObject *parent)
+		QColor OptionItem::border() const
+		{
+			switch (status) {
+			case model::OptionModel::Idle:
+				return QColor("#b4b4b5");
+			case model::OptionModel::Selected:
+				return QColor("#0076d4");
+			case model::OptionModel::Processing:
+				return QColor(Qt::black);
+			case model::OptionModel::Successful:
+				return QColor("#009f00");
+			case model::OptionModel::Failed:
+				return QColor("#810000");
+			default:
+				return QColor("#b6bd00");
+			}
+		}
+		
+		QColor OptionItem::foreground() const
+		{
+			switch (status) {
+			case model::OptionModel::Idle:
+				return QColor(Qt::black);
+			case model::OptionModel::Selected:
+				return QColor(Qt::black);
+			case model::OptionModel::Processing:
+				return QColor(Qt::white);
+			case model::OptionModel::Successful:
+				return QColor(Qt::black);
+			case model::OptionModel::Failed:
+				return QColor(Qt::white);
+			default:
+				return QColor(Qt::black);
+			}
+		}
+		
+		OptionsListModel::OptionsListModel(QObject *parent)
 			: QAbstractListModel(parent),
 			  _assetId(0),
 			  _moneyBack(0),
@@ -66,7 +103,9 @@ namespace vantagefx {
 			case IdRole: return _options[index.row()].id;
 			case StatusRole: return _options[index.row()].status;
 			case NameRole: return _options[index.row()].name();
-			case ColorRole: return _options[index.row()].color();
+			case BackgroundRole: return _options[index.row()].background();
+			case BorderRole: return _options[index.row()].border();
+			case ForegroundRole: return _options[index.row()].foreground();
 			case BetRole: return _options[index.row()].bet;
 			}
 			return QVariant();
@@ -76,9 +115,11 @@ namespace vantagefx {
 		{
 			QHash<int, QByteArray> result;
 			result[IdRole] = "id";
-			result[StatusRole] = "status";
 			result[NameRole] = "name";
-			result[ColorRole] = "color";
+			result[StatusRole] = "status";
+			result[BackgroundRole] = "background";
+			result[BorderRole] = "border";
+			result[ForegroundRole] = "foreground";
 			result[BetRole] = "bet";
 			return result;
 		}
@@ -104,7 +145,9 @@ namespace vantagefx {
 			if (result.status != item.status()) {
 				result.status = item.status();
 				roles.push_back(StatusRole);
-				roles.push_back(ColorRole);
+				roles.push_back(BackgroundRole);
+				roles.push_back(BorderRole);
+				roles.push_back(ForegroundRole);
 			}
 			if (result.bet != item.currentBet()) {
 				result.bet = item.currentBet();
@@ -129,7 +172,7 @@ namespace vantagefx {
 					option.id = 0;
 					option.status = model::OptionModel::Idle;
 					option.bet = 0;
-					dataChanged(index(j), index(j), { IdRole, StatusRole, ColorRole, BetRole });
+					dataChanged(index(j), index(j), { IdRole, StatusRole, BackgroundRole, BorderRole, ForegroundRole, BetRole });
 				}
 				if (_options[j].id == 0) empty++;
 			}
