@@ -80,9 +80,10 @@ namespace vantagefx {
             if (mode().isEmpty()) setMode("view");
 			_model.updateOptions(ctx->refresh());
 			setMoney(_model.currentMoney());
-			makePurchases(_model.options());
 
-			_refreshTimeout = 0;
+			if (!makePurchases(_model.options())) {
+				_refreshTimeout = 0;
+			}
 		}
 
         void MainViewModel::refreshError(std::exception e)
@@ -283,11 +284,11 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    void MainViewModel::makePurchases(QMap<int64_t, model::OptionModel> &options)
+	    bool MainViewModel::makePurchases(QMap<int64_t, model::OptionModel> &options)
         {
-			if (options.empty()) return;
+			if (options.empty()) return false;
 			_options.updateOptions(options);
-			if (!_model.isLoggedIn()) return;
+			if (!_model.isLoggedIn()) return false;
 			for(auto option: options) {
 				if (option.status() != model::OptionModel::Selected) continue;
 				auto threshold = _options.threshold(option.asset().id());
@@ -295,15 +296,14 @@ namespace vantagefx {
 
 				if (option.highRateValue() >= std::abs(threshold)) {
 					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
-					_refreshTimeout = -1;
-					return;
+					return true;
 				}
 				if (option.lowRateValue() >= std::abs(threshold)) {
 					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
-					_refreshTimeout = -1;
-					return;
+					return true;
 				}
 			}
+			return false;
 		}
 
 	    const QString &MainViewModel::money() const
