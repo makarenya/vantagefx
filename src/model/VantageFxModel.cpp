@@ -279,19 +279,18 @@ namespace vantagefx {
 				file.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text);
 				QTextStream stream(&file);
 				if (file.size() == 0) {
-					stream << "Hour;30s;60s;2m;5m;Total" << endl;
+					stream << "Hour;30s W;30s F;30s P;60s W;60s F; 60s P;2m W;2m F;2m P;5m W; 5m F; 5m P;Total W;Total F;Total P" << endl;
 				}
 				auto now = QDateTime::currentDateTime().addSecs(-1000);
-				auto date = QString("%1-%2 %3")
+				auto date = QString("%1-%2-%3 %4")
+					.arg(now.date().year(), 4, 10, QChar('0'))
 					.arg(now.date().month(), 2, 10, QChar('0'))
 					.arg(now.date().day(), 2, 10, QChar('0'))
 					.arg(now.time().hour(), 2, 10, QChar('0'));
+
 				stream << date;
 				for(auto item : it.value()) {
-					stream << ";";
-					if (item.wins != 0 || item.fails != 0 || item.draws != 0) {
-						stream << item.wins << " " << item.fails << " " << item.draws;
-					}
+					stream << ";" << item.wins << ";" << item.fails << ";" << item.draws << endl;
 				}
 			}
 		}
