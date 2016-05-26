@@ -160,7 +160,7 @@ namespace vantagefx {
 					else if (transaction.isLoose()){
 						option.closeFail();
 
-						auto newBet = option.currentBet() + option.currentBet() * betGrowth() / 100;
+						auto newBet = option.currentBet() + static_cast<int>(std::round(option.currentBet() * betGrowth() / 100.0));
 						if (option.currentBet() == 500) newBet = firstBet();
 						else if (newBet > 500) newBet = 500;
 						option.setCurrentBet(newBet);
