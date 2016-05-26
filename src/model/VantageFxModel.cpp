@@ -290,8 +290,9 @@ namespace vantagefx {
 
 				stream << date;
 				for(auto item : it.value()) {
-					stream << ";" << item.wins << ";" << item.fails << ";" << item.draws << endl;
+					stream << ";" << item.wins << ";" << item.fails << ";" << item.draws;
 				}
+				stream << endl;
 			}
 		}
 	}
