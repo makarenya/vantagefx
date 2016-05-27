@@ -28,7 +28,7 @@ int start(int argc, char **argv);
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
     int argc;
-	auto argv = CommandLineToArgvW(GetCommandLine(), &argc);
+	auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	std::vector<std::vector<char>> items(argc);
 	std::vector<char*> args(argc);
 	for(auto i = 0; i < argc; ++i) {

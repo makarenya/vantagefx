@@ -7,18 +7,21 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 if (MSVC)
     set(CMAKE_PREFIX_PATH "c:/msvc_2015")
     set(Boost_USE_STATIC_LIBS ON) # only find static libs
-	set(MAKE_GUI "1")
     add_definitions(-D_WIN32_WINNT=0x0502 -DWINVER=0x0502)
     add_definitions(-D_UNICODE -DUNICODE)
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif ()
-if (MINGW)
-    set(CMAKE_EXE_LINKER_FLAGS "-mwindows -municode")
-endif ()
 
-if (MAKE_GUI) 
-    set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:\"wWinMainCRTStartup\"")
+set(MAKE_GUI "1")
+
+if (MAKE_GUI)
+	if (MSVC)
+		set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:\"wWinMainCRTStartup\"")
+	endif()
+	if (MINGW)
+		set(CMAKE_EXE_LINKER_FLAGS "-mwindows -municode")
+	endif ()
     add_definitions(-DGUI_MAIN)
 endif()
 
@@ -195,7 +198,7 @@ set(SOURCE_FILES
 		src/model/CurrentSettings.h
 		src/model/TransactionModel.cpp
 		src/model/TransactionModel.h
-		)
+		src/controller/StatisticRenderer.cpp src/controller/StatisticRenderer.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
