@@ -67,9 +67,9 @@ int start(int argc, char **argv)
 
 	QApplication app(argc, argv);
 
-	fs::path cert_path = fs::path(DATA_DIR) / "ca.cer";
+	fs::path cert_path = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
 	if (!fs::exists(cert_path)) {
-		cert_path = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
+		cert_path = fs::path(DATA_DIR) / "ca.cer";
 	}
 
 	QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
