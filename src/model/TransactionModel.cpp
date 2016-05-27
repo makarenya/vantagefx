@@ -31,9 +31,9 @@ namespace vantagefx {
             _asset = &asset;
         }
 
-		void TransactionModel::setOptionSeconds(int seconds)
+		void TransactionModel::setOptionIndex(int index)
 		{
-			_optionSeconds = seconds;
+			_optionIndex = index;
 		}
 
 

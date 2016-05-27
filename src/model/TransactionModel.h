@@ -23,8 +23,8 @@ namespace vantagefx {
             void setAsset(const AssetModel &asset);
             const AssetModel & asset() const;
 
-			void setOptionSeconds(int seconds);
-			int optionSeconds() const;
+			void setOptionIndex(int index);
+			int optionIndex() const;
 
             void setExpiryDate(const QDateTime &expiryDate);
             const QDateTime &expiryDate() const;
@@ -43,7 +43,7 @@ namespace vantagefx {
             int64_t _transactionId;
             int64_t _optionId;
             const AssetModel *_asset;
-			int _optionSeconds;
+			int _optionIndex;
             QDateTime _expiryDate;
 			int64_t _bet;
             int64_t _returned;
@@ -56,7 +56,7 @@ namespace vantagefx {
 
         inline const AssetModel &TransactionModel::asset() const { return *_asset; }
 
-		inline int TransactionModel::optionSeconds() const { return _optionSeconds; }
+		inline int TransactionModel::optionIndex() const { return _optionIndex; }
 
         inline const QDateTime &TransactionModel::expiryDate() const { return _expiryDate; }
 

@@ -90,19 +90,31 @@ namespace vantagefx {
 	    void OptionModel::closeSuccess()
 	    {
 			_status = Successful;
-			_openTime = QDateTime::currentDateTime().addSecs(10);
+			auto time = QDateTime::currentDateTime().addSecs(10);
+			if (time > _openTime) _openTime = time;
+			else if (time.secsTo(_openTime) > 5) {
+				qDebug("something wrong");
+			}
 	    }
 
 	    void OptionModel::closeFail()
 	    {
 			_status = Failed;
-			_openTime = QDateTime::currentDateTime().addSecs(10);
+			auto time = QDateTime::currentDateTime().addSecs(10);
+			if (time > _openTime) _openTime = time;
+			else if (time.secsTo(_openTime) > 5) {
+				qDebug("something wrong");
+			}
 		}
 
 	    void OptionModel::closeReturn()
 	    {
 			_status = Returned;
-			_openTime = QDateTime::currentDateTime().addSecs(10);
+			auto time = QDateTime::currentDateTime().addSecs(10);
+			if (time > _openTime) _openTime = time;
+			else if (time.secsTo(_openTime) > 5) {
+				qDebug("something wrong");
+			}
 		}
 
 	    OptionModel::OptionStatus OptionModel::status() const
@@ -112,5 +124,10 @@ namespace vantagefx {
 			}
 			return _status;
 	    }
+
+		bool OptionModel::isAvailable() const
+		{
+			return _openTime <= QDateTime::currentDateTime() && checked();
+		}
     }
 }

@@ -91,7 +91,7 @@ namespace vantagefx {
 			return _betGrowth;
 		}
 
-		void VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
+		QList<TransactionModel> VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
 		{
 			_currentMoney = refresh->item("money/value").toLong();
 
@@ -141,6 +141,8 @@ namespace vantagefx {
 				_options.remove(id);
 			}
 
+			QList<TransactionModel> result;
+
 			for(auto &pos : refresh->query("positionUpdates/[positionStatus={0}]", { GwtValue(_positionClosed) })) {
 				auto obj = pos.value.toObject();
 				auto id = obj->value("transactionId").toLong();
@@ -168,8 +170,10 @@ namespace vantagefx {
 					else option.closeReturn();
                 }
 
-				_closedTransactions.push_back(std::move(transaction));
+				result.push_back(std::move(transaction));
 			}
+
+			return result;
 		}
 
 		QMap<int64_t, OptionModel> &VantageFxModel::options() {
@@ -220,81 +224,18 @@ namespace vantagefx {
 			item.setOptionId(optionId);
 			item.setExpiryDate(expiryDate);
 			item.setAsset(_options[optionId].asset());
-			item.setOptionSeconds(option.seconds());
+			item.setOptionIndex(option.index());
 			option.openTransaction();
 			return std::make_tuple(std::ref(option), std::ref(item));
 		}
 
-		struct HourInfo
-	    {
-			int wins;
-			int fails;
-			int draws;
 
-			HourInfo()
-				: wins(0), 
-				  fails(0), 
-				  draws(0) { }
-	    };
-
-	    void VantageFxModel::flushTransactions()
-	    {
-			QMap<QString, QList<HourInfo>> info;
-			for(auto &transaction :_closedTransactions) {
-				auto &name = transaction.asset().name();
-				if (!info.contains(name)) {
-					info[name] = QList<HourInfo>({ HourInfo(), HourInfo(), HourInfo(), HourInfo(), HourInfo() });
-				}
-				auto index = 0;
-				switch(transaction.optionSeconds()) {
-					case 60: index = 1; break;
-					case 120: index = 2; break;
-					case 300: index = 3; break;
-					default: break;
-				}
-				if (transaction.isWon()) {
-					info[name][index].wins++;
-					info[name][4].wins++;
-				}
-				else if (transaction.isLoose()) {
-					info[name][index].fails++;
-					info[name][4].fails++;
-				}
-				else {
-					info[name][index].draws++;
-					info[name][4].draws++;
-				}
-		    }
-			_closedTransactions.clear();
-
-			auto docs = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-			auto statistics = QDir(docs.filePath("vantagefx"));
-			if (!statistics.exists()) statistics.mkdir(statistics.path());
-
-			for(auto it = info.begin(); it != info.end(); ++it) {
-				QString name = it.key();
-				name.replace("/", "-");
-				auto path = statistics.filePath(name + ".csv");
-				QFile file(path);
-				file.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text);
-				QTextStream stream(&file);
-				if (file.size() == 0) {
-					stream << "Hour;30s W;30s F;30s P;60s W;60s F; 60s P;2m W;2m F;2m P;5m W; 5m F; 5m P;Total W;Total F;Total P" << endl;
-				}
-				auto now = QDateTime::currentDateTime().addSecs(-1000);
-				auto date = QString("%1-%2-%3 %4")
-					.arg(now.date().year(), 4, 10, QChar('0'))
-					.arg(now.date().month(), 2, 10, QChar('0'))
-					.arg(now.date().day(), 2, 10, QChar('0'))
-					.arg(now.time().hour(), 2, 10, QChar('0'));
-
-				stream << date;
-				for(auto item : it.value()) {
-					stream << ";" << item.wins << ";" << item.fails << ";" << item.draws;
-				}
-				stream << endl;
-			}
+		bool VantageFxModel::hasTransactionFor(int64_t optionId) const
+		{
+			for(auto &transaction : _openedTransactions) {
+                if (transaction.optionId() == optionId) return true;
+            }
+            return false;
 		}
 	}
 }
-

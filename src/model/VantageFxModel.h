@@ -34,12 +34,13 @@ namespace vantagefx {
 			void setBetGrowth(int betGrowth);
 			int betGrowth() const;
 
-			void updateOptions(api::GwtObjectPtr refresh);
+			QList<TransactionModel> updateOptions(api::GwtObjectPtr refresh);
 			QMap<int64_t, OptionModel> &options();
 			OptionModel &optionInfo(int64_t optionId);
 			int64_t currentMoney() const;
 	        std::tuple<OptionModel &, TransactionModel &> updatePurchase(api::GwtObjectPtr transaction);
-	        void flushTransactions();
+			bool hasTransactionFor(int64_t optionId) const;
+
         private:
 
 			int _openId;
@@ -54,8 +55,6 @@ namespace vantagefx {
 
 			QMap<int64_t, OptionModel> _options;
 			QMap<int64_t, TransactionModel> _openedTransactions;
-			QList<TransactionModel> _closedTransactions;
-
 			int64_t _currentMoney;
 
 			int _firstBet;

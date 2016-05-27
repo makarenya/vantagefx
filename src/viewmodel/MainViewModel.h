@@ -10,6 +10,7 @@
 #include "ComboBoxModel.h"
 #include "VantageFxService.h"
 #include "../model/VantageFxModel.h"
+#include "../controller/StatisticRenderer.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -178,11 +179,13 @@ namespace vantagefx {
 			QString _optionName;
 			int _optionReturn;
 			QString _optionExpire;
+			controller::StatisticRenderer _stat;
 
 			VantageFxService &_service;
 			model::VantageFxModel _model;
             int _refreshTimeout;
 			int _lastHour;
+            int _lastDay;
         };
 
         inline const QString &MainViewModel::mode() const { return _mode; }

@@ -16,7 +16,8 @@ namespace vantagefx {
 				  _loggedIn(false),
 			      _service(service),
 			      _refreshTimeout(-1),
-			      _lastHour(-1)
+			      _lastHour(-1),
+                  _lastDay(-1)
         {
 			model::CurrentSettings settings;
 			settings.load();
@@ -78,8 +79,11 @@ namespace vantagefx {
 		void MainViewModel::refreshed(RefreshContextPtr ctx)
         {
             if (mode().isEmpty()) setMode("view");
-			_model.updateOptions(ctx->refresh());
+			auto closed = _model.updateOptions(ctx->refresh());
 			setMoney(_model.currentMoney());
+			for(auto transaction: closed) {
+				_stat.update(transaction.asset().name(), transaction.optionIndex(), transaction.bet(), transaction.returned());
+			}
 
 			if (!makePurchases(_model.options())) {
 				_refreshTimeout = 0;
@@ -158,10 +162,16 @@ namespace vantagefx {
 				doRefresh();
 			}
 	        auto hour = QDateTime::currentDateTime().time().hour();
+            auto day = QDateTime::currentDateTime().date().day();
+
 			if (_lastHour >= 0 && hour != _lastHour) {
-				_model.flushTransactions();
+				_stat.writeHourLine();
 			}
+            if (_lastDay >= 0 && day != _lastDay) {
+                _stat.writeDayLine();
+            }
 			_lastHour = hour;
+            _lastDay = day;
         }
 
 		void MainViewModel::doLogin()
@@ -289,8 +299,12 @@ namespace vantagefx {
 			if (options.empty()) return false;
 			_options.updateOptions(options);
 			if (!_model.isLoggedIn()) return false;
-			for(auto option: options) {
-				if (option.status() != model::OptionModel::Selected) continue;
+			for(auto& option: options) {
+				if (!option.isAvailable()) continue;
+				if (_model.hasTransactionFor(option.optionId())) {
+					qDebug("second buy");
+					continue;
+				}
 				auto threshold = _options.threshold(option.asset().id());
 				if (std::abs(threshold) < 50) threshold = 71;
 

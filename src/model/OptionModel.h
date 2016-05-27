@@ -69,6 +69,8 @@ namespace vantagefx {
 
 			OptionStatus status() const;
 
+			bool isAvailable() const;
+
 			void setChecked(bool checked);
 			void toggle();
             bool checked() const;
