@@ -57,7 +57,7 @@ ColumnLayout {
 
     Button {
       x: 300
-      width: 80
+      width: 100
       height: 22
       text: "Update bet"
       onClicked: root.setBet(parseInt(firstBet.text), parseInt(betGrowth.text));
