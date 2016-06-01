@@ -1,3 +1,4 @@
+#include "src/http/HttpRequest.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -9,7 +10,6 @@
 #include "src/api/GwtType.h"
 #include "src/api/GwtBundle.h"
 #include "src/serialized/LutResolverInitPackage.h"
-#include "src/http/HttpRequest.h"
 #include "src/analyzer/GwtAnalyzer.h"
 #include "src/viewmodel/MainViewModel.h"
 #include "src/viewmodel/VantageFxService.h"
