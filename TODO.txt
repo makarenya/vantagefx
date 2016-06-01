@@ -7,8 +7,8 @@ Live:
     Server: Live1
 
 Demo:
-    Account Number: 123301954
-    Password: eNJ0D
+    Account Number: 888890350
+    Password: o0Q98
     Server: Demo
 
 Слева вверху открываешь закладку Short-Term, 60 seconds. Там 10 пар валют.
