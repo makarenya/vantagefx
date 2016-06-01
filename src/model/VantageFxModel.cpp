@@ -17,7 +17,7 @@ namespace vantagefx {
 	              _accountId(0),
 	              _currentMoney(0),
 			      _firstBet(10),
-			      _betGrowth(115)
+			      _betGrowth(170)
 	    {}
 
 	    void VantageFxModel::setLut(api::GwtObjectPtr lut) {
