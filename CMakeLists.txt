@@ -205,7 +205,8 @@ set(SOURCE_FILES
 		src/model/CurrentSettings.h
 		src/model/TransactionModel.cpp
 		src/model/TransactionModel.h
-		src/controller/StatisticRenderer.cpp src/controller/StatisticRenderer.h)
+		src/controller/StatisticRenderer.cpp
+        src/controller/StatisticRenderer.h)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
