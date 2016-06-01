@@ -31,18 +31,21 @@ namespace vantagefx {
             }
         }
 
-        int ComboBoxModel::rowCount(const QModelIndex &parent) const {
+        int ComboBoxModel::rowCount(const QModelIndex &parent) const
+		{
             return _comboList.size();
         }
 
-        QVariant ComboBoxModel::data(const QModelIndex &index, int role) const {
+        QVariant ComboBoxModel::data(const QModelIndex &index, int role) const
+		{
             if (!index.isValid()) return QVariant();
             if (index.row() >= _comboList.size()) return QVariant();
             if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
             return _comboList[index.row()];
         }
 
-        QHash<int, QByteArray> ComboBoxModel::roleNames() const {
+        QHash<int, QByteArray> ComboBoxModel::roleNames() const
+		{
             QHash<int, QByteArray> roles;
             roles[Qt::DisplayRole] = "display";
             return roles;

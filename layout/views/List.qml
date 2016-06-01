@@ -35,6 +35,7 @@ ColumnLayout {
       anchors.fill: parent
       anchors.leftMargin: 10
       anchors.rightMargin: 10
+      anchors.bottomMargin: 40
       model: root.options
 
       delegate: OptionLine {
@@ -42,6 +43,23 @@ ColumnLayout {
         anchors.right: parent.right
         height: 20
       }
+    }
+    ComboBox {
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      anchors.leftMargin: 10
+      anchors.bottomMargin: 1
+      width: 200
+      id: addBox
+      model: root.assets
+    }
+    Button {
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      anchors.leftMargin: 220
+      width: 100
+      text: "Add item"
+      onClicked: root.watch(addBox.currentIndex)
     }
   }
 }

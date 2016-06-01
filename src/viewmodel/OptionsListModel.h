@@ -14,7 +14,7 @@ namespace vantagefx {
 
         struct OptionItem {
 
-            OptionItem();
+            OptionItem(int s = 0);
 
             int64_t id;
             model::OptionModel::OptionStatus status;
@@ -43,20 +43,24 @@ namespace vantagefx {
 				BackgroundRole,
 				BorderRole,
 				ForegroundRole,
-				BetRole
+				BetRole,
+                SelectedRole
 			};
 
 			explicit OptionsListModel(QObject *parent);
 			int rowCount(const QModelIndex &parent) const override;
 			QVariant data(const QModelIndex &index, int role) const override;
+            bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 			QHash<int, QByteArray> roleNames() const override;
-			void updateOption(model::OptionModel &item);
+			void updateOption(const model::OptionModel &item);
 			void ids(QSet<int64_t> &list);
 			bool remove(QSet<int64_t> &list);
-			bool toggle(int64_t optionId);
 			bool contains(int64_t optionId) const;
 			bool isSelected(int64_t optionid) const;
 
+            void setMarketId(int marketId);
+
+            int marketId() const;
 
 			void setAssetId(int assetId);
 
@@ -65,10 +69,6 @@ namespace vantagefx {
 			void setName(QString name);
 
 			QString name() const;
-
-			void setMoneyBack(int moneyBack);
-
-			int moneyBack() const;
 
 			void setRateHi(int rateHi);
 
@@ -82,17 +82,7 @@ namespace vantagefx {
 
 			double price() const;
 
-			void setMarket(QString market);
-
-			QString market() const;
-
-			void setSubMarket(QString subMarket);
-
-			QString subMarket() const;
-
-			void setLineId(QString lineId);
-
-			QString lineId() const;
+			int64_t order() const;
 
 			void setThreshold(int threshold);
 
@@ -100,37 +90,28 @@ namespace vantagefx {
 
 		private:
 
+            int _marketId;
 			int _assetId;
 			QString _name;
-			int _moneyBack;
 			int _rateHi;
 			int _rateLow;
 			double _price;
-			QString _market;
-			QString _subMarket;
-			QString _lineId;
 			int _threshold;
 
 			QVector<OptionItem> _options;
 		};
 
+        inline int OptionsListModel::marketId() const { return _marketId; }
+
 		inline int OptionsListModel::assetId() const { return _assetId; }
 
 		inline QString OptionsListModel::name() const { return _name; }
-
-		inline int OptionsListModel::moneyBack() const { return _moneyBack; }
 
 		inline int OptionsListModel::rateHi() const { return _rateHi; }
 
 		inline int OptionsListModel::rateLow() const { return _rateLow; }
 
 		inline double OptionsListModel::price() const { return _price; }
-
-		inline QString OptionsListModel::market() const { return _market; }
-
-		inline QString OptionsListModel::subMarket() const { return _subMarket; }
-
-		inline QString OptionsListModel::lineId() const { return _lineId; }
 
 		inline int OptionsListModel::threshold() const { return _threshold; }
 
@@ -144,7 +125,6 @@ namespace vantagefx {
             enum RoleNames {
                 AssetIdRole = Qt::UserRole + 1,
                 NameRole,
-                MoneyBackRole,
                 RateLowRole,
                 RateHiRole,
                 PriceRole,
@@ -159,11 +139,13 @@ namespace vantagefx {
 			Q_INVOKABLE QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 			Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-			Q_INVOKABLE void select(long long optionId);
+			void watchForAsset(const model::AssetModel &asset);
+            Q_INVOKABLE void stopWatch(int assetId);
 
             QHash<int, QByteArray> roleNames() const override;
 
-            void updateOptions(QMap<int64_t, model::OptionModel> &options);
+            void updateAssets(const QMap<int, model::AssetModel> &assets);
+            void updateOptions(const QMap<int64_t, model::OptionModel> &options);
 			void updateOption(model::OptionModel &item);
 
 			bool containsOption(int64_t optionId) const;
@@ -173,8 +155,6 @@ namespace vantagefx {
 			int threshold(int assetId);
 
         private:
-			static QVector<int> updateOption(OptionsListModel *current, model::OptionModel &item);
-			OptionsListModel *createOption(model::OptionModel &item, std::string lineId);
             QList<OptionsListModel *> _items;
         };
     }

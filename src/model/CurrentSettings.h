@@ -25,11 +25,16 @@ namespace vantagefx {
             const QString &server() const;
             void setServer(const QString &server);
 
+			const QSet<int> &assets() const;
+			void appendAsset(int assetId);
+			void removeAsset(int assetId);
+
         private:
 
             QString _login;
             QString _password;
             QString _server;
+			QSet<int> _assets;
         };
     }
 }

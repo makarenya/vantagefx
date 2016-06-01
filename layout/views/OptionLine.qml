@@ -63,9 +63,8 @@ Rectangle {
         Button {
           width: 50
           height: 20
-          visible: model.id > 0
           text: model.name
-          onClicked: root.options.select(model.id)
+          onClicked: model.selected = !model.selected
         }
 
         Rectangle {
@@ -73,11 +72,8 @@ Rectangle {
           y: 1
           width: 30
           height: 18
-          border {
-            width: 1
-            color: model.border
-          }
-          visible: model.id > 0
+          border.width: 1
+          border.color: model.border
           color: model.background
 
           Text {
@@ -95,6 +91,18 @@ Rectangle {
 
     Rectangle {
       Layout.fillWidth: true
+    }
+
+    Rectangle {
+      Layout.preferredWidth: 80
+      height: 20
+
+      Button {
+        width: 80
+        height: 20
+        text: "Remove"
+        onClicked: root.stopWatch(model.asset)
+      }
     }
   }
 }

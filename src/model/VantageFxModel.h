@@ -22,6 +22,7 @@ namespace vantagefx {
 			void setLut(api::GwtObjectPtr lut);
             int instrumentTypeId() const;
 			const QStringList &servers() const;
+			const QMap<int, AssetModel> &assets() const;
             int rateId(QString name);
 
 			void setAccount(api::GwtObjectPtr auth);
@@ -37,6 +38,7 @@ namespace vantagefx {
 			QList<TransactionModel> updateOptions(api::GwtObjectPtr refresh);
 			QMap<int64_t, OptionModel> &options();
 			OptionModel &optionInfo(int64_t optionId);
+			AssetModel &assetInfo(int assetId);
 			int64_t currentMoney() const;
 	        std::tuple<OptionModel &, TransactionModel &> updatePurchase(api::GwtObjectPtr transaction);
 			bool hasTransactionFor(int64_t optionId) const;

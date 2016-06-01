@@ -64,6 +64,10 @@ namespace vantagefx {
 			return _servers;
 		}
 
+		const QMap<int, AssetModel> &VantageFxModel::assets() const {
+			return _assets;
+		};
+
 		int VantageFxModel::rateId(QString name)
 		{
 			return _rates[name];
@@ -133,9 +137,7 @@ namespace vantagefx {
 				auto &model = _options[id];
 				model.setOptionId(id);
 				model.setAsset(&_assets[asset.toInt()]);
-				model.setMoneyBack(obj->value("return").toInt());
 				model.setSeconds(obj->value("optionSeconds").toInt());
-				model.setReturnValue(obj->value("return").toInt());
 			}
 			for(auto id : old) {
 				_options.remove(id);
@@ -184,6 +186,11 @@ namespace vantagefx {
 	    {
 			return _options[optionId];
 		}
+
+        AssetModel &VantageFxModel::assetInfo(int assetId)
+        {
+            return _assets[assetId];
+        }
 
 	    void VantageFxModel::setAccount(api::GwtObjectPtr auth)
         {

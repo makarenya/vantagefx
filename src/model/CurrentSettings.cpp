@@ -31,6 +31,17 @@ namespace vantagefx {
 
                     auto server = root.namedItem("server");
                     if (server.isElement()) _server = server.toElement().text();
+
+					auto assets = root.namedItem("assets");
+					_assets.clear();
+					if (assets.isElement()) {
+						auto nodes = assets.toElement().childNodes();
+						for(auto i = 0; i < nodes.size(); ++i) {
+							if (nodes.at(i).isElement()) {
+								_assets.insert(nodes.at(i).toElement().text().toInt());
+							}
+						}
+					}
                 }
             }
         }
@@ -55,6 +66,14 @@ namespace vantagefx {
             auto server = doc.createElement("server");
             server.appendChild(doc.createTextNode(_server));
             root.appendChild(server);
+
+			auto assets = doc.createElement("assets");
+			for (auto item : _assets) {
+				auto node = doc.createElement("item");
+				node.appendChild(doc.createTextNode(QString::number(item)));
+				assets.appendChild(node);
+			}
+			root.appendChild(assets);
 
             QFile file(settingsPath);
             file.open(QIODevice::ReadWrite | QIODevice::Truncate);
@@ -91,6 +110,21 @@ namespace vantagefx {
         {
             return _server;
         }
+
+        const QSet<int> &CurrentSettings::assets() const
+		{
+			return _assets;
+		}
+
+		void CurrentSettings::appendAsset(int assetId)
+		{
+			_assets.insert(assetId);
+		}
+
+		void CurrentSettings::removeAsset(int assetId)
+		{
+			_assets.remove(assetId);
+		}
     }
 }
 

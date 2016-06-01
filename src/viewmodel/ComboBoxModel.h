@@ -14,8 +14,8 @@ namespace vantagefx {
         class ComboBoxModel : public QAbstractListModel
         {
             Q_OBJECT
-
         public:
+
             ComboBoxModel(QObject *parent = 0);
 
             const QStringList comboList();

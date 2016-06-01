@@ -9,7 +9,9 @@
 #include "OptionsListModel.h"
 #include "ComboBoxModel.h"
 #include "VantageFxService.h"
+#include "AssetsViewModel.h"
 #include "../model/VantageFxModel.h"
+#include "../model/CurrentSettings.h"
 #include "../controller/StatisticRenderer.h"
 
 namespace vantagefx {
@@ -24,6 +26,7 @@ namespace vantagefx {
             Q_PROPERTY(QString mode READ mode NOTIFY modeChanged);
 			Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
             Q_PROPERTY(AssetListModel *options READ options NOTIFY optionsChanged)
+			Q_PROPERTY(AssetsViewModel *assets READ assets NOTIFY assetsChanged)
             Q_PROPERTY(QString login READ login WRITE setLogin NOTIFY loginChanged)
             Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
             Q_PROPERTY(QString server READ server WRITE setServer NOTIFY serverChanged)
@@ -47,13 +50,16 @@ namespace vantagefx {
 
             virtual ~MainViewModel();
 
-            AssetListModel *options() { return &_options; }
-
             Q_INVOKABLE void doLogin();
             Q_INVOKABLE void processLogin();
             Q_INVOKABLE void cancelLogin();
             Q_INVOKABLE void view(long long optionId);
 			Q_INVOKABLE void setBet(int firstBet, int betGrowth);
+            Q_INVOKABLE void watch(int index);
+            Q_INVOKABLE void stopWatch(int assetId);
+
+            AssetListModel *options();
+            AssetsViewModel *assets();
 
             const QString &mode() const;
             void setMode(const QString &mode);
@@ -109,6 +115,8 @@ namespace vantagefx {
 
             void optionsChanged();
 
+			void assetsChanged();
+
             void loginChanged();
 
             void passwordChanged();
@@ -160,9 +168,11 @@ namespace vantagefx {
 			Q_SLOT void purchaseError(std::exception e);
 
 
-			bool makePurchases(QMap<int64_t, model::OptionModel> &options);
+			bool makePurchases(const QMap<int, model::AssetModel> &assets, const QMap<int64_t, model::OptionModel> &options);
 			
+			model::CurrentSettings _settings;
 			AssetListModel _options;
+			AssetsViewModel _assets;
             QString _mode;
 			QString _description;
             QString _login;
@@ -186,6 +196,9 @@ namespace vantagefx {
 			int _lastHour;
             int _lastDay;
         };
+
+        inline AssetListModel *MainViewModel::options() { return &_options; }
+        inline AssetsViewModel *MainViewModel::assets() { return &_assets; }
 
         inline const QString &MainViewModel::mode() const { return _mode; }
 

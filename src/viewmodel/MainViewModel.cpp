@@ -2,7 +2,6 @@
 // Created by alexx on 09.03.2016.
 //
 #include "MainViewModel.h"
-#include "../model/CurrentSettings.h"
 
 namespace vantagefx {
     namespace viewmodel {
@@ -19,11 +18,10 @@ namespace vantagefx {
 			      _lastHour(-1),
                   _lastDay(-1)
         {
-			model::CurrentSettings settings;
-			settings.load();
-			setLogin(settings.login());
-			setPassword(settings.password());
-			setServer(settings.server());
+			_settings.load();
+			setLogin(_settings.login());
+			setPassword(_settings.password());
+			setServer(_settings.server());
 
 			qRegisterMetaType<LoadingContextPtr>("LoadingContextPtr");
 			qRegisterMetaType<RefreshContextPtr>("RefreshContextPtr");
@@ -59,6 +57,11 @@ namespace vantagefx {
         {
             _model.setLut(ctx->lut());
 			_servers.setComboList(_model.servers());
+			_assets.setList(_model.assets());
+            for(auto assetId : _settings.assets()) {
+                _options.watchForAsset(_model.assets()[assetId]);
+            }
+            emit assetsChanged();
 			doRefresh();
         }
 
@@ -86,7 +89,17 @@ namespace vantagefx {
 				_stat.update(transaction.asset().name(), transaction.optionIndex(), transaction.bet(), transaction.returned(), threshold);
 			}
 
-			if (!makePurchases(_model.options())) {
+            bool changed = false;
+            for(auto item : _model.options()) {
+                if (_settings.assets().contains(item.asset().id())) continue;
+                changed = true;
+                _settings.appendAsset(item.asset().id());
+            }
+            if (changed) {
+                _settings.save();
+            }
+
+			if (!makePurchases(_model.assets(), _model.options())) {
 				_refreshTimeout = 0;
 			}
 		}
@@ -119,11 +132,10 @@ namespace vantagefx {
 			setLoggedIn(_model.isLoggedIn());
 			setFullName(_model.userName());
 
-			model::CurrentSettings settings;
-			settings.setLogin(login());
-			settings.setPassword(password());
-			settings.setServer(server());
-			settings.save();
+			_settings.setLogin(login());
+			_settings.setPassword(password());
+			_settings.setServer(server());
+			_settings.save();
 		}
 
 		void MainViewModel::authError(std::exception e)
@@ -191,7 +203,6 @@ namespace vantagefx {
             auto info = _model.optionInfo(optionId);
             setCurrentOption(info);
             setOptionName(info.asset().name());
-            setOptionReturn(info.returnValue());
             if (info.seconds() >= 120) {
                 setOptionExpire(QString::number(info.seconds() / 60) + "m");
             }
@@ -207,6 +218,22 @@ namespace vantagefx {
             _options.updateOptions(_model.options());
 			emit firstBetChanged();
 			emit betGrowthChanged();
+        }
+
+        void MainViewModel::watch(int index)
+        {
+            auto assetId = _assets.assetId(index);
+            auto asset = _model.assetInfo(assetId);
+            _options.watchForAsset(asset);
+			_settings.appendAsset(assetId);
+			_settings.save();
+        }
+
+        void MainViewModel::stopWatch(int assetId)
+        {
+            _options.stopWatch(assetId);
+            _settings.removeAsset(assetId);
+            _settings.save();
         }
 
 	    void MainViewModel::setMode(const QString &mode)
@@ -288,12 +315,13 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    bool MainViewModel::makePurchases(QMap<int64_t, model::OptionModel> &options)
+	    bool MainViewModel::makePurchases(const QMap<int, model::AssetModel> &assets, const QMap<int64_t, model::OptionModel> &options)
         {
 			if (options.empty()) return false;
+            _options.updateAssets(assets);
 			_options.updateOptions(options);
 			if (!_model.isLoggedIn()) return false;
-			for(auto& option: options) {
+			for (auto& option: options) {
 				if (!option.isAvailable()) continue;
 				if (!_options.isSelected(option.optionId())) continue;
 				if (_model.hasTransactionFor(option.optionId())) {

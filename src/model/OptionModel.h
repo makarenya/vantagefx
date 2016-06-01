@@ -23,7 +23,8 @@ namespace vantagefx {
 				Processing,
 				Successful,
 				Failed,
-				Returned
+				Returned,
+				NotFound
 			};
 
 			OptionModel();
@@ -32,13 +33,9 @@ namespace vantagefx {
 
             AssetModel &asset() const;
 
-            int moneyBack() const;
-
             int seconds() const;
 
 			int index() const;
-
-			int returnValue() const;
 
             double price() const;
 
@@ -54,11 +51,7 @@ namespace vantagefx {
 
             void setAsset(AssetModel *assetId);
 
-            void setMoneyBack(int moneyBack);
-
             void setSeconds(int seconds);
-
-			void setReturnValue(int returnValue);
 
             void setPrice(double price);
 
@@ -78,9 +71,7 @@ namespace vantagefx {
 		private:
             int64_t _optionId;
 			AssetModel *_asset;
-            int _moneyBack;
             int _seconds;
-			int _returnValue;
             double _price;
             QDateTime _close;
 			int _currentBet;
@@ -103,10 +94,6 @@ namespace vantagefx {
 			default: return 0;
 			}
         }
-
-		inline int OptionModel::returnValue() const { return _returnValue; }
-
-        inline int OptionModel::moneyBack() const { return _moneyBack; }
 
         inline AssetModel &OptionModel::asset() const { return *_asset; }
 
