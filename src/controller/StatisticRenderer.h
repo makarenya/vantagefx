@@ -48,12 +48,12 @@ namespace vantagefx {
 
         class StatisticRenderer {
         public:
-            void update(QString asset, int index, int64_t bet, int64_t won);
+            void update(QString asset, int index, int64_t bet, int64_t won, int level);
             void writeHourLine();
             void writeDayLine();
 
         private:
-            void writeFailsLine(QString asset, int index, int fails, int64_t result);
+            void writeFailsLine(QString asset, int index, int fails, int64_t result, int level);
             QDir rootDir();
             QMap<QString, QList<OptionInfo>> _assets;
         };

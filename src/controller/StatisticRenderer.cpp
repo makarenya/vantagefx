@@ -82,7 +82,7 @@ namespace vantagefx {
             struct FailsCsvFileAppender : public CsvFileAppender
             {
                 FailsCsvFileAppender(QDir dir)
-                        : CsvFileAppender(dir.filePath("fails.csv"), { "Date", "Asset", "Sec", "Price", "Line" })
+                        : CsvFileAppender(dir.filePath("fails.csv"), { "Date", "Asset", "Sec", "Price", "Line", "Level" })
                 {}
             };
         }
@@ -121,14 +121,14 @@ namespace vantagefx {
             _day = HourInfo();
         }
 
-        void StatisticRenderer::update(QString asset, int index, int64_t bet, int64_t won) {
+        void StatisticRenderer::update(QString asset, int index, int64_t bet, int64_t won, int level) {
             auto &info = _assets[asset];
             while(info.size() < 5) {
                 info.push_back(OptionInfo());
             }
             auto &opt = info[index];
             if (won > bet && opt.failsLine() >= 5) {
-                writeFailsLine(asset, index, opt.failsLine(), opt.result());
+                writeFailsLine(asset, index, opt.failsLine(), opt.result(), level);
 				opt.clearResult();
             }
             opt.update(bet, won);
@@ -163,7 +163,7 @@ namespace vantagefx {
             }
         }
 
-        void StatisticRenderer::writeFailsLine(QString asset, int index, int fails, int64_t result)
+        void StatisticRenderer::writeFailsLine(QString asset, int index, int fails, int64_t result, int level)
         {
             csv::FailsCsvFileAppender file(rootDir());
 			file.write(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
@@ -175,6 +175,7 @@ namespace vantagefx {
                 default: file.write("30"); break;
             }
             file.write(QString::number(result / 100.0, '0', 2));
+			file.write(QString::number(level));
             file.write(fails);
         }
 

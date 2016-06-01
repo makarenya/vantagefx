@@ -82,7 +82,8 @@ namespace vantagefx {
 			auto closed = _model.updateOptions(ctx->refresh());
 			setMoney(_model.currentMoney());
 			for(auto transaction: closed) {
-				_stat.update(transaction.asset().name(), transaction.optionIndex(), transaction.bet(), transaction.returned());
+				auto threshold = _options.threshold(transaction.asset().id());
+				_stat.update(transaction.asset().name(), transaction.optionIndex(), transaction.bet(), transaction.returned(), threshold);
 			}
 
 			if (!makePurchases(_model.options())) {
