@@ -200,13 +200,6 @@ namespace vantagefx {
             }
         }
 
-	    void MainViewModel::selectOption(int64_t optionId, int seconds, bool checked)
-        {
-			auto &option = _model.optionInfo(optionId);
-			option.setChecked(!option.checked());
-			_options.updateOptions(_model.options());
-        }
-
 	    void MainViewModel::setBet(int firstBet, int betGrowth)
         {
 			_model.setFirstBet(firstBet);
@@ -302,6 +295,7 @@ namespace vantagefx {
 			if (!_model.isLoggedIn()) return false;
 			for(auto& option: options) {
 				if (!option.isAvailable()) continue;
+				if (!_options.isSelected(option.optionId())) continue;
 				if (_model.hasTransactionFor(option.optionId())) {
 					qDebug("second buy");
 					continue;

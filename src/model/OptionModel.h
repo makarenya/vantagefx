@@ -20,7 +20,6 @@ namespace vantagefx {
 
 			enum OptionStatus {
 				Idle,
-				Selected,
 				Processing,
 				Successful,
 				Failed,
@@ -71,10 +70,6 @@ namespace vantagefx {
 
 			bool isAvailable() const;
 
-			void setChecked(bool checked);
-			void toggle();
-            bool checked() const;
-
 			void openTransaction();
 			void closeSuccess();
 			void closeFail();
@@ -88,7 +83,6 @@ namespace vantagefx {
 			int _returnValue;
             double _price;
             QDateTime _close;
-            bool _checked;
 			int _currentBet;
 			OptionStatus _status;
 			QDateTime _openTime;
@@ -117,8 +111,6 @@ namespace vantagefx {
         inline AssetModel &OptionModel::asset() const { return *_asset; }
 
         inline int64_t OptionModel::optionId() const { return _optionId; }
-
-        inline bool OptionModel::checked() const { return _checked; }
 
 		inline int OptionModel::currentBet() const { return _currentBet; }
     }

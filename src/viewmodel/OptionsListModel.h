@@ -20,7 +20,9 @@ namespace vantagefx {
             model::OptionModel::OptionStatus status;
             int bet;
 			int seconds;
+			bool selected;
 
+			bool toggle();
 			QString name() const;
             QColor background() const;
 			QColor border() const;
@@ -48,10 +50,13 @@ namespace vantagefx {
 			int rowCount(const QModelIndex &parent) const override;
 			QVariant data(const QModelIndex &index, int role) const override;
 			QHash<int, QByteArray> roleNames() const override;
-			const OptionItem &option(int index) const;
 			void updateOption(model::OptionModel &item);
 			void ids(QSet<int64_t> &list);
 			bool remove(QSet<int64_t> &list);
+			bool toggle(int64_t optionId);
+			bool contains(int64_t optionId) const;
+			bool isSelected(int64_t optionid) const;
+
 
 			void setAssetId(int assetId);
 
@@ -161,13 +166,16 @@ namespace vantagefx {
             void updateOptions(QMap<int64_t, model::OptionModel> &options);
 			void updateOption(model::OptionModel &item);
 
+			bool containsOption(int64_t optionId) const;
+			OptionsListModel &assetFor(int64_t optionId) const;
+			bool isSelected(int64_t optionId) const;
+
 			int threshold(int assetId);
 
         private:
 			static QVector<int> updateOption(OptionsListModel *current, model::OptionModel &item);
 			OptionsListModel *createOption(model::OptionModel &item, std::string lineId);
             QList<OptionsListModel *> _items;
-			QMap<int64_t, model::OptionModel> *_options;
         };
     }
 }

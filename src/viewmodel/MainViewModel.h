@@ -53,7 +53,6 @@ namespace vantagefx {
             Q_INVOKABLE void processLogin();
             Q_INVOKABLE void cancelLogin();
             Q_INVOKABLE void view(long long optionId);
-			Q_INVOKABLE void selectOption(long long optionId, int seconds, bool checked);
 			Q_INVOKABLE void setBet(int firstBet, int betGrowth);
 
             const QString &mode() const;

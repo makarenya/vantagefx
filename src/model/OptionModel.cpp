@@ -15,7 +15,6 @@ namespace vantagefx {
 	              _seconds(0),
 			      _returnValue(0),
 	              _price(0),
-			      _checked(false),
 			      _currentBet(10), 
 			      _status(Idle),
 			      _openTime()
@@ -71,16 +70,6 @@ namespace vantagefx {
 			_currentBet = bet;
 	    }
 
-	    void OptionModel::setChecked(bool checked)
-		{
-			_checked = checked;
-		}
-
-		void OptionModel::toggle()
-	    {
-			_checked = !_checked;
-	    }
-
 		void OptionModel::openTransaction()
 	    {
 			_status = Processing;
@@ -120,14 +109,14 @@ namespace vantagefx {
 	    OptionModel::OptionStatus OptionModel::status() const
 	    {
 			if (_openTime <= QDateTime::currentDateTime()) {
-				return checked() ? Selected : Idle;
+				return Idle;
 			}
 			return _status;
 	    }
 
 		bool OptionModel::isAvailable() const
 		{
-			return _openTime <= QDateTime::currentDateTime() && checked();
+			return _openTime <= QDateTime::currentDateTime();
 		}
     }
 }

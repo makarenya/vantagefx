@@ -14,8 +14,14 @@ namespace vantagefx {
                 : id(0),
                   status(model::OptionModel::Idle),
                   bet(0), 
-				  seconds(0)
+				  seconds(0),
+				  selected(false)
                 {}
+
+		bool OptionItem::toggle()
+		{
+			return selected = !selected;
+		}
 
 		QString OptionItem::name() const
 		{
@@ -29,9 +35,8 @@ namespace vantagefx {
         {
             switch (status) {
                 case model::OptionModel::Idle:
-                    return QColor(Qt::white);
-                case model::OptionModel::Selected:
-                    return QColor("#e4f0fa");
+					if (selected) return QColor("#e4f0fa");
+					return QColor(Qt::white);
                 case model::OptionModel::Processing:
 					return QColor("#565656");
                 case model::OptionModel::Successful:
@@ -47,9 +52,8 @@ namespace vantagefx {
 		{
 			switch (status) {
 			case model::OptionModel::Idle:
+				if (selected) return QColor("#0076d4");
 				return QColor("#b4b4b5");
-			case model::OptionModel::Selected:
-				return QColor("#0076d4");
 			case model::OptionModel::Processing:
 				return QColor(Qt::black);
 			case model::OptionModel::Successful:
@@ -65,8 +69,7 @@ namespace vantagefx {
 		{
 			switch (status) {
 			case model::OptionModel::Idle:
-				return QColor(Qt::black);
-			case model::OptionModel::Selected:
+				if (selected) return QColor(Qt::black);
 				return QColor(Qt::black);
 			case model::OptionModel::Processing:
 				return QColor(Qt::white);
@@ -123,11 +126,12 @@ namespace vantagefx {
 			result[BetRole] = "bet";
 			return result;
 		}
-
+		/*
 		const OptionItem &OptionsListModel::option(int index) const
 		{
 			return _options[index];
 		}
+		*/
 
 	    void OptionsListModel::updateOption(model::OptionModel &item)
         {
@@ -163,6 +167,7 @@ namespace vantagefx {
 			}
         }
 
+
 	    bool OptionsListModel::remove(QSet<int64_t>& list)
         {
 	        auto empty = 0;
@@ -178,6 +183,35 @@ namespace vantagefx {
 			}
 			return empty == _options.size();
         }
+
+		bool OptionsListModel::contains(int64_t optionId) const
+		{
+			for (auto &item : _options) {
+				if (item.id == optionId) return true;
+			}
+			return false;
+		}
+
+		bool OptionsListModel::isSelected(int64_t optionId) const
+		{
+			for (auto &item : _options) {
+				if (item.id == optionId) return item.selected;
+			}
+			throw std::out_of_range("option " + std::to_string(optionId) + " not found");
+		}
+
+		bool OptionsListModel::toggle(int64_t optionId)
+		{
+			for(int i = 0; i < _options.size(); ++i) {
+				auto &option = _options[i];
+				if (option.id == optionId) {
+					option.toggle();
+					dataChanged(index(i), index(i), { StatusRole, BackgroundRole, ForegroundRole, BorderRole });
+					return option.selected;
+				}
+			}
+			throw std::out_of_range("option " + std::to_string(optionId) + " not found");
+		}
 
 	    void OptionsListModel::setAssetId(int assetId)
         {
@@ -230,8 +264,7 @@ namespace vantagefx {
         }
 
 	    AssetListModel::AssetListModel(QObject *parent)
-                : QAbstractListModel(parent), 
-			      _options(nullptr)
+                : QAbstractListModel(parent)
         {}
 		
 		QHash<int, QByteArray> AssetListModel::roleNames() const
@@ -290,9 +323,7 @@ namespace vantagefx {
 
 		void AssetListModel::select(long long optionId)
 		{
-			auto &option = (*_options)[optionId];
-			option.toggle();
-			updateOption(option);
+			assetFor(optionId).toggle(optionId);
 		}
 
         int AssetListModel::rowCount(const QModelIndex &parent) const
@@ -344,7 +375,6 @@ namespace vantagefx {
 
         void AssetListModel::updateOptions(QMap<int64_t, model::OptionModel> &options)
         {
-			_options = &options;
 			if (options.empty()) return;
 			QSet<int64_t> removed;
 			for (auto &current : _items) {
@@ -404,11 +434,32 @@ namespace vantagefx {
 		void AssetListModel::updateOption(model::OptionModel &item)
 		{
 			for (auto i = 0; i < _items.size(); ++i) {
-				if (_items[i]->option(item.index()).id == item.optionId())
+				if (_items[i]->contains(item.optionId()))
 				{
 					_items[i]->updateOption(item);
 				}
 			}
+		}
+
+		bool AssetListModel::containsOption(int64_t optionId) const
+		{
+			for (auto asset : _items) {
+				if (asset->contains(optionId)) return true;
+			}
+			return false;
+		}
+
+		OptionsListModel &AssetListModel::assetFor(int64_t optionId) const
+		{
+			for (auto asset : _items) {
+				if (asset->contains(optionId)) return *asset;
+			}
+			throw std::out_of_range("option " + std::to_string(optionId) + " not found");
+		}
+
+		bool AssetListModel::isSelected(int64_t optionId) const
+		{
+			return assetFor(optionId).isSelected(optionId);
 		}
 
 		int AssetListModel::threshold(int assetId) {
