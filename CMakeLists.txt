@@ -126,6 +126,12 @@ endif()
 
 
 set(SOURCE_FILES
+        layout/views/Details.qml
+        layout/views/List.qml
+        layout/views/Loading.qml
+        layout/views/Login.qml
+        layout/panels/LoginPanel.qml
+        layout/views/OptionLine.qml
         src/main.cpp
         src/model/MainModel.cpp
         src/model/MainModel.h
