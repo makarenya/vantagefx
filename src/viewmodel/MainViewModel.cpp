@@ -99,7 +99,10 @@ namespace vantagefx {
                 _settings.save();
             }
 
-			if (!makePurchases(_model.assets(), _model.options())) {
+			_options.updateAssets(_model.assets());
+			_options.updateOptions(_model.options());
+
+			if (!makePurchases(_model.options())) {
 				_refreshTimeout = 0;
 			}
 		}
@@ -315,11 +318,9 @@ namespace vantagefx {
             emit optionExpireChanged();
         }
 
-	    bool MainViewModel::makePurchases(const QMap<int, model::AssetModel> &assets, const QMap<int64_t, model::OptionModel> &options)
+	    bool MainViewModel::makePurchases(const QMap<int64_t, model::OptionModel> &options)
         {
 			if (options.empty()) return false;
-            _options.updateAssets(assets);
-			_options.updateOptions(options);
 			if (!_model.isLoggedIn()) return false;
 			for (auto& option: options) {
 				if (!option.isAvailable()) continue;
