@@ -6,7 +6,6 @@
 #define VANTAGEFX_OPTIONSLISTMODEL_H
 
 #include <QtCore>
-#include <QColor>
 #include "../model/OptionModel.h"
 
 namespace vantagefx {
@@ -114,49 +113,6 @@ namespace vantagefx {
 		inline double OptionsListModel::price() const { return _price; }
 
 		inline int OptionsListModel::threshold() const { return _threshold; }
-
-
-        class AssetListModel : public QAbstractListModel
-        {
-            Q_OBJECT
-
-        public:
-
-            enum RoleNames {
-                AssetIdRole = Qt::UserRole + 1,
-                NameRole,
-                RateLowRole,
-                RateHiRole,
-                PriceRole,
-				ThresholdRole,
-				OptionsRole
-            };
-
-	        explicit AssetListModel(QObject *parent = nullptr);
-
-			Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
-			Q_INVOKABLE QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-			Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-
-			void watchForAsset(const model::AssetModel &asset);
-            Q_INVOKABLE void stopWatch(int assetId);
-
-            QHash<int, QByteArray> roleNames() const override;
-
-            void updateAssets(const QMap<int, model::AssetModel> &assets);
-            void updateOptions(const QMap<int64_t, model::OptionModel> &options);
-			void updateOption(model::OptionModel &item);
-
-			bool containsOption(int64_t optionId) const;
-			OptionsListModel &assetFor(int64_t optionId) const;
-			bool isSelected(int64_t optionId) const;
-
-			int threshold(int assetId);
-
-        private:
-            QList<OptionsListModel *> _items;
-        };
     }
 }
 

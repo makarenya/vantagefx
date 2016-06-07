@@ -129,17 +129,17 @@ endif()
 
 
 set(SOURCE_FILES
+        src/main.cpp
+        src/GwtHttpRequest.cpp
+        src/GwtHttpRequest.h
+
         layout/views/Details.qml
         layout/views/List.qml
         layout/views/Loading.qml
         layout/views/Login.qml
-        layout/panels/LoginPanel.qml
         layout/views/OptionLine.qml
-        src/main.cpp
-        src/model/MainModel.cpp
-        src/model/MainModel.h
-        src/viewmodel/MainViewModel.cpp
-        src/viewmodel/MainViewModel.h
+        layout/panels/LoginPanel.qml
+
         src/api/GwtRpcResponse.cpp
         src/api/GwtRpcResponse.h
         src/api/GwtResponseData.h
@@ -170,6 +170,9 @@ set(SOURCE_FILES
         src/api/GwtIterator.h
         src/api/GwtPathExpression.cpp
         src/api/GwtPathExpression.h
+		src/api/GwtHttpRequestContext.cpp
+		src/api/GwtHttpRequestContext.h
+
         src/http/HttpContext.cpp
         src/http/HttpContext.h
         src/http/HttpRequest.cpp
@@ -180,26 +183,33 @@ set(SOURCE_FILES
         src/http/HttpResponseParser.h
         src/http/HttpConnection.cpp
         src/http/HttpConnection.h
+        src/http/Url.cpp
+        src/http/Url.h
+
         src/analyzer/FiddlerLogEntry.cpp
         src/analyzer/FiddlerLogEntry.h
         src/analyzer/FiddlerLogParser.cpp
         src/analyzer/FiddlerLogParser.h
         src/analyzer/GwtAnalyzer.cpp
         src/analyzer/GwtAnalyzer.h
-        src/http/Url.cpp
-        src/http/Url.h
-        src/GwtHttpRequest.cpp
-        src/GwtHttpRequest.h
+
+		src/viewmodel/MainViewModel.cpp
+		src/viewmodel/MainViewModel.h
         src/viewmodel/VantageFxService.cpp
         src/viewmodel/VantageFxService.h
         src/viewmodel/OptionsListModel.cpp
         src/viewmodel/OptionsListModel.h
+		src/viewmodel/AssetsViewModel.cpp
+		src/viewmodel/AssetsViewModel.h
+		src/viewmodel/AssetListModel.cpp
+		src/viewmodel/AssetListModel.h
+		src/viewmodel/OptionItem.cpp
+		src/viewmodel/OptionItem.h
+		src/viewmodel/ComboBoxModel.cpp
+		src/viewmodel/ComboBoxModel.h
+
         src/model/OptionModel.cpp
         src/model/OptionModel.h
-        src/api/GwtHttpRequestContext.cpp
-        src/api/GwtHttpRequestContext.h
-        src/viewmodel/ComboBoxModel.cpp
-        src/viewmodel/ComboBoxModel.h
         src/model/VantageFxModel.cpp
 		src/model/VantageFxModel.h
 		src/model/AssetModel.cpp
@@ -208,10 +218,10 @@ set(SOURCE_FILES
 		src/model/CurrentSettings.h
 		src/model/TransactionModel.cpp
 		src/model/TransactionModel.h
+
 		src/controller/StatisticRenderer.cpp
         src/controller/StatisticRenderer.h
-		src/viewmodel/AssetsViewModel.cpp
-		src/viewmodel/AssetsViewModel.h)
+		)
 
 
 qt5_add_resources(RESOURCES layout/qml.qrc)

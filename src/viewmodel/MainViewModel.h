@@ -6,7 +6,7 @@
 #define QT_SECOND_MAINVIEWMODEL_H
 
 #include <QtCore>
-#include "OptionsListModel.h"
+#include "AssetListModel.h"
 #include "ComboBoxModel.h"
 #include "VantageFxService.h"
 #include "AssetsViewModel.h"
