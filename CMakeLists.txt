@@ -18,11 +18,12 @@ set(MAKE_GUI "1")
 if (MAKE_GUI)
 	if (MSVC)
 		set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:\"wWinMainCRTStartup\"")
+		add_definitions(-DGUI_MAIN)
 	endif()
 	if (MINGW)
 		set(CMAKE_EXE_LINKER_FLAGS "-mwindows -municode")
+		add_definitions(-DGUI_MAIN)
 	endif ()
-    add_definitions(-DGUI_MAIN)
 endif()
 
 if (MINGW)
@@ -133,12 +134,12 @@ set(SOURCE_FILES
         src/GwtHttpRequest.cpp
         src/GwtHttpRequest.h
 
-        layout/views/Details.qml
-        layout/views/List.qml
-        layout/views/Loading.qml
-        layout/views/Login.qml
-        layout/views/OptionLine.qml
-        layout/panels/LoginPanel.qml
+        #layout/views/Details.qml
+        #layout/views/List.qml
+        #layout/views/Loading.qml
+        #layout/views/Login.qml
+        #layout/views/OptionLine.qml
+        #layout/panels/LoginPanel.qml
 
         src/api/GwtRpcResponse.cpp
         src/api/GwtRpcResponse.h
