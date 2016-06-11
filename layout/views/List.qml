@@ -41,7 +41,7 @@ ColumnLayout {
       delegate: OptionLine {
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 20
+        height: 24
       }
     }
     ComboBox {

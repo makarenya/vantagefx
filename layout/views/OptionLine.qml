@@ -58,18 +58,18 @@ Rectangle {
 
       delegate: Rectangle {
         Layout.preferredWidth: 90
-        height: 20
+        height: 24
 
         Button {
           width: 50
-          height: 20
+          height: 24
           text: model.name
           onClicked: model.selected = !model.selected
         }
 
         Rectangle {
           anchors.right: parent.right
-          y: 1
+          y: 3
           width: 30
           height: 18
           border.width: 1
@@ -78,6 +78,7 @@ Rectangle {
 
           Text {
             width: 30
+            y: 1
             height: 18
             text: model.bet
             renderType: Text.NativeRendering
@@ -95,11 +96,11 @@ Rectangle {
 
     Rectangle {
       Layout.preferredWidth: 80
-      height: 20
+      height: 24
 
       Button {
         width: 80
-        height: 20
+        height: 24
         text: "Remove"
         onClicked: root.stopWatch(model.asset)
       }
