@@ -16,30 +16,32 @@ namespace vantagefx {
         {
         public:
 
-            TimePoint(QDateTime time = QDateTime(), double price = 0, int rate = 0)
-                    : _time(time), _price(price), _rate(rate) { }
+            TimePoint(QDateTime time = QDateTime(), double price = 0, QMap<QString, int> rates = QMap<QString, int>())
+                    : _time(time), _price(price), _rates(rates) { }
 
             QDateTime time() const { return _time; }
             double price() const { return _price; }
-            int rate() const { return _rate; };
+            const QMap<QString, int> &rates() const { return _rates; };
 
         private:
             QDateTime _time;
             double _price;
-            int _rate;
+            QMap<QString, int> _rates;
         };
 
         class VirtualBet
         {
         public:
 
-            VirtualBet(QDateTime time)
-                    : _time(time), _result(0), _rate(0), _empty(true) {}
+            VirtualBet(int seconds)
+                    : _seconds(seconds), _result(0), _empty(true) {}
 
+            void setTime(const QDateTime &time) { _time = time; }
             QDateTime time() const { return _time; }
+            int seconds() const { return _seconds; }
             int result() const { return _result; }
-            int rate() const { return _rate; }
-            void setRate(int rate) { _rate = rate; }
+            int rate(QString name) const { return _rates[name]; }
+            void setRates(const QMap<QString, int> &rates) { _rates = rates; }
             bool empty() const { return _empty; }
 
             void setHigh() { _result = 1; _empty = false; }
@@ -48,8 +50,9 @@ namespace vantagefx {
 
         private:
             QDateTime _time;
+            int _seconds;
             int _result;
-            int _rate;
+            QMap<QString, int> _rates;
             bool _empty;
         };
 
