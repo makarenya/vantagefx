@@ -7,7 +7,7 @@
 
 #include <QtCore>
 #include "../model/TransactionModel.h"
-
+#include "../viewmodel/OptionItem.h"
 
 namespace vantagefx {
     namespace controller {
@@ -48,14 +48,17 @@ namespace vantagefx {
 
         class StatisticRenderer {
         public:
+            void setLogin(const QString &login);
             void update(QString asset, int index, int64_t bet, int64_t won, int level);
             void writeHourLine();
             void writeDayLine();
+            void writeVirtualBets(QMap<QString, QList<viewmodel::VirtualBet>> &bets);
 
         private:
             void writeFailsLine(QString asset, int index, int fails, int64_t result, int level);
             QDir rootDir();
             QMap<QString, QList<OptionInfo>> _assets;
+            QString _login;
         };
     }
 }

@@ -6,27 +6,11 @@
 #define VANTAGEFX_OPTIONSLISTMODEL_H
 
 #include <QtCore>
+#include "OptionItem.h"
 #include "../model/OptionModel.h"
 
 namespace vantagefx {
     namespace viewmodel {
-
-        struct OptionItem {
-
-            OptionItem(int s = 0);
-
-            int64_t id;
-            model::OptionModel::OptionStatus status;
-            int bet;
-			int seconds;
-			bool selected;
-
-			bool toggle();
-			QString name() const;
-            QColor background() const;
-			QColor border() const;
-			QColor foreground() const;
-        };
 
 		class OptionsListModel : public QAbstractListModel
 		{
@@ -57,6 +41,8 @@ namespace vantagefx {
 			bool contains(int64_t optionId) const;
 			bool isSelected(int64_t optionid) const;
 
+            QList<VirtualBet> calculateVirtualBets();
+
             void setMarketId(int marketId);
 
             int marketId() const;
@@ -70,6 +56,8 @@ namespace vantagefx {
 			QString name() const;
 
 			void setRateHi(int rateHi);
+
+			void setAllRates(const QMap<QString, int> &rates);
 
 			int rateHi() const;
 
@@ -98,6 +86,8 @@ namespace vantagefx {
 			int _threshold;
 
 			QVector<OptionItem> _options;
+            QLinkedList<TimePoint> _sequence;
+			QMap<QString, int> _rates;
 		};
 
         inline int OptionsListModel::marketId() const { return _marketId; }

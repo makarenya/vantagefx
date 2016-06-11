@@ -15,7 +15,7 @@ namespace vantagefx {
                   bet(0),
 				  seconds(s),
 				  selected(false)
-                {}
+        {}
 
 		bool OptionItem::toggle()
 		{
@@ -89,5 +89,30 @@ namespace vantagefx {
                     return QColor(Qt::white);
 			}
 		}
+
+        void OptionItem::initializeTimePoint(QLinkedList<TimePoint>::iterator timePoint)
+        {
+            this->timePoint = timePoint;
+        }
+
+        VirtualBet OptionItem::calculateVirtualBet(TimePoint &now)
+        {
+            auto bet = VirtualBet(seconds);
+            if (timePoint->time().secsTo(now.time()) > seconds) {
+                if (now.price() > timePoint->price()) {
+                    bet.setHigh();
+                }
+                else if (now.price() < timePoint->price()) {
+                    bet.setLow();
+                }
+                else {
+                    bet.setParity();
+                }
+				bet.setTime(timePoint->time());
+                bet.setRates(timePoint->rates());
+                timePoint++;
+            }
+            return bet;
+        }
     }
 }

@@ -101,6 +101,8 @@ namespace vantagefx {
 
 			_options.updateAssets(_model.assets());
 			_options.updateOptions(_model.options());
+            auto bets = _options.calculateVirtualBets();
+            _stat.writeVirtualBets(bets);
 
 			if (!makePurchases(_model.options())) {
 				_refreshTimeout = 0;
@@ -135,6 +137,7 @@ namespace vantagefx {
 			setLoggedIn(_model.isLoggedIn());
 			setFullName(_model.userName());
 
+            _stat.setLogin(login());
 			_settings.setLogin(login());
 			_settings.setPassword(password());
 			_settings.setServer(server());

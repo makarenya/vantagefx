@@ -19,7 +19,12 @@ namespace vantagefx {
 			  _price(0.0),
 			  _threshold(71),
 			  _options({ OptionItem(30), OptionItem(60), OptionItem(120), OptionItem(300) })
-        {}
+        {
+            _sequence.push_back(TimePoint(QDateTime::currentDateTime(), 0));
+            for(int i = 0; i < _options.size(); ++i) {
+                _options[i].timePoint = _sequence.begin();
+            }
+        }
 
 	    int OptionsListModel::rowCount(const QModelIndex &parent) const
         {
@@ -135,6 +140,39 @@ namespace vantagefx {
 			throw std::out_of_range("option " + std::to_string(optionId) + " not found");
 		}
 
+        QList<VirtualBet> OptionsListModel::calculateVirtualBets()
+        {
+            if (_rateHi == 0 || _rateLow == 0) return QList<VirtualBet>();
+            // Текущая засечка по времени
+            auto now = TimePoint(QDateTime::currentDateTime(), _price, _rates);
+            // Если до сих пор в последовательности засечек ничего нет,
+            // то опции не содержат правильный указатель на свою вершину.
+            if (_sequence.empty()) {
+                _sequence.push_back(now);
+                // Инициализируем указатели для опций
+                for(int i = 0; i < _options.size(); ++i) {
+                    _options[i].initializeTimePoint(_sequence.begin());
+                }
+            }
+            else {
+                // Либо просто добавляем засечку в последовательность
+                _sequence.push_back(now);
+            }
+            // Список результатов
+            QList<VirtualBet> bets;
+
+            // Добавляем результаты
+            for(int i = 0; i < _options.size(); ++i) {
+                bets.append(_options[i].calculateVirtualBet(now));
+            }
+            // Если последовательность перерасла 6-минутный рубеж, обрезаем её.
+            if (_sequence.first().time().secsTo(now.time()) > 360) {
+                _sequence.removeFirst();
+            }
+            // Массив результатов
+            return bets;
+        }
+
         void OptionsListModel::setMarketId(int marketId)
         {
             _marketId = marketId;
@@ -154,6 +192,11 @@ namespace vantagefx {
         {
 	        _rateHi = rateHi;
         }
+
+		void OptionsListModel::setAllRates(const QMap<QString, int> &rates)
+		{
+			_rates = rates;
+		}
 
 	    void OptionsListModel::setRateLow(int rateLow)
         {

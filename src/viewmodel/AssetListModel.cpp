@@ -73,6 +73,7 @@ namespace vantagefx {
             item->setName(asset.name());
             item->setRateLow(asset.rateValue("Put"));
             item->setRateHi(asset.rateValue("Call"));
+			item->setAllRates(asset.rates());
             item->setPrice(asset.price());
 
             // Все пары упорядочены по своему индексу, опредемому полем order.
@@ -131,6 +132,7 @@ namespace vantagefx {
                         current->setRateHi(item.rateValue("Put"));
                         roles.push_back(RateHiRole);
                     }
+					current->setAllRates(item.rates());
                     if (item.price() != current->price()) {
                         current->setPrice(item.price());
                         roles.push_back(PriceRole);
@@ -198,6 +200,15 @@ namespace vantagefx {
 				}
 			}
 		}
+
+        QMap<QString, QList<VirtualBet>> AssetListModel::calculateVirtualBets()
+        {
+            QMap<QString, QList<VirtualBet>> result;
+            for(int i = 0; i < _items.size(); ++i) {
+                result[_items[i]->name()] = _items[i]->calculateVirtualBets();
+            }
+            return result;
+        }
 
 		bool AssetListModel::containsOption(int64_t optionId) const
 		{

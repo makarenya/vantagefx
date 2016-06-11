@@ -44,6 +44,8 @@ namespace vantagefx {
             void updateOptions(const QMap<int64_t, model::OptionModel> &options);
 			void updateOption(model::OptionModel &item);
 
+            QMap<QString, QList<VirtualBet>> calculateVirtualBets();
+
 			bool containsOption(int64_t optionId) const;
 			OptionsListModel &assetFor(int64_t optionId) const;
 			bool isSelected(int64_t optionId) const;

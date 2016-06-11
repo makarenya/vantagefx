@@ -34,6 +34,7 @@ namespace vantagefx {
 
 	        void setRate(const QString &name, int value);
 	        int rateValue(const QString& name) const;
+			const QMap<QString, int> &rates() const;
 
         private:
             int _id;
@@ -57,6 +58,8 @@ namespace vantagefx {
         inline const QString &AssetModel::marketName() const { return _marketName; }
 
         inline const QString &AssetModel::subMarketName() const { return _subMarketName; }
+
+		inline const QMap<QString, int> &AssetModel::rates() const { return _rates; }
     }
 }
 

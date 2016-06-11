@@ -85,6 +85,13 @@ namespace vantagefx {
                         : CsvFileAppender(dir.filePath("fails.csv"), { "Date", "Asset", "Sec", "Price", "Line", "Level" })
                 {}
             };
+
+            struct VirtualCsvFileAppender : public CsvFileAppender
+            {
+                VirtualCsvFileAppender(QDir dir)
+					: CsvFileAppender(dir.filePath("virtual.csv"), { "Date", "Asset", "Sec", "Up Result", "Down Result", "Call", "Put", "Touch", "NoTouch", "In", "Out", "TouchDown", "NoTouchDown", "Above", "Below", "Sell", "Buy", "UpAsk", "DownAsk", "UpBid", "DownBid" })
+				{}
+            };
         }
 
         void HourInfo::write(csv::CsvFileAppender &appender) {
@@ -121,6 +128,11 @@ namespace vantagefx {
             _day = HourInfo();
         }
 
+        void StatisticRenderer::setLogin(const QString &login)
+        {
+            _login = login;
+        }
+
         void StatisticRenderer::update(QString asset, int index, int64_t bet, int64_t won, int level) {
             auto &info = _assets[asset];
             while(info.size() < 5) {
@@ -137,7 +149,8 @@ namespace vantagefx {
 
         void StatisticRenderer::writeHourLine()
         {
-            for (auto it = _assets.begin(); it != _assets.end(); ++it) {
+			if (_login.isEmpty()) return;
+			for (auto it = _assets.begin(); it != _assets.end(); ++it) {
                 csv::HourCsvFileAppender file(rootDir(), it.key());
 
                 auto now = QDateTime::currentDateTime().addSecs(-1000);
@@ -151,7 +164,8 @@ namespace vantagefx {
 
         void StatisticRenderer::writeDayLine()
         {
-            for (auto it = _assets.begin(); it != _assets.end(); ++it) {
+			if (_login.isEmpty()) return;
+			for (auto it = _assets.begin(); it != _assets.end(); ++it) {
                 csv::HourCsvFileAppender file(rootDir(), it.key());
 
                 auto now = QDateTime::currentDateTime().addSecs(-1000);
@@ -163,9 +177,53 @@ namespace vantagefx {
             }
         }
 
+        void StatisticRenderer::writeVirtualBets(QMap<QString, QList<viewmodel::VirtualBet>> &bets)
+        {
+			if (_login.isEmpty()) return;
+            csv::VirtualCsvFileAppender file(rootDir());
+            for(auto it = bets.begin(); it != bets.end(); ++it) {
+                for(auto bet : it.value()) {
+                    if (!bet.empty()) {
+                        file.write(bet.time().toString("yyyy-MM-dd HH:mm:ss"));
+                        file.write(it.key());
+                        file.write(bet.seconds());
+						if (bet.result() > 0) {
+							file.write(70);
+							file.write(-100);
+						}
+						else if (bet.result() < 0) {
+							file.write(-100);
+							file.write(70);
+						}
+						else {
+							file.write(0);
+							file.write(0);
+						}
+						file.write(bet.rate("Call"));
+						file.write(bet.rate("Put"));
+						file.write(bet.rate("Touch"));
+						file.write(bet.rate("NoTouch"));
+						file.write(bet.rate("In"));
+						file.write(bet.rate("Out"));
+						file.write(bet.rate("TouchDown"));
+						file.write(bet.rate("NoTouchDown"));
+						file.write(bet.rate("Above"));
+						file.write(bet.rate("Below"));
+						file.write(bet.rate("Sell"));
+						file.write(bet.rate("Buy"));
+						file.write(bet.rate("UpAsk"));
+						file.write(bet.rate("DownAsk"));
+						file.write(bet.rate("UpBid"));
+						file.write(bet.rate("DownBid"));
+                    }
+                }
+            }
+        }
+
         void StatisticRenderer::writeFailsLine(QString asset, int index, int fails, int64_t result, int level)
         {
-            csv::FailsCsvFileAppender file(rootDir());
+			if (_login.isEmpty()) return;
+			csv::FailsCsvFileAppender file(rootDir());
 			file.write(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
             file.write(asset);
             switch(index) {
@@ -183,7 +241,9 @@ namespace vantagefx {
         {
             auto docs = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
             auto statistics = QDir(docs.filePath("vantagefx"));
-            if (!statistics.exists()) statistics.mkdir(statistics.path());
+            if (!_login.isEmpty())
+                statistics = QDir(statistics.filePath(_login));
+            if (!statistics.exists()) statistics.mkpath(statistics.path());
 			return statistics;
         }
     }
