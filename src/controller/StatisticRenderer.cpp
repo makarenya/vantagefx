@@ -89,7 +89,7 @@ namespace vantagefx {
             struct VirtualCsvFileAppender : public CsvFileAppender
             {
                 VirtualCsvFileAppender(QDir dir)
-					: CsvFileAppender(dir.filePath("virtual.csv"), { "Date", "Asset", "Sec", "Up Result", "Down Result", "Call", "Put", "Touch", "NoTouch", "In", "Out", "TouchDown", "NoTouchDown", "Above", "Below", "Sell", "Buy", "UpAsk", "DownAsk", "UpBid", "DownBid" })
+					: CsvFileAppender(dir.filePath("virtual.csv"), { "Date", "Asset", "Sec", "Result", "Up Result", "Down Result", "Shoft Dynamic", "Mid Dynamic", "Long Dynamic", "Call", "Put", "Touch", "NoTouch", "In", "Out", "TouchDown", "NoTouchDown", "Above", "Below", "Sell", "Buy", "UpAsk", "DownAsk", "UpBid", "DownBid" })
 				{}
             };
         }
@@ -187,6 +187,7 @@ namespace vantagefx {
                         file.write(bet.time().toString("yyyy-MM-dd HH:mm:ss"));
                         file.write(it.key());
                         file.write(bet.seconds());
+						file.write(bet.result());
 						if (bet.result() > 0) {
 							file.write(70);
 							file.write(-100);
@@ -199,6 +200,9 @@ namespace vantagefx {
 							file.write(0);
 							file.write(0);
 						}
+						file.write(bet.shortDynamic());
+						file.write(bet.midDynamic());
+						file.write(bet.longDynamic());
 						file.write(bet.rate("Call"));
 						file.write(bet.rate("Put"));
 						file.write(bet.rate("Touch"));

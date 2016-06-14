@@ -34,7 +34,7 @@ namespace vantagefx {
         public:
 
             VirtualBet(int seconds)
-                    : _seconds(seconds), _result(0), _empty(true) {}
+                    : _seconds(seconds), _result(0), _empty(true), _shortDynamic(0), _midDynamic(0), _longDynamic(0) {}
 
             void setTime(const QDateTime &time) { _time = time; }
             QDateTime time() const { return _time; }
@@ -42,7 +42,13 @@ namespace vantagefx {
             int result() const { return _result; }
             int rate(QString name) const { return _rates[name]; }
             void setRates(const QMap<QString, int> &rates) { _rates = rates; }
-            bool empty() const { return _empty; }
+			void setShortDynamic(int dynamic) { _shortDynamic = dynamic;  }
+			void setMidDynamic(int dynamic) { _midDynamic = dynamic; }
+			void setLongDynamic(int dynamic) { _longDynamic = dynamic;  }
+			int shortDynamic() const { return _shortDynamic;  }
+			int midDynamic() const { return _midDynamic; }
+			int longDynamic() const { return _longDynamic; }
+			bool empty() const { return _empty; }
 
             void setHigh() { _result = 1; _empty = false; }
             void setLow() { _result = -1; _empty = false; }
@@ -54,6 +60,9 @@ namespace vantagefx {
             int _result;
             QMap<QString, int> _rates;
             bool _empty;
+			int _shortDynamic;
+			int _midDynamic;
+			int _longDynamic;
         };
 
         struct OptionItem

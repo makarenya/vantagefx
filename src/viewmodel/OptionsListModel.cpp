@@ -163,10 +163,32 @@ namespace vantagefx {
 
             // Добавляем результаты
             for(int i = 0; i < _options.size(); ++i) {
-                bets.append(_options[i].calculateVirtualBet(now));
+				auto bet = _options[i].calculateVirtualBet(now);
+				if (!bet.empty()) {
+					auto pnt = _options[i].timePoint;
+					int dynLevel = 0;
+					for (auto it = _sequence.begin(); it != _sequence.end(); ++it) {
+						int diff = it->time().secsTo(pnt->time());
+						
+						int dynamics = it->price() == 0 ? 0 : round((pnt->price() - it->price()) * 100000 / it->price());
+						if (dynLevel == 0 && diff < 120) {
+							bet.setLongDynamic(dynamics);
+							dynLevel = 1;
+						}
+						if (dynLevel == 1 && diff < 60) {
+							bet.setMidDynamic(dynamics);
+							dynLevel = 2;
+						}
+						if (dynLevel == 2 && diff < 30) {
+							bet.setShortDynamic(dynamics);
+							break;
+						}
+					}
+				}
+                bets.append(bet);
             }
             // Если последовательность перерасла 6-минутный рубеж, обрезаем её.
-            if (_sequence.first().time().secsTo(now.time()) > 360) {
+            if (_sequence.first().time().secsTo(now.time()) > 600) {
                 _sequence.removeFirst();
             }
             // Массив результатов
