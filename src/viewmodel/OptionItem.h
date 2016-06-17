@@ -40,7 +40,7 @@ namespace vantagefx {
             QDateTime time() const { return _time; }
             int seconds() const { return _seconds; }
             int result() const { return _result; }
-            int rate(QString name) const { return _rates[name]; }
+            int rate(QString name) const { return _rates.contains(name) ? _rates[name] : 50; }
             void setRates(const QMap<QString, int> &rates) { _rates = rates; }
 			void setShortDynamic(int dynamic) { _shortDynamic = dynamic;  }
 			void setMidDynamic(int dynamic) { _midDynamic = dynamic; }
@@ -48,7 +48,7 @@ namespace vantagefx {
 			int shortDynamic() const { return _shortDynamic;  }
 			int midDynamic() const { return _midDynamic; }
 			int longDynamic() const { return _longDynamic; }
-			bool empty() const { return _empty; }
+			bool empty() const { return _empty || _rates.size() == 0; }
 
             void setHigh() { _result = 1; _empty = false; }
             void setLow() { _result = -1; _empty = false; }

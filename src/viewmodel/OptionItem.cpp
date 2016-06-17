@@ -98,21 +98,20 @@ namespace vantagefx {
         VirtualBet OptionItem::calculateVirtualBet(TimePoint &now)
         {
             auto bet = VirtualBet(seconds);
-			if (status == model::OptionModel::NotFound) return bet;
-			if (timePoint->time().secsTo(now.time()) <= seconds) return bet;
-
-            if (now.price() > timePoint->price()) {
-                bet.setHigh();
+            if (timePoint->time().secsTo(now.time()) > seconds) {
+                if (now.price() > timePoint->price()) {
+                    bet.setHigh();
+                }
+                else if (now.price() < timePoint->price()) {
+                    bet.setLow();
+                }
+                else {
+                    bet.setParity();
+                }
+				bet.setTime(timePoint->time());
+                bet.setRates(timePoint->rates());
+                timePoint++;
             }
-            else if (now.price() < timePoint->price()) {
-                bet.setLow();
-            }
-            else {
-                bet.setParity();
-            }
-			bet.setTime(timePoint->time());
-            bet.setRates(timePoint->rates());
-            timePoint++;
             return bet;
         }
     }
