@@ -39,9 +39,7 @@ namespace vantagefx {
 
             double price() const;
 
-			int lowRateValue() const;
-
-			int highRateValue() const;
+			int rate(const QString &name) const;
 
 			int currentBet() const;
 

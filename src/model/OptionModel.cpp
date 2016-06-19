@@ -18,14 +18,9 @@ namespace vantagefx {
 			      _openTime()
 			{}
 
-	    int OptionModel::lowRateValue() const
+	    int OptionModel::rate(const QString &name) const
 	    {
-			return asset().rateValue("Call");
-		}
-
-	    int OptionModel::highRateValue() const
-	    {
-			return asset().rateValue("Put");
+			return asset().rateValue(name);
 		}
 
 	    void OptionModel::setOptionId(int64_t optionId)

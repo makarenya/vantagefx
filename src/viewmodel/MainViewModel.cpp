@@ -332,12 +332,12 @@ namespace vantagefx {
 					continue;
 				}
 				int threshold = 70;
-				if (option.highRateValue() >= std::abs(threshold)) {
-					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
+				if (option.rate("Call") >= 70 && option.rate("In") >= 70) {
+					doPurchase(option.optionId(), option.currentBet() * 100, _model.rateId("Call"));
 					return true;
 				}
-				if (option.lowRateValue() >= std::abs(threshold)) {
-					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Call") : _model.rateId("Put"));
+				if (option.rate("Put") >= 70 && option.rate("Out") >= 70) {
+					doPurchase(option.optionId(), option.currentBet() * 100, _model.rateId("Put"));
 					return true;
 				}
 			}
