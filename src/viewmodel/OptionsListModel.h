@@ -41,6 +41,9 @@ namespace vantagefx {
 			bool contains(int64_t optionId) const;
 			bool isSelected(int64_t optionid) const;
 
+			const TimePoint *timePoint(QDateTime maxTime);
+			int dynamic(const TimePoint *end, int interval);
+
             QList<VirtualBet> calculateVirtualBets();
 
             void setMarketId(int marketId);

@@ -20,10 +20,6 @@ namespace vantagefx {
 			  _threshold(71),
 			  _options({ OptionItem(30), OptionItem(60), OptionItem(120), OptionItem(300) })
         {
-            _sequence.push_back(TimePoint(QDateTime::currentDateTime(), 0));
-            for(int i = 0; i < _options.size(); ++i) {
-                _options[i].timePoint = _sequence.begin();
-            }
         }
 
 	    int OptionsListModel::rowCount(const QModelIndex &parent) const
@@ -140,52 +136,49 @@ namespace vantagefx {
 			throw std::out_of_range("option " + std::to_string(optionId) + " not found");
 		}
 
+		/**
+		 * @brief Возвращает самую последнюю по времени точку, произошедшую не позже maxTime
+		*/
+		const TimePoint *OptionsListModel::timePoint(QDateTime maxTime)
+		{
+			TimePoint *last = nullptr;
+			for (auto point : _sequence) {
+				if (point.time() > maxTime) return last;
+				last = &point;
+			}
+			return last;
+		}
+
+		/*
+		 * @brief Возвращает взвешенную динамику цены
+		*/
+		int OptionsListModel::dynamic(const TimePoint *end, int interval)
+		{
+			auto start = timePoint(end->time().addSecs(interval));
+			if (!start) return 0;
+			return start->price() == 0 ? 0 : round((end->price() - start->price()) * 100000 / start->price());
+		}
+
         QList<VirtualBet> OptionsListModel::calculateVirtualBets()
         {
             if (_rateHi == 0 || _rateLow == 0) return QList<VirtualBet>();
             // Текущая засечка по времени
             auto now = TimePoint(QDateTime::currentDateTime(), _price, _rates);
-            // Если до сих пор в последовательности засечек ничего нет,
-            // то опции не содержат правильный указатель на свою вершину.
-            if (_sequence.empty()) {
-                _sequence.push_back(now);
-                // Инициализируем указатели для опций
-                for(int i = 0; i < _options.size(); ++i) {
-                    _options[i].initializeTimePoint(_sequence.begin());
-                }
-            }
-            else {
-                // Либо просто добавляем засечку в последовательность
-                _sequence.push_back(now);
-            }
-            // Список результатов
+			// Добавляем засечку в последовательность
+			_sequence.push_back(now);
+			// Список результатов
             QList<VirtualBet> bets;
 
             // Добавляем результаты
             for(int i = 0; i < _options.size(); ++i) {
-				auto bet = _options[i].calculateVirtualBet(now);
-				if (!bet.empty()) {
-					auto pnt = _options[i].timePoint;
-					int dynLevel = 0;
-					for (auto it = _sequence.begin(); it != _sequence.end(); ++it) {
-						int diff = it->time().secsTo(pnt->time());
-						
-						int dynamics = it->price() == 0 ? 0 : round((pnt->price() - it->price()) * 100000 / it->price());
-						if (dynLevel == 0 && diff < 120) {
-							bet.setLongDynamic(dynamics);
-							dynLevel = 1;
-						}
-						if (dynLevel == 1 && diff < 60) {
-							bet.setMidDynamic(dynamics);
-							dynLevel = 2;
-						}
-						if (dynLevel == 2 && diff < 30) {
-							bet.setShortDynamic(dynamics);
-							break;
-						}
-					}
-				}
-                bets.append(bet);
+				auto point = timePoint(now.time().addSecs(-_options[i].seconds));
+				if (!point) continue;
+				auto bet = _options[i].calculateVirtualBet(*point, now);
+				if (bet.empty()) continue;
+				bet.setLongDynamic(dynamic(point, 120));
+				bet.setMidDynamic(dynamic(point, 60));
+				bet.setShortDynamic(dynamic(point, 30));
+	            bets.append(bet);
             }
             // Если последовательность перерасла 6-минутный рубеж, обрезаем её.
             if (_sequence.first().time().secsTo(now.time()) > 600) {

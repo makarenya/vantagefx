@@ -19,12 +19,12 @@ namespace vantagefx {
             TimePoint(QDateTime time = QDateTime(), double price = 0, QMap<QString, int> rates = QMap<QString, int>())
                     : _time(time), _price(price), _rates(rates) { }
 
-            QDateTime time() const { return _time; }
+			const QDateTime &time() const { return _time; }
             double price() const { return _price; }
             const QMap<QString, int> &rates() const { return _rates; };
 
         private:
-            QDateTime _time;
+			QDateTime _time;
             double _price;
             QMap<QString, int> _rates;
         };
@@ -37,7 +37,7 @@ namespace vantagefx {
                     : _seconds(seconds), _result(0), _empty(true), _shortDynamic(0), _midDynamic(0), _longDynamic(0) {}
 
             void setTime(const QDateTime &time) { _time = time; }
-            QDateTime time() const { return _time; }
+			QDateTime time() const { return _time; }
             int seconds() const { return _seconds; }
             int result() const { return _result; }
             int rate(QString name) const { return _rates.contains(name) ? _rates[name] : 50; }
@@ -55,7 +55,7 @@ namespace vantagefx {
             void setParity() { _result = 0; _empty = false; }
 
         private:
-            QDateTime _time;
+			QDateTime _time;
             int _seconds;
             int _result;
             QMap<QString, int> _rates;
@@ -81,10 +81,7 @@ namespace vantagefx {
             QColor border() const;
             QColor foreground() const;
 
-            void initializeTimePoint(QLinkedList<TimePoint>::iterator timePoint);
-            VirtualBet calculateVirtualBet(TimePoint &now);
-
-            QLinkedList<TimePoint>::iterator timePoint;
+            VirtualBet calculateVirtualBet(const TimePoint &start, const TimePoint &stop);
         };
     }
 }
