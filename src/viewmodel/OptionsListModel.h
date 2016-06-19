@@ -74,10 +74,6 @@ namespace vantagefx {
 
 			int64_t order() const;
 
-			void setThreshold(int threshold);
-
-			int threshold() const;
-
 		private:
 
             int _marketId;
@@ -86,7 +82,6 @@ namespace vantagefx {
 			int _rateHi;
 			int _rateLow;
 			double _price;
-			int _threshold;
 
 			QVector<OptionItem> _options;
             QLinkedList<TimePoint> _sequence;
@@ -104,8 +99,6 @@ namespace vantagefx {
 		inline int OptionsListModel::rateLow() const { return _rateLow; }
 
 		inline double OptionsListModel::price() const { return _price; }
-
-		inline int OptionsListModel::threshold() const { return _threshold; }
     }
 }
 

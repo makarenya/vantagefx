@@ -17,7 +17,6 @@ namespace vantagefx {
 			  _rateHi(0),
 			  _rateLow(0),
 			  _price(0.0),
-			  _threshold(71),
 			  _options({ OptionItem(30), OptionItem(60), OptionItem(120), OptionItem(300) })
         {
         }
@@ -226,11 +225,6 @@ namespace vantagefx {
 	    int64_t OptionsListModel::order() const
         {
             return (marketId() << 20) | assetId();
-        }
-
-	    void OptionsListModel::setThreshold(int threshold)
-        {
-	        _threshold = threshold;
         }
 	}
 }

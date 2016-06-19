@@ -85,8 +85,7 @@ namespace vantagefx {
 			auto closed = _model.updateOptions(ctx->refresh());
 			setMoney(_model.currentMoney());
 			for(auto transaction: closed) {
-				auto threshold = _options.threshold(transaction.asset().id());
-				_stat.update(transaction.asset().name(), transaction.optionIndex(), transaction.bet(), transaction.returned(), threshold);
+				_stat.update(transaction.asset().name(), transaction.optionIndex(), transaction.bet(), transaction.returned(), 0);
 			}
 
             bool changed = false;
@@ -332,9 +331,7 @@ namespace vantagefx {
 					qDebug("second buy");
 					continue;
 				}
-				auto threshold = _options.threshold(option.asset().id());
-				if (std::abs(threshold) < 50) threshold = 71;
-
+				int threshold = 70;
 				if (option.highRateValue() >= std::abs(threshold)) {
 					doPurchase(option.optionId(), option.currentBet() * 100, threshold > 0 ? _model.rateId("Put") : _model.rateId("Call"));
 					return true;

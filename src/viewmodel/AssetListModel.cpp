@@ -19,7 +19,6 @@ namespace vantagefx {
             roles[RateLowRole] = "low";
             roles[RateHiRole] = "high";
             roles[PriceRole] = "price";
-            roles[ThresholdRole] = "threshold";
 			roles[OptionsRole] = "options";
 			return roles;
         }
@@ -43,8 +42,6 @@ namespace vantagefx {
                     return option->rateHi();
                 case PriceRole:
                     return option->price();
-				case ThresholdRole:
-                    return option->threshold();
 				case OptionsRole:
 					return QVariant::fromValue(option);
 				default:
@@ -56,9 +53,11 @@ namespace vantagefx {
         {
             if (!index.isValid()) return false;
             if (index.row() > _items.size()) return false;
-            if (role != ThresholdRole) return false;
-            _items[index.row()]->setThreshold(value.toInt());
-            return true;
+            // Обработка установки значений
+            switch(role) {
+            default:
+                return false;
+            }
         }
 
 		/**
@@ -230,12 +229,5 @@ namespace vantagefx {
 		{
 			return assetFor(optionId).isSelected(optionId);
 		}
-
-		int AssetListModel::threshold(int assetId) {
-            for(auto item : _items) {
-                if (item->assetId() == assetId) return item->threshold();
-            }
-            return 0;
-        }
     }
 }

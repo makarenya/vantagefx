@@ -44,15 +44,6 @@ Rectangle {
       renderType: Text.NativeRendering
     }
 
-    TextField {
-      id: threshold
-      Layout.preferredWidth: 50
-      height: 22
-      text: model.threshold
-    }
-
-    Binding { target: model; property: "threshold"; value: threshold.text }
-
     Repeater {
       model: options
 

@@ -24,7 +24,6 @@ namespace vantagefx {
                 RateLowRole,
                 RateHiRole,
                 PriceRole,
-				ThresholdRole,
 				OptionsRole
             };
 
@@ -49,8 +48,6 @@ namespace vantagefx {
 			bool containsOption(int64_t optionId) const;
 			OptionsListModel &assetFor(int64_t optionId) const;
 			bool isSelected(int64_t optionId) const;
-
-			int threshold(int assetId);
 
         private:
             QList<OptionsListModel *> _items;
