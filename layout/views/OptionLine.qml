@@ -15,32 +15,65 @@ Rectangle {
     }
 
     Text {
-      Layout.preferredWidth: 20
-      text: model.high
+      Layout.preferredWidth: 40
+      text: model.ratePut + " / " + model.rateOut
       renderType: Text.NativeRendering
     }
 
     Rectangle {
       Layout.preferredWidth: 100
-      height: 16
+      height: 20
 
       Rectangle {
-        width: model.low
-        height: 16
+        x: 29
+        y: 0
+        width: 1
+        height: 20
+        color: "black"
+      }
+
+      Rectangle {
+        x: 69
+        y: 0
+        width: 1
+        height: 20
+        color: "black"
+      }
+
+      Rectangle {
+        y: 1
+        width: model.ratePut
+        height: 8
+        color: "#ff0000"
+      }
+
+      Rectangle {
+        y: 1
+        x: model.ratePut
+        width: model.rateCall
+        height: 8
         color: "#00ff00"
       }
 
       Rectangle {
-        x: model.low
-        width: model.high
-        height: 16
+        y: 11
+        width: model.rateOut
+        height: 8
         color: "#ff0000"
+      }
+
+      Rectangle {
+        y: 11
+        x: model.rateOut
+        width: model.rateIn
+        height: 8
+        color: "#00ff00"
       }
     }
 
     Text {
-      Layout.preferredWidth: 20
-      text: model.low
+      Layout.preferredWidth: 40
+      text: model.rateCall + " / " + model.rateIn
       renderType: Text.NativeRendering
     }
 

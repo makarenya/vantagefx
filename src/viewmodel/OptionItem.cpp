@@ -14,7 +14,7 @@ namespace vantagefx {
                   status(model::OptionModel::NotFound),
                   bet(0),
 				  seconds(s),
-				  selected(false)
+				  selected(true)
         {}
 
 		bool OptionItem::toggle()

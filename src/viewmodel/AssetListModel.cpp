@@ -16,8 +16,10 @@ namespace vantagefx {
             roles[Qt::DisplayRole] = "display";
             roles[AssetIdRole] = "asset";
             roles[NameRole] = "name";
-            roles[RateLowRole] = "low";
-            roles[RateHiRole] = "high";
+            roles[RateCallRole] = "rateCall";
+            roles[RatePutRole] = "ratePut";
+            roles[RateInRole] = "rateIn";
+            roles[RateOutRole] = "rateOut";
             roles[PriceRole] = "price";
 			roles[OptionsRole] = "options";
 			return roles;
@@ -36,10 +38,14 @@ namespace vantagefx {
                     return option->name();
                 case AssetIdRole:
                     return option->assetId();
-                case RateLowRole:
-                    return option->rateLow();
-                case RateHiRole:
-                    return option->rateHi();
+                case RateCallRole:
+                    return option->rate("Call");
+                case RatePutRole:
+                    return option->rate("Put");
+                case RateInRole:
+                    return option->rate("In");
+                case RateOutRole:
+                    return option->rate("Out");
                 case PriceRole:
                     return option->price();
 				case OptionsRole:
@@ -70,8 +76,6 @@ namespace vantagefx {
             item->setMarketId(asset.marketId());
             item->setAssetId(asset.id());
             item->setName(asset.name());
-            item->setRateLow(asset.rateValue("Put"));
-            item->setRateHi(asset.rateValue("Call"));
 			item->setAllRates(asset.rates());
             item->setPrice(asset.price());
 
@@ -123,14 +127,18 @@ namespace vantagefx {
 
                     QVector<int> roles;
                     // Обновляются отображаемые данные
-                    if (item.rateValue("Call") != current->rateLow()) {
-                        current->setRateLow(item.rateValue("Call"));
-                        roles.push_back(RateLowRole);
+                    if (item.rateValue("Call") != current->rate("Call")) {
+                        roles.push_back(RateCallRole);
                     }
-                    if (item.rateValue("Put") != current->rateHi()) {
-                        current->setRateHi(item.rateValue("Put"));
-                        roles.push_back(RateHiRole);
+                    if (item.rateValue("Put") != current->rate("Put")) {
+                        roles.push_back(RatePutRole);
                     }
+					if (item.rateValue("In") != current->rate("In")) {
+						roles.push_back(RateInRole);
+					}
+					if (item.rateValue("Out") != current->rate("Out")) {
+						roles.push_back(RateOutRole);
+					}
 					current->setAllRates(item.rates());
                     if (item.price() != current->price()) {
                         current->setPrice(item.price());

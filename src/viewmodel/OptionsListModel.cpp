@@ -14,8 +14,6 @@ namespace vantagefx {
 		OptionsListModel::OptionsListModel(QObject *parent)
 			: QAbstractListModel(parent),
 			  _assetId(0),
-			  _rateHi(0),
-			  _rateLow(0),
 			  _price(0.0),
 			  _options({ OptionItem(30), OptionItem(60), OptionItem(120), OptionItem(300) })
         {
@@ -141,7 +139,7 @@ namespace vantagefx {
 		const TimePoint *OptionsListModel::timePoint(QDateTime maxTime)
 		{
 			TimePoint *last = nullptr;
-			for (auto point : _sequence) {
+			for (auto &point : _sequence) {
 				if (point.time() > maxTime) return last;
 				last = &point;
 			}
@@ -153,14 +151,14 @@ namespace vantagefx {
 		*/
 		int OptionsListModel::dynamic(const TimePoint *end, int interval)
 		{
-			auto start = timePoint(end->time().addSecs(interval));
+			auto start = timePoint(end->time().addSecs(-interval));
 			if (!start) return 0;
 			return start->price() == 0 ? 0 : round((end->price() - start->price()) * 100000 / start->price());
 		}
 
         QList<VirtualBet> OptionsListModel::calculateVirtualBets()
         {
-            if (_rateHi == 0 || _rateLow == 0) return QList<VirtualBet>();
+            if (_rates.size() == 0) return QList<VirtualBet>();
             // Текущая засечка по времени
             auto now = TimePoint(QDateTime::currentDateTime(), _price, _rates);
 			// Добавляем засечку в последовательность
@@ -202,20 +200,10 @@ namespace vantagefx {
 	        _name = name;
         }
 
-	    void OptionsListModel::setRateHi(int rateHi)
-        {
-	        _rateHi = rateHi;
-        }
-
 		void OptionsListModel::setAllRates(const QMap<QString, int> &rates)
 		{
 			_rates = rates;
 		}
-
-	    void OptionsListModel::setRateLow(int rateLow)
-        {
-	        _rateLow = rateLow;
-        }
 
 	    void OptionsListModel::setPrice(double price)
         {

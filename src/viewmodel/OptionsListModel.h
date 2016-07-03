@@ -58,15 +58,9 @@ namespace vantagefx {
 
 			QString name() const;
 
-			void setRateHi(int rateHi);
-
 			void setAllRates(const QMap<QString, int> &rates);
 
-			int rateHi() const;
-
-			void setRateLow(int rateLow);
-
-			int rateLow() const;
+			int rate(const QString &name) const;
 
 			void setPrice(double price);
 
@@ -79,8 +73,6 @@ namespace vantagefx {
             int _marketId;
 			int _assetId;
 			QString _name;
-			int _rateHi;
-			int _rateLow;
 			double _price;
 
 			QVector<OptionItem> _options;
@@ -94,9 +86,7 @@ namespace vantagefx {
 
 		inline QString OptionsListModel::name() const { return _name; }
 
-		inline int OptionsListModel::rateHi() const { return _rateHi; }
-
-		inline int OptionsListModel::rateLow() const { return _rateLow; }
+		inline int OptionsListModel::rate(const QString &name) const { return _rates.contains(name) ? _rates[name] : 50; }
 
 		inline double OptionsListModel::price() const { return _price; }
     }

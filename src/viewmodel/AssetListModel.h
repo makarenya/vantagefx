@@ -21,8 +21,10 @@ namespace vantagefx {
             enum RoleNames {
                 AssetIdRole = Qt::UserRole + 1,
                 NameRole,
-                RateLowRole,
-                RateHiRole,
+                RateCallRole,
+                RatePutRole,
+                RateInRole,
+                RateOutRole,
                 PriceRole,
 				OptionsRole
             };
