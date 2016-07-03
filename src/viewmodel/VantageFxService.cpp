@@ -34,7 +34,7 @@ namespace vantagefx {
 	    void LoadingContext::send()
         {
 			auto self = shared_from_this();
-			std::string url = "https://binaryoptions.vantagefx.com/app/index.html";
+			std::string url = "https://binaryoptions.vantagefx.com/";
 			http::HttpRequest index(url);
 			_context.send(std::move(index), std::bind(&LoadingContext::indexLoaded, self, _1, _2));
 		}

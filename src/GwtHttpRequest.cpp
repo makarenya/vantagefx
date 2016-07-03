@@ -69,13 +69,13 @@ namespace vantagefx {
 
 	GwtHttpRequest::GwtHttpRequest(const std::string &uri, const std::string &uid,
 		const std::string &servlet, const std::string &method)
-            : http::HttpRequest("https://binaryoptions.vantagefx.com/app/services/" + uri, "POST"),
+            : http::HttpRequest("https://binaryoptions.vantagefx.com/services/" + uri, "POST"),
               _uid(uid),
               _servlet(servlet),
               _method(method)
 	{
-        addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/app/Basic/");
-        addHeader("X-GWT-Permutation", "97A60A56BD971D60069316AF35BCDFB9");
+        addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/Basic/");
+        addHeader("X-GWT-Permutation", "B9DC7DC8D4CFEFD7E25C35E26053B8FC");
         addHeader("Origin", "https://binaryoptions.vantagefx.com");
         addHeader("Content-Type", "text/x-gwt-rpc; charset=UTF-8");
     }
@@ -83,7 +83,7 @@ namespace vantagefx {
     void GwtHttpRequest::updateContent()
     {
         GwtHttpRequestContext ctx;
-        ctx << "https://binaryoptions.vantagefx.com/app/Basic/";
+        ctx << "https://binaryoptions.vantagefx.com/Basic/";
         ctx << _uid;
         ctx << _servlet;
         ctx << _method;
