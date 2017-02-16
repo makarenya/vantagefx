@@ -23,7 +23,7 @@ namespace vantagefx {
             }
             _url = strings[get<int>(*item++)];
             _strongName = strings[get<int>(*item++)];
-            if (_flags && RpcTokenIcluded) {
+            if (_flags & RpcTokenIcluded) {
                 throw std::runtime_error("rpc token not supported");
             }
             _serviceName = strings[get<int>(*item++)];

@@ -2,8 +2,6 @@
 // Created by alexx on 26.03.2016.
 //
 
-#include <iostream>
-#include <fstream>
 #include "GwtParser.h"
 #include "GwtType.h"
 #include "GwtBundle.h"
@@ -25,7 +23,7 @@ namespace vantagefx {
 				if (valueType == 0) field = fint("value");
 				else if (valueType == 1) field = fdbl("value");
 				else field = flng("value");
-				auto value = popValue();
+				auto value = popValue("field value");
 				std::vector<GwtFieldPtr> fields = { field };
 				auto type = std::make_shared<GwtComplexType>("temp", fields, "value");
 				auto obj = std::make_shared<GwtObject>(type);
@@ -34,14 +32,24 @@ namespace vantagefx {
 			}
 
             int typeId;
-            *this >> typeId;
+			pop(typeId, "type id");
             GwtObjectPtr obj;
             if (typeId == 0) {
                 obj = GwtObjectPtr();
             }
             else if (typeId < 0) {
 	            auto key = ~typeId;
-                obj = _fetched[key];
+				if (key >= _fetched.size())
+					throw ParseError("key overflow detected");
+				obj = _fetched[key];
+				for(auto item: _fetchStack)
+				{
+					if (obj == item)
+					{
+						obj = GwtObjectPtr();
+						break;
+					}
+				}
             }
             else {
                 auto it = _bundle.type(word(typeId));
@@ -51,7 +59,9 @@ namespace vantagefx {
                 obj = std::make_shared<GwtObject>(it);
                 _fetched.push_back(obj);
 				_fetchStack.push_back(obj);
+				pushItem(obj->type()->name() + "::");
                 it->parse(*this, obj);
+				popItem();
 				_fetchStack.erase(_fetchStack.end() - 1);
             }
 			if (last && !eof()) throw std::runtime_error("not all fetched");
@@ -80,5 +90,12 @@ namespace vantagefx {
 			}
 			return GwtObjectPtr();
 	    }
+
+	    void GwtParser::printItems(std::ostream& stream)
+	    {
+			for (auto &item : _itemStack) {
+				stream << item;
+			}
+		}
     }
 }

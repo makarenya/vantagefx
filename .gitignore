@@ -1,3 +1,5 @@
 .idea/
 data/
 *.sdf
+cmake-build-debug/
+msvc/

@@ -257,7 +257,8 @@ namespace vantagefx {
 
 		GwtValue LongField::parse(GwtParser &parser) {
             int64_t value;
-            parser >> value;
+			auto fn = parser.last()->type()->name() + "::" + name();
+			parser.pop(value, fn);
             updateFactor(this, value);
             return GwtValue(value);
         }
@@ -282,7 +283,6 @@ namespace vantagefx {
 
 	    bool IntField::equal(const GwtValue& value, const GwtValue& other) const
         {
-	        auto o = other.toInt();
 			return value.intValue() == other.toInt() && value.intValue() != 0;
 		}
 
@@ -291,7 +291,8 @@ namespace vantagefx {
 
 		GwtValue StdField::parse(GwtParser &parser) {
             int value;
-            parser >> value;
+			auto fn = parser.last()->type()->name() + "::" + name();
+			parser.pop(value, fn);
             auto string = parser.str(value);
             if (value == parser.maxWord()) {
                 std::cout << parser.stack().back()->type()->name() << "::" << name() << " can be a string '"
@@ -322,7 +323,8 @@ namespace vantagefx {
 
 		GwtValue IntField::parse(GwtParser &parser) {
             int value;
-            parser >> value;
+			auto fn = parser.last()->type()->name() + "::" + name();
+			parser.pop(value, fn);
             updateFactor(this, value);
             return GwtValue(value);
         }
@@ -360,10 +362,12 @@ namespace vantagefx {
 
 		GwtValue FloatField::parse(GwtParser &parser) {
             double value;
+			auto fn = parser.last()->type()->name() + "::" + name();
+			
             if (_ignoreOther)
-                value = parser.popAsDouble();
+                value = parser.popAsDouble(fn);
             else
-                parser >> value;
+                parser.pop(value, fn);
             updateFactor(this, value);
             return GwtValue(value);
         }
@@ -387,7 +391,8 @@ namespace vantagefx {
 
 		GwtValue StringField::parse(GwtParser &parser) {
             int value;
-            parser >> value;
+			auto fn = parser.last()->type()->name() + "::" + name();
+			parser.pop(value, fn);
             auto string = parser.word(value);
             updateFactor(this, string);
             return GwtValue(value, string);

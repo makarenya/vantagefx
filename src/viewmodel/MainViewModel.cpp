@@ -332,11 +332,11 @@ namespace vantagefx {
 					continue;
 				}
 				int threshold = 70;
-				if (option.rate("Call") >= 70 && option.rate("In") >= 70) {
+				if (option.rate("Call") >= threshold && option.rate("In") >= threshold) {
 					doPurchase(option.optionId(), option.currentBet() * 100, _model.rateId("Call"));
 					return true;
 				}
-				if (option.rate("Put") >= 70 && option.rate("Out") >= 70) {
+				if (option.rate("Put") >= threshold && option.rate("Out") >= threshold) {
 					doPurchase(option.optionId(), option.currentBet() * 100, _model.rateId("Put"));
 					return true;
 				}

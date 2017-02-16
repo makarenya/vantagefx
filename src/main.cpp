@@ -14,6 +14,7 @@
 #include "src/viewmodel/MainViewModel.h"
 #include "src/viewmodel/VantageFxService.h"
 
+
 #ifdef WINVER
 #include <shellapi.h>
 #endif
@@ -38,6 +39,12 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpC
 		args[i] = &items[i][0];
 	}
 	LocalFree(argv);
+	auto paths = QCoreApplication::libraryPaths();
+	paths.append(".");
+	paths.append("imageformats");
+	paths.append("platforms");
+	paths.append("sqldrivers");
+	QCoreApplication::setLibraryPaths(paths);
 
 	return start(argc, &args[0]);
 }

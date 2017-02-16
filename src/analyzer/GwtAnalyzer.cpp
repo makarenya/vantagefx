@@ -49,10 +49,10 @@ namespace vantagefx {
 			}
 			catch (std::exception &ex) {
 				std::cout << ex.what() << std::endl;
-				if (parser.root()) parser.root()->saveXml("d:\\error.xml");
+				//if (parser.root()) parser.root()->saveXml("d:\\error.xml");
 				parser.printStack(std::cout);
-				parser.back(10);
-				parser.print(std::cout, 9);
+				parser.back(40);
+				parser.print(std::cout, 39);
 				std::cout << ">> ";
 				parser.print(std::cout, 60);
 			}
@@ -74,10 +74,10 @@ namespace vantagefx {
 		    }
 		    catch (std::exception &ex) {
 				std::cout << ex.what() << std::endl;
-				if (parser.root()) parser.root()->saveXml("d:\\error.xml");
+				//if (parser.root()) parser.root()->saveXml("d:\\error.xml");
 				parser.printStack(std::cout);
-				parser.back(10);
-				parser.print(std::cout, 9);
+				parser.back(30);
+				parser.print(std::cout, 29);
 				std::cout << ">> ";
 			    parser.print(std::cout, 60);
 		    }

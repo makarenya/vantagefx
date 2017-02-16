@@ -37,11 +37,12 @@ namespace vantagefx {
 				handler(parser.parse(), boost::optional<std::exception>());
 			}
 			catch (std::exception &e) {
+				//if (parser.root()) parser.root()->saveXml("d:\\error.xml");
 				std::cout << e.what() << std::endl;
 				parser.back(10);
 				parser.print(std::cout, 9);
 				std::cout << ">>> ";
-				parser.print(std::cout, 100);
+				parser.print(std::cout, 200);
 				handler(api::GwtObjectPtr(), e);
 			}
 		});
@@ -75,7 +76,7 @@ namespace vantagefx {
               _method(method)
 	{
         addHeader("X-GWT-Module-Base", "https://binaryoptions.vantagefx.com/Basic/");
-        addHeader("X-GWT-Permutation", "B9DC7DC8D4CFEFD7E25C35E26053B8FC");
+        addHeader("X-GWT-Permutation", "EC832338C860A14F6FE257BC7E5B0145");
         addHeader("Origin", "https://binaryoptions.vantagefx.com");
         addHeader("Content-Type", "text/x-gwt-rpc; charset=UTF-8");
     }
@@ -122,8 +123,9 @@ namespace vantagefx {
 		_fields.push_back(std::make_shared<GwtRequestObjectField>(value));
 	}
 
+
 	GwtAuthRequest::GwtAuthRequest(const std::string &login, const std::string &password, const std::string &server)
-            : GwtHttpRequest("AccountService", "413A5B61C75C56589A1EA33BAB70D8D3", 
+            : GwtHttpRequest("AccountService", "2A44E11BCE527BD22DCB1DA4B988BC6D", 
 				"com.optionfair.client.common.services.AccountService", "login")
     {
         strField(login);
@@ -141,14 +143,14 @@ namespace vantagefx {
 	}
 
 	GwtLutRequest::GwtLutRequest()
-		: GwtHttpRequest("Lut", "F5609C0B32D4C72047639979C6C333F4",
+		: GwtHttpRequest("Lut", "675CC75F4A6258B77ED300AA5A176C9F",
 			"com.optionfair.client.common.services.LutService", "getAll")
 	{
 		updateContent();
 	}
 
 	GwtInstrumentConfigurationDataRequest::GwtInstrumentConfigurationDataRequest(int externalId)
-		: GwtHttpRequest("Lut", "F5609C0B32D4C72047639979C6C333F4",
+		: GwtHttpRequest("Lut", "675CC75F4A6258B77ED300AA5A176C9F",
 			"com.optionfair.client.common.services.LutService", "getInstrumentConfigurationData")
     {
         intField(externalId);
@@ -156,14 +158,14 @@ namespace vantagefx {
 	}
 
 	GwtInstrumentTypeIdsWithOpenOptionsRequest::GwtInstrumentTypeIdsWithOpenOptionsRequest()
-		: GwtHttpRequest("Trading", "094DCA70134E3C91D91952E12643E178",
+		: GwtHttpRequest("Trading", "B2468E19B9FF13C9D0406F518BC26A3D",
 			"com.optionfair.client.common.services.TradingService", "getInstrumentTypeIdsWithOpenOptions")
 	{
 		updateContent();
 	}
 
 	GwtCometUpdatesRequest::GwtCometUpdatesRequest(int instrumentTypeId, int64_t lastUpdated, int64_t currentOption)
-		: GwtHttpRequest("refresh", "36F1204346683C3C0438E630893A8A1D",
+		: GwtHttpRequest("refresh", "87CBEFA9AF1D7D7D77153941747A727F",
 			"com.optionfair.client.common.services.nongenerated.RefreshService", "getCometUpdates")
     {
         intField(instrumentTypeId);
@@ -174,7 +176,7 @@ namespace vantagefx {
 
 	GwtPrepare2OpenPositionRequest::GwtPrepare2OpenPositionRequest(int64_t accountId, int64_t optionId, int assetId,
 																   int64_t sum, double price, int positionType)
-		: GwtHttpRequest("Trading", "094DCA70134E3C91D91952E12643E178",
+		: GwtHttpRequest("Trading", "B2468E19B9FF13C9D0406F518BC26A3D",
 			"com.optionfair.client.common.services.TradingService", "prepare2OpenPosition")
     {
 		std::stringstream str;
@@ -194,7 +196,7 @@ namespace vantagefx {
     }
 
 	GwtOpenPositionRequest::GwtOpenPositionRequest(const GwtObjectPtr &prepareResponse)
-			: GwtHttpRequest("Trading", "094DCA70134E3C91D91952E12643E178",
+			: GwtHttpRequest("Trading", "B2468E19B9FF13C9D0406F518BC26A3D",
 				"com.optionfair.client.common.services.TradingService","openPosition")
 	{
 		ptrField(prepareResponse);

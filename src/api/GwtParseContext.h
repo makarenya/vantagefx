@@ -12,25 +12,27 @@ namespace vantagefx {
     namespace api {
         class GwtParseContext {
         public:
-            typedef JsonVariantList::const_iterator const_iterator;
+			typedef std::vector<std::pair<JsonVariant, std::string>> ItemsList;
+            typedef ItemsList::iterator iterator;
 
             GwtParseContext(StringList &&stringList, JsonVariantList &&data);
 
-            GwtParseContext &operator>>(std::string &value);
+			void pop(std::string &value, const std::string &what);
 
-            GwtParseContext &operator>>(int &value);
+        	void pop(int &value, const std::string &what);
 
-            GwtParseContext &operator>>(double &value);
+        	void pop(double &value, const std::string &what);
 
-            double popAsDouble();
+			void pop(int64_t &value, const std::string &what);
 
-			GwtValue popValue();
+			void pop(boost::posix_time::ptime &value, const std::string &what);
 
-            int peekValueType();
+        	double popAsDouble(const std::string &what);
 
-            GwtParseContext &operator>>(int64_t &value);
+			GwtValue popValue(const std::string &what);
 
-            GwtParseContext &operator>>(boost::posix_time::ptime &value);
+            int peekValueType() const;
+
 
             bool eof() const { return _end == _it; }
 
@@ -50,9 +52,9 @@ namespace vantagefx {
 
         private:
             StringList _strings;
-			JsonVariantList _data;
-            const_iterator _it;
-            const_iterator _end;
+			ItemsList _data;
+            iterator _it;
+            iterator _end;
             int _maxWord = 1;
         };
     }

@@ -64,9 +64,8 @@ namespace vantagefx {
                 fstd("some_3")
             });
 
-            add("com.optionfair.client.model.Option/887736323", {
-
-                fstr("serialuid"),
+            add("com.optionfair.client.model.Option/1343902663", {
+				fstr("serialuid"),
                 fint("assetId"), // Для какой пары текущий опцион
                 fstd("some_2"),
                 fint("optionSeconds"),
@@ -95,12 +94,148 @@ namespace vantagefx {
                 fdbl("price"),
                 fstd("some_26"),
                 fptr("openFrom"),
-                fint("optionStatus"),
-                fdbl("some_29"),
+				fint("some_int"),
+				fptr("some_date"),
+				fint("optionStatus"),
+				fdbl("some_29"),
                 fdbl("some_30"),
                 fdbl("some_31"),
                 fdbl("some_32"),
                 flng("some_33"),
+            });
+
+
+/**
+0
+124
+bVQI
+7.679500e-01
+311
+0
+6 [java.util.Date/3385151746]
+Vo7NMsA
+0.000000e+00
+0.000000e+00
+HUw
+5 [com.optionfair.client.model.Option/1343902663]
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+ZN
+0
+0
+0
+170
+7 [1]
+7.679500e-01
+0
+0
+0
+6 [java.util.Date/3385151746]
+Vo7NMsA
+14
+7.679500e-01
+0.000000e+00
+0.000000e+00
+0.000000e+00
+O
+5 [com.optionfair.client.model.Option/1343902663]
+5 [com.optionfair.client.model.Option/1343902663]
+0
+60
+0
+-1
+6 [java.util.Date/3385151746]
+Vo$o7MA
+0
+124
+bVP2
+1.252100e+00
+311
+0
+6 [java.util.Date/3385151746]
+Vo7NMsA
+0.000000e+00
+0.000000e+00
+Opg
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+P_
+0
+0
+0
+170
+7 [1]
+1.252100e+00
+0
+0
+0
+6 [java.util.Date/3385151746]
+Vo7NMsA
+14
+1.252100e+00
+0.000000e+00
+0.000000e+00
+0.000000e+00
+O
+5 [com.optionfair.client.model.Option/1343902663]
+14
+0
+60
+0
+-1
+6 [java.util.Date/3385151746]
+Vo9WhwA
+0
+124
+bVTl
+5.340500e+01
+311
+0
+6 [java.util.Date/3385151746]
+Vo7owXA
+0.000000e+00
+0.000000e+00
+HUw
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+1 [com.optionfair.client.model.ClientUpdatePack/839029662]
+Tr
+0
+0
+0
+165
+7 [1]
+5.340500e+01
+0
+0
+0
+6 [java.util.Date/3385151746]
+Vo7oqgA
+14
+5.340500e+01
+0.000000e+00
+0.000000e+00
+0.000000e+00
+O
+5 [com.optionfair.client.model.Option/1343902663]
+4 [java.lang.Long/4227064769]
+0
+300
+0
+-1
+6 [java.util.Date/3385151746] */
+
+			add("com.optionfair.client.model.AssetCurrencyRel/2204523642", {
+				fstr("serialuid"), //6[rO0ABXcEAAAAAA == ]
+				fstd("some1"), //43[Wagered]
+                fptr("pk"),
+				fstd("std1"), //1[com.optionfair.client.model.LutResolverInitPackage / 2546929785]
+				fstd("std2"), //1[com.optionfair.client.model.LutResolverInitPackage / 2546929785]
+			});
+
+            add("com.optionfair.client.model.AssetCurrencyRelPK/4186144263", {
+                fint("some_id"), //43[Wagered]
             });
 
             add("com.optionfair.client.model.PositionUpdate/3887973789", {
@@ -116,8 +251,8 @@ namespace vantagefx {
             });
 
             add("com.optionfair.client.model.AssetUpdate/3263927368", {
-                fstr("serialuid"),
-                fint("assetStatusId"), // статус лота (нужен Production)
+				fstr("serialuid"), //6[rO0ABXcEAAAAAA == ]
+				fint("assetStatusId"), // статус лота (нужен Production)
                 fint("assetId"), // Идентификатор лота
                 fdbl("targetPrice"), // Текущая цена
             });
@@ -138,7 +273,7 @@ namespace vantagefx {
                 fstd("some_1"),
 			});
 
-            add("com.optionfair.client.model.LutResolverInitPackage/3212179674", {
+            add("com.optionfair.client.model.LutResolverInitPackage/2546929785", {
                 fptr("pspToPspType"),
                 fptr("lutTypes"),
                 fptr("paymentMethods"),
@@ -147,6 +282,7 @@ namespace vantagefx {
                 fptr("some_3"),
                 fptr("blackWhiteList"),
                 fptr("someList1"),
+                fptr("brand"),
                 fptr("brandCurrencyCountryResolver"),
                 fstd("externalId"),
                 fstd("some_5"),
@@ -196,6 +332,11 @@ namespace vantagefx {
                 fstr("some_1"),
                 fdbl("some_2")
             });
+
+			add("com.optionfair.client.ui.pages.tradePage.spread.NoSpread/2332320922", {
+				//fint("some_1"),
+				//fint("some_2"),
+			});
 
             add("com.optionfair.client.ui.pages.tradePage.spread.Low/1807028581", {
                 fstr("some_1"),
@@ -264,7 +405,7 @@ namespace vantagefx {
 
 
 
-            add("com.optionfair.client.model.Account/2810493929", {
+            add("com.optionfair.client.model.Account/3668294554", {
                 fstr("serialuid"),
                 fstd("some_1"),
                 fstr("regular"),
@@ -315,6 +456,7 @@ namespace vantagefx {
                 fstr("shortName"),
                 fstd("some_33"),
                 fstd("some_34"),
+				fstd("some_345"),
                 flng("some_35"),
                 fstd("some_36"),
                 flng("some_37"),
@@ -346,6 +488,7 @@ namespace vantagefx {
                 fint("some_59"),
                 fint("some_60"),
                 fstr("some_61"),
+				fstd("some_615"),
                 fdbl("some_62"),
                 fptr("spreadCalculator"),
                 fstd("some_63"),
@@ -460,36 +603,38 @@ namespace vantagefx {
                 fint("order")
             });
 
-            add("com.optionfair.client.model.CurrencyCountryLimit/94057825", {
-                fstr("serialuid"),
-                fstd("externalId"),
-                fstd("some_2"),
-                fint("currencyId"),
-                fint("order"),
-                fstd("some_3"),
-                flng("some_4"),
-                flng("some_5"),
-                flng("some_6"),
-                flng("some_7"),
-                flng("some_8"),
-                flng("some_9"),
-                flng("some_10"),
-                flng("some_11"),
-                flng("some_12"),
-                flng("some_13"),
-                flng("some_14"),
-                flng("some_15"),
-                flng("some_16"),
-                flng("some_17"),
-                flng("some_18"),
-                flng("some_19"),
-                flng("some_20"),
-                flng("some_21"),
-                flng("some_22"),
-                flng("some_23"),
-                flng("some_24"),
-				flng("some_25"),
-				flng("some_26")
+            add("com.optionfair.client.model.CurrencyCountryLimit/3396769176", {
+                fstr("serialuid"), // 6 [rO0ABXcEAAAAAA==]
+                fstd("externalId"), // 37 [Admin]
+                fstd("some_2"), // 1043 [XX]
+                fint("currencyId"), // 1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]
+                fint("order"), // 1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]
+                fstd("some_3"), // 0
+                flng("some_4"), // MNQ
+                flng("some_5"), // B6Eg
+                flng("some_6"), // MNQ
+                flng("some_7"), // Ek$A
+                flng("some_8"), // MNQ
+                flng("some_9"), // MNQ
+                flng("some_10"), // TEtA
+                flng("some_11"), // MNQ
+                flng("some_12"), // MNQ
+                flng("some_13"), // D0JA
+                flng("some_14"), // Yag
+                flng("some_15"), // D0JA
+                flng("some_16"), // HoSA+
+                flng("some_17"), // Po
+                flng("some_18"), // CcQ
+                flng("some_19"), // Po
+                flng("some_20"), // BOI
+                flng("some_21"), // E4g
+                flng("some_22"), // Po
+                flng("some_23"), // Po
+                flng("some_24"), // Po
+				flng("some_25"), // Po
+				flng("some_26"), // D0JA
+                flng("some_27"), // D0JA
+                flng("some_28"), // CcQ
 			});
 
             add("com.optionfair.client.model.Currency/2484116626", {
@@ -523,17 +668,23 @@ namespace vantagefx {
                 fstd("some_11")
             });
 
-            add("com.optionfair.client.model.BrandRegulation/895814788", {
-                fstr("serialuid"),
-                fint("externalId"),
-                fstd("some_1"),
-                fstd("some_2"),
-                fstd("some_3"),
-                fstd("some_4"),
-                fstd("some_5"),
-                fstd("some_6"),
-                fstd("some_7")
+            add("com.optionfair.client.model.BrandRegulation/1013124097", {
+                fstr("serialuid"), // 6 [rO0ABXcEAAAAAA==]
+                fint("externalId"), // 37 [Admin]
+                fstd("some_1"), // 1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]
+                fstd("some_2"), // 1680 [Swaziland]
+                fstd("some_3"), // 1502 [PSE]
+                fstd("some_4"), // 2800
+                fstd("some_5"), // 0
+                fstd("some_6"), // 3 [java.lang.Integer/3438268394]
+                fstd("some_7"), // 3000
+                fstd("some_8"), // 2000
+                fstd("some_9"), // 1675 [SJM]
+                fptr("some_10"), // -4104
+                fstd("some_11"), // 141 [RU]
             });
+
+
 
 			add("com.optionfair.client.model.DateTimeFormatOF/3059496483", {
 				fstr("serialuid"),
@@ -562,7 +713,7 @@ namespace vantagefx {
                 fstr("some_7")
             });
 
-            add("com.optionfair.client.model.Asset/3083867617", {
+            add("com.optionfair.client.model.Asset/2513088007", {
 				fstr("serialuid"),
 				fdbl("some_1"),
 				fdbl("some_2"),
@@ -586,6 +737,7 @@ namespace vantagefx {
 				fstd("some_20"),
 				fstd("some_21"),
 				fint("some_22"),
+				fdbl("some_225"),
 				fint("some_23"),
 				fint("some_24"),
 				fdbl("some_25"),
@@ -601,6 +753,7 @@ namespace vantagefx {
 				fstr("some_35"),
 				fstr("some_36"),
 				fstd("some_37"),
+				fstr("some_375"),
 				fdbl("some_38")
 			});
 
@@ -637,15 +790,17 @@ namespace vantagefx {
 				fstd("some_13"),//267 [IdPay_cysec]
 			});
 			
-			add("com.optionfair.client.model.TradeActionResponse/3233850074", {
+			add("com.optionfair.client.model.TradeActionResponse/2831172712", {
                 flng("accountId"), //ISw
                 fint("some_2"),//0
                 flng("money"),//Po
                 fint("some_4"),//4
                 fdbl("some_5", true),//0
+				flng("some_55"),
                 fdbl("some_6"),//1.13335
                 fint("some_7"),//0
-                fstr("some_8"),//2 [ACR+yRO4lkJ3cjauwhbeAQ==]
+				fint("some_75"),//0
+				fstr("some_8"),//2 [ACR+yRO4lkJ3cjauwhbeAQ==]
                 fdbl("some_9", true),//0
                 fint("some_10"),//1 [com.optionfair.client.model.TradeActionResponse/3233850074]
                 flng("some_11"),//Xm$s
@@ -656,7 +811,71 @@ namespace vantagefx {
                 fstr("some_16"),//4 [1.13335]
                 fint("some_17"),//0
                 flng("purchasedAt"),//VRdvfvC
-                fint("some_19")
+                fint("some_19"),
+				fint("some_20")
+            });
+
+            add("com.optionfair.client.model.Brand/160541779", {
+                fstr("serialuid"),//        "6 [rO0ABXcEAAAAAA==]\n"
+                fstr("some_1"), //        "778 [/]\n"
+                fdbl("some_2"), //        "1.500000e+00\n"
+                fint("some_3"), //        "1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]\n"
+                fint("some_4"), //        "0\n"
+                fint("some_5"), //        "2835\n"
+                fint("some_6"), //        "0\n"
+                flng("some_7"), //        "Yag\n"
+                fint("some_8"), //        "320 [Fee]\n"
+                fint("some_9"), //        "0\n"
+                fstr("some_10"), //        "776 [basic]\n"
+                fint("some_11"), //        3 [java.lang.Integer/3438268394]\n"
+                flng("some_12"), //        "MNQ\n"
+                fint("some_13"), //        "0\n"
+                flng("some_14"), //        "Yag\n"
+                fstd("some_15"), //        "595 []\n"
+                fstd("some_16"), //        "37 [Admin]\n"
+                fstr("domain"), //        "779 [.*vantagefx.com]\n"
+                fint("some_17"), //        "1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]\n"
+                fint("some_18"), //       "0\n"
+                fint("some_19"), //        "1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]\n"
+                fint("some_20"), //        "0\n"
+                fint("some_21"), //        "99999\n"
+                fstr("some_22"), //        "780 [Enfinium]\n"
+                fstd("some_23"), //        "10 [Mrs.]\n"
+                fdbl("some_24"), //        "0.000000e+00")
+                fptr("operator")
+            });
+            add("com.optionfair.client.model.Operator/1111544044", {
+                fstr("serialuid"),//        "6 [rO0ABXcEAAAAAA==]\n"
+                fptr("some_1"),
+                fint("some_2"),
+                fstr("some_3"),
+                fint("some_4"),
+                fint("some_5"),
+                fptr("some_6"),
+                fint("some_7"), //  1650
+                fstr("some_8"), //  37 [Admin]
+                fstr("some_9"), //  788 [none]
+                fstr("some_10"),//  789 [http://nihul.4xp.com/digital_options/soap_do.php?wsdl]
+                fint("some_11"), //                    1640
+                fdbl("some_12"), //                    0.000000e+00
+                fint("some_13"), //                    1666
+                fdbl("some_14"), //                    1.500000e-01
+                fdbl("some_15"), //                    2.000000e-01
+                fint("some_16"), //                    1
+                fptr("some_17"), //                    0
+                fint("some_18"), //                    1
+                fint("some_19"), //                    1
+                fint("some_20"), //                    0
+                fdbl("some_21"), //                    0.000000e+00
+                fstd("some_22"), //                    77 [TransactionType]
+                fdbl("some_23"), //                    0.000000e+00
+                fstr("some_24"), //                    790 [0]
+                fint("some_25"), //                    1 [com.optionfair.client.model.LutResolverInitPackage/2546929785]
+                fint("some_26"), //                    0
+                fint("some_27"), //                    0
+                fint("some_28"), //                    0
+                fint("some_29"), //                    0
+                fint("some_30"), //                    0
             });
 
             add("com.optionfair.client.model.Position/1677341959", {
@@ -740,7 +959,7 @@ namespace vantagefx {
             add(std::make_shared<GwtMapType>("java.util.HashMap/1797211028", 0));
             add(std::make_shared<GwtMapType>("java.util.LinkedHashMap/3008245022", 1));
 			add("java.lang.Integer/3438268394", { fint("value") }, "value");
-			add("com.optionfair.client.luts.Instrument/3175034088", { fint("value") }, "value");
+			add("com.optionfair.client.luts.Instrument/2210327378", { fint("value") }, "value");
 			add("java.lang.Long/4227064769", { flng("value") }, "value");
 			add("java.lang.String/2004016611", { fstr("value") }, "value");
 			add("java.util.Date/3385151746", { fdte("value") }, "value");

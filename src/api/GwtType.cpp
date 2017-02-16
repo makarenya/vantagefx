@@ -75,7 +75,9 @@ namespace vantagefx {
 					throw ParseError(info.str());
 				}
 				try {
+					parser.pushItem(fieldName + "->");
                     value = field->parse(parser);
+					parser.popItem();
                 }
                 catch (boost::bad_get) {
                     throw WrongGwtType(name(), fieldName, field->type(), parser.peekType());
@@ -149,12 +151,14 @@ namespace vantagefx {
         void GwtListType::parse(GwtParser &parser, std::shared_ptr<GwtObject> &result) const
         {
             int length;
-            parser >> length;
+            parser.pop(length, "length");
             result->add("length", length);
 
             for (auto i = 0; i < length; i++) {
                 auto name = boost::lexical_cast<std::string>(i);
+				parser.pushItem("[" + name + "]");
                 result->add(name, parser.parse());
+				parser.popItem();
             }
         }
 
@@ -196,14 +200,25 @@ namespace vantagefx {
         {
             for (auto i = 0; i < _skip; i++) {
                 int tmp;
-                parser >> tmp;
+                parser.pop(tmp, "");
             }
             int length;
-            parser >> length;
+			parser.pop(length, "length");
 
             for (auto i = 0; i < length; i++) {
+				parser.pushItem("KEY:" + std::to_string(i));
                 auto key = parser.parse();
+				auto keyTypeName = key->type()->name();
+				/*
+				if (keyTypeName != "java.lang.Integer/3438268394" && 
+					keyTypeName != "java.lang.String/2004016611" &&
+					keyTypeName != "net.sf.gilead.pojo.gwt.basic.StringParameter/2783524083")
+					throw new ParseError("Invalid key type");
+            	*/
+				parser.popItem();
+				parser.pushItem("VALUE:" + std::to_string(i));
                 auto value = parser.parse();
+				parser.popItem();
 				if (!key) {
 					throw ParseError("null key not supported");
 				}
@@ -271,11 +286,11 @@ namespace vantagefx {
 			std::string iface;
 			std::string method;
 			int props;
-			parser >> unit;
-			parser >> hash;
-			parser >> iface;
-			parser >> method;
-			parser >> props;
+			parser.pop(unit, "unit");
+			parser.pop(hash, "hash");
+			parser.pop(iface, "iface");
+			parser.pop(method, "method");
+			parser.pop(props, "props");
 			result->add("unit", unit);
 			result->add("hash", hash);
 			result->add("interface", iface);
@@ -284,7 +299,7 @@ namespace vantagefx {
 			std::vector<std::string> types;
 			for (auto i = 0; i < props; i++) {
 				int typeId;
-				parser >> typeId;
+				parser.pop(typeId, "type id");
 				types.push_back(parser.word(typeId));
 			}
 	        auto i = 0;
@@ -292,25 +307,25 @@ namespace vantagefx {
 				auto name = boost::lexical_cast<std::string>(i++);
 				if (type == "Z" || type == "B" || type == "C" || type == "S" || type == "I") {
                     int value;
-                    parser >> value;
+					parser.pop(value, "int");
                     result->add("value_" + name, value);
                     result->add("type_" + name, 0);
                 }
                 else if (type == "F" || type == "D") {
                     double value;
-                    parser >> value;
+					parser.pop(value, "float");
                     result->add("value_" + name, value);
                     result->add("type_" + name, 1);
                 }
                 else if (type == "J") {
                     int64_t value;
-                    parser >> value;
+					parser.pop(value, "long");
                     result->add("value_" + name, value);
                     result->add("type_" + name, 2);
                 }
                 else if (type == "java.lang.String/2004016611") {
                     std::string value;
-                    parser >> value;
+					parser.pop(value, "string");
                     result->add("value_" + name, value);
                     result->add("type_" + name, 3);
                 }

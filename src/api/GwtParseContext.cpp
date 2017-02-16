@@ -64,57 +64,63 @@ namespace vantagefx {
 
 	    GwtParseContext::GwtParseContext(StringList &&stringList, JsonVariantList &&data) {
             _strings = std::move(stringList);
-			_data = std::move(data);
-            _it = _data.cend();
-            _end = _data.cbegin();
+			for(auto it = data.begin(); it != data.end(); ++it) {
+				_data.push_back(std::make_pair(*it, ""));
+			}
+            _it = _data.end();
+            _end = _data.begin();
         }
 
-        GwtParseContext &GwtParseContext::operator>>(std::string &value) {
-            auto id = boost::get<int>(*--_it);
+        void GwtParseContext::pop(std::string &value, const std::string &what) {
+            auto id = boost::get<int>((--_it)->first);
+			_it->second = what;
             value = word(id);
-            return *this;
         }
 
-        GwtParseContext &GwtParseContext::operator>>(int &value) {
-            value = boost::get<int>(*--_it);
-            return *this;
-        }
+		void GwtParseContext::pop(int &value, const std::string &what) {
+            value = boost::get<int>((--_it)->first);
+			_it->second = what;
+		}
 
-        GwtParseContext &GwtParseContext::operator>>(double &value) {
-            value = boost::get<double>(*--_it);
-            return *this;
-        }
+		void GwtParseContext::pop(double &value, const std::string &what) {
+            value = boost::get<double>((--_it)->first);
+			_it->second = what;
+		}
 
-        double GwtParseContext::popAsDouble() {
-            return boost::apply_visitor(visitors::double_visitor(), *--_it);
-        }
+		void GwtParseContext::pop(int64_t &value, const std::string &what) {
+			auto val = boost::get<std::string>((--_it)->first);
+			value = base64::base64Decode(val);
+			_it->second = what;
+		}
 
-	    GwtValue GwtParseContext::popValue()
+		void GwtParseContext::pop(boost::posix_time::ptime &value, const std::string &what) {
+			using boost::posix_time::ptime;
+			using boost::posix_time::milliseconds;
+			namespace gregorian = boost::gregorian;
+			int64_t t;
+			pop(t, what);
+			ptime start(gregorian::date(1970, 1, 1));
+			value = start + milliseconds(static_cast<long>(t));
+		}
+		
+    	double GwtParseContext::popAsDouble(const std::string &what) {
+            auto value = boost::apply_visitor(visitors::double_visitor(), (--_it)->first);
+			_it->second = what;
+			return value;
+		}
+
+	    GwtValue GwtParseContext::popValue(const std::string &what)
         {
-			return boost::apply_visitor(visitors::value_visitor(), *--_it);
-        }
+			auto value = boost::apply_visitor(visitors::value_visitor(), (--_it)->first);
+			_it->second = what;
+			return value;
+		}
 
-        int GwtParseContext::peekValueType() {
+        int GwtParseContext::peekValueType() const
+        {
             if (_strings.size() > 0) return -1;
             if (eof()) return -1;
-            return (_it - 1)->which();
-        }
-
-        GwtParseContext &GwtParseContext::operator>>(int64_t &value) {
-            auto val = boost::get<std::string>(*--_it);
-            value = base64::base64Decode(val);
-            return *this;
-        }
-
-        GwtParseContext &GwtParseContext::operator>>(boost::posix_time::ptime &value) {
-            using boost::posix_time::ptime;
-            using boost::posix_time::milliseconds;
-            namespace gregorian = boost::gregorian;
-            int64_t t;
-            *this >> t;
-            ptime start(gregorian::date(1970, 1, 1));
-            value = start + milliseconds(static_cast<long>(t));
-            return *this;
+            return (_it - 1)->first.which();
         }
 
         struct print_visitor : boost::static_visitor<std::ostream &> {
@@ -124,18 +130,18 @@ namespace vantagefx {
 
             std::ostream &operator()(int value) const {
                 if (value > 0 && value <= _ctx.maxWord()) {
-                    return _stream << value << " [" << _ctx.word(value) << "]" << std::endl;
+                    return _stream << value << " [" << _ctx.word(value) << "]";
                 }
-                return _stream << value << std::endl;
+                return _stream << value;
             }
 
 			std::ostream &operator()(double value) const {
-				return _stream << std::scientific << value << std::endl;;
+				return _stream << std::scientific << value;
 			}
 
             template<typename T>
             std::ostream &operator()(T value) const {
-                return _stream << value << std::endl;
+                return _stream << value;
             }
 
         private:
@@ -144,7 +150,7 @@ namespace vantagefx {
         };
 
         std::string GwtParseContext::peekType() const {
-            switch (_it->which()) {
+            switch (_it->first.which()) {
                 case 0:
                     return "int";
                 case 1:
@@ -173,7 +179,13 @@ namespace vantagefx {
         void GwtParseContext::print(std::ostream &stream, int count) {
             for (auto i = 0; i < count; i++) {
                 if (_it == _end) return;
-                boost::apply_visitor(print_visitor(stream, *this), *--_it);
+	            --_it;
+                boost::apply_visitor(print_visitor(stream, *this), _it->first);
+				if (!_it->second.empty())
+				{
+					stream << "\t\t#" << _it->second;
+				}
+				stream << std::endl;
             }
         }
 
