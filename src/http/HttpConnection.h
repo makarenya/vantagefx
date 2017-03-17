@@ -108,7 +108,7 @@ namespace vantagefx {
 
             void close() override;
 
-			bool verifyCertificate(bool preverified, ssl::verify_context &context);
+	        static bool verifyCertificate(bool preverified, ssl::verify_context &context);
 
             void handleResolve(const error_code &ec, ip::tcp::resolver::iterator it);
 
