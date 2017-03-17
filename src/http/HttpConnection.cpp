@@ -213,17 +213,6 @@ namespace vantagefx {
                 return ip::tcp::resolver::query(_proxy, boost::lexical_cast<std::string>(_proxyPort));
 		}
 
-	    /*
-	    void HttpConnection::send(std::shared_ptr<HttpRequest> &request) {
-
-	    }
-
-	    void HttpConnection::close() {
-
-	    }
-	     */
-
-
         SslConnection::SslConnection(HttpContext &context, const std::string &host, int port)
                 : Connection(context, "https", host, port == 0 ? 443 : port),
                   _socket(context.service(), context.ssl()),
