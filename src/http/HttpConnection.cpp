@@ -331,10 +331,12 @@ namespace vantagefx {
 		{
 			auto self = shared_from_this();
 			if (ec) {
+				/*
 				if (ec.category() == asio::error::get_ssl_category() &&
 					ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)) {
 					_socket.lowest_layer().close();
 				}
+				*/
                 handleError(ec);
 				return;
             }

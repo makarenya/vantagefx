@@ -2,4 +2,4 @@
 data/
 *.sdf
 cmake-build-debug/
-msvc/
+msvc_2017/

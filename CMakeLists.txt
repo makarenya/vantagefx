@@ -5,13 +5,14 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (MSVC)
-    set(CMAKE_PREFIX_PATH "c:/msvc_2015")
+    set(CMAKE_PREFIX_PATH "c:/msvc_2017")
     set(Boost_USE_STATIC_LIBS ON) # only find static libs
     add_definitions(-D_WIN32_WINNT=0x0502 -DWINVER=0x0502)
     add_definitions(-D_UNICODE -DUNICODE)
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif ()
+
 
 set(MAKE_GUI "1")
 
@@ -28,6 +29,10 @@ endif()
 
 if (MINGW)
 	add_definitions(-DBOOST_USE_WINDOWS_H)
+endif()
+
+if (APPLE)
+    set(OPENSSL_ROOT_DIR /opt/local)
 endif()
 
 add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data/")
@@ -145,7 +150,7 @@ set(SOURCE_FILES
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
 add_executable(vantagefx ${SOURCE_FILES} ${RESOURCES})
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(. ${Boost_INCLUDE_DIRS})
 target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 if(WIN32)
     target_link_libraries(vantagefx wsock32 ws2_32 Shell32 Winhttp)
