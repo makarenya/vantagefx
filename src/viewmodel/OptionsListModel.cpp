@@ -12,12 +12,13 @@ namespace vantagefx {
     namespace viewmodel {
 
 		OptionsListModel::OptionsListModel(QObject *parent)
-			: QAbstractListModel(parent),
-			  _assetId(0),
-			  _price(0.0),
-			  _options({ OptionItem(30), OptionItem(60), OptionItem(120), OptionItem(300) })
-        {
-        }
+		    : QAbstractListModel(parent), 
+    	      _marketId(0),
+		      _assetId(0),
+		      _price(0.0),
+		      _options({OptionItem(30), OptionItem(60), OptionItem(120), OptionItem(300)})
+	    {
+	    }
 
 	    int OptionsListModel::rowCount(const QModelIndex &parent) const
         {
