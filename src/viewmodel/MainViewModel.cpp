@@ -62,7 +62,7 @@ namespace vantagefx {
                 _options.watchForAsset(_model.assets()[assetId]);
             }
             emit assetsChanged();
-			doRefresh();
+			_refreshTimeout = 0;
         }
 
         void MainViewModel::loadingError(std::exception e)
@@ -104,15 +104,14 @@ namespace vantagefx {
             _stat.writeVirtualBets(bets);
 
 			if (!makePurchases(_model.options())) {
-				_refreshTimeout = 0;
-			}
+				_refreshTimeout = 50;
+        	}
 		}
 
         void MainViewModel::refreshError(std::exception e)
         {
             qDebug() << e.what();
-			doRefresh();
-			_refreshTimeout = 0;
+			_refreshTimeout = 10;
 		}
 
 		void MainViewModel::processLogin()
@@ -131,7 +130,7 @@ namespace vantagefx {
 
 		void MainViewModel::authenticated(AuthContextPtr ctx)
 		{
-			_refreshTimeout = 40;
+			_refreshTimeout = 10;
 			_model.setAccount(ctx->auth());
 			setLoggedIn(_model.isLoggedIn());
 			setFullName(_model.userName());
@@ -147,7 +146,7 @@ namespace vantagefx {
         {
 			qDebug() << e.what();
 			setMode("view");
-			_refreshTimeout = 40;
+			_refreshTimeout = 10;
 		}
 
 	    void MainViewModel::doPurchase(int64_t optionId, int64_t money, int positionType)
@@ -165,18 +164,18 @@ namespace vantagefx {
         {
 			auto result = _model.updatePurchase(ctx->transaction());
 			_options.updateOption(std::get<0>(result));
-			_refreshTimeout = 20;
+			_refreshTimeout = 40;
 		}
 
 		void MainViewModel::purchaseError(std::exception e)
         {
 			qDebug() << e.what();
 			setMode("view");
-			_refreshTimeout = 20;
+			_refreshTimeout = 40;
 		}
 
         void MainViewModel::update() {
-			if (_refreshTimeout >= 0 && ++_refreshTimeout == 50) {
+			if (_refreshTimeout >= 0 && _refreshTimeout-- == 0) {
 				doRefresh();
 			}
 	        auto hour = QDateTime::currentDateTime().time().hour();
@@ -216,13 +215,13 @@ namespace vantagefx {
             }
         }
 
-	    void MainViewModel::setBet(int firstBet, int betGrowth)
+	    void MainViewModel::setBet(int betAmount, int betsCount)
         {
-			_model.setFirstBet(firstBet);
-			_model.setBetGrowth(betGrowth);
+			_model.setBetAmount(betAmount);
+			_model.setBetsCount(betsCount);
             _options.updateOptions(_model.options());
-			emit firstBetChanged();
-			emit betGrowthChanged();
+			emit betAmountChanged();
+			emit betsCountChanged();
         }
 
         void MainViewModel::watch(int index)
@@ -333,11 +332,17 @@ namespace vantagefx {
 				}
 				int threshold = 70;
 				if (option.rate("Call") >= threshold && option.rate("In") >= threshold) {
-					doPurchase(option.optionId(), option.currentBet() * 100, _model.rateId("Call"));
+					for (auto i = 0; i < betsCount(); i++)
+					{
+						doPurchase(option.optionId(), betAmount() * 100, _model.rateId("Call"));
+					}
 					return true;
 				}
 				if (option.rate("Put") >= threshold && option.rate("Out") >= threshold) {
-					doPurchase(option.optionId(), option.currentBet() * 100, _model.rateId("Put"));
+					for (auto i = 0; i < betsCount(); i++)
+					{
+						doPurchase(option.optionId(), betAmount() * 100, _model.rateId("Put"));
+					}
 					return true;
 				}
 			}

@@ -13,7 +13,6 @@ namespace vantagefx {
 	              _asset(nullptr),
 	              _seconds(0),
 	              _price(0),
-			      _currentBet(10), 
 			      _status(Idle),
 			      _openTime()
 			{}
@@ -47,11 +46,6 @@ namespace vantagefx {
 		{
             _close = close;
         }
-
-	    void OptionModel::setCurrentBet(int bet)
-	    {
-			_currentBet = bet;
-	    }
 
 		void OptionModel::openTransaction()
 	    {

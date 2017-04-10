@@ -16,8 +16,8 @@ namespace vantagefx {
 	              _instrumentTypeId(0),
 	              _accountId(0),
 	              _currentMoney(0),
-			      _firstBet(10),
-			      _betGrowth(170)
+			      _betAmount(100),
+			      _betsCount(1)
 	    {}
 
 	    void VantageFxModel::setLut(api::GwtObjectPtr lut) {
@@ -73,26 +73,21 @@ namespace vantagefx {
 			return _rates[name];
 		}
 
-		void VantageFxModel::setFirstBet(int firstBet)
+		void VantageFxModel::setBetAmount(int betAmount)
 		{
-			for(auto &opt : _options) {
-				if (opt.currentBet() == _firstBet) {
-					opt.setCurrentBet(firstBet);
-				}
-			}
-			_firstBet = firstBet;
+			_betAmount = betAmount;
 		}
 
-		int VantageFxModel::firstBet() const {
-			return _firstBet;
+		int VantageFxModel::betAmount() const {
+			return _betAmount;
 		}
 
-		void VantageFxModel::setBetGrowth(int betGrowth) {
-			_betGrowth = betGrowth;
+		void VantageFxModel::setBetsCount(int betsCount) {
+			_betsCount = betsCount;
 		}
 
-		int VantageFxModel::betGrowth() const {
-			return _betGrowth;
+		int VantageFxModel::betsCount() const {
+			return _betsCount;
 		}
 
 		QList<TransactionModel> VantageFxModel::updateOptions(api::GwtObjectPtr refresh)
@@ -156,18 +151,11 @@ namespace vantagefx {
 
 				if (_options.contains(transaction.optionId())) {
                     auto &option = _options[transaction.optionId()];
-					if (transaction.isWon())
-					{
+					if (transaction.isWon()) {
 						option.closeSuccess();
-						option.setCurrentBet(firstBet());
 					}
 					else if (transaction.isLoose()){
 						option.closeFail();
-
-						auto newBet = option.currentBet() + static_cast<int>(std::round(option.currentBet() * betGrowth() / 100.0));
-						if (option.currentBet() == 500) newBet = firstBet();
-						else if (newBet > 500) newBet = 500;
-						option.setCurrentBet(newBet);
 					}
 					else option.closeReturn();
                 }

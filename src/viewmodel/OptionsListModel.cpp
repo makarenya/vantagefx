@@ -35,7 +35,6 @@ namespace vantagefx {
                 case BackgroundRole: return _options[index.row()].background();
                 case BorderRole: return _options[index.row()].border();
                 case ForegroundRole: return _options[index.row()].foreground();
-                case BetRole: return _options[index.row()].bet;
                 case SelectedRole: return _options[index.row()].selected;
                 default: return QVariant();
 			}
@@ -62,7 +61,6 @@ namespace vantagefx {
 			result[BackgroundRole] = "background";
 			result[BorderRole] = "border";
 			result[ForegroundRole] = "foreground";
-			result[BetRole] = "bet";
             result[SelectedRole] = "selected";
 			return result;
 		}
@@ -87,10 +85,6 @@ namespace vantagefx {
 				roles.push_back(BorderRole);
 				roles.push_back(ForegroundRole);
 			}
-			if (result.bet != item.currentBet()) {
-				result.bet = item.currentBet();
-				roles.push_back(BetRole);
-			}
 			dataChanged(index(i), index(i), roles);
         }
 
@@ -110,7 +104,7 @@ namespace vantagefx {
 					option.id = 0;
 					option.status = model::OptionModel::NotFound;
 					option.bet = 0;
-					dataChanged(index(j), index(j), { IdRole, StatusRole, BackgroundRole, BorderRole, ForegroundRole, BetRole });
+					dataChanged(index(j), index(j), { IdRole, StatusRole, BackgroundRole, BorderRole, ForegroundRole });
 				}
 				if (_options[j].id == 0) empty++;
 			}

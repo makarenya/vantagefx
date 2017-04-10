@@ -26,7 +26,6 @@ namespace vantagefx {
 				BackgroundRole,
 				BorderRole,
 				ForegroundRole,
-				BetRole,
                 SelectedRole
 			};
 

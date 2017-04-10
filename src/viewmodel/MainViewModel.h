@@ -40,8 +40,8 @@ namespace vantagefx {
 			Q_PROPERTY(int optionReturn READ optionReturn NOTIFY optionReturnChanged)
 			Q_PROPERTY(QString optionExpire READ optionExpire NOTIFY optionExpireChanged)
 
-			Q_PROPERTY(int firstBet READ firstBet NOTIFY firstBetChanged)
-			Q_PROPERTY(int betGrowth READ betGrowth NOTIFY betGrowthChanged)
+			Q_PROPERTY(int betAmount READ betAmount NOTIFY betAmountChanged)
+			Q_PROPERTY(int betsCount READ betsCount NOTIFY betsCountChanged)
 
         public:
             explicit MainViewModel(VantageFxService &servie);
@@ -54,7 +54,7 @@ namespace vantagefx {
             Q_INVOKABLE void processLogin();
             Q_INVOKABLE void cancelLogin();
             Q_INVOKABLE void view(long long optionId);
-			Q_INVOKABLE void setBet(int firstBet, int betGrowth);
+			Q_INVOKABLE void setBet(int betAmount, int betsCount);
             Q_INVOKABLE void watch(int index);
             Q_INVOKABLE void stopWatch(int assetId);
 
@@ -99,9 +99,9 @@ namespace vantagefx {
 			const QString &optionExpire() const;
 			void setOptionExpire(const QString &optionExpire);
 
-            int firstBet() const;
+            int betAmount() const;
 
-            int betGrowth() const;
+            int betsCount() const;
 
         public slots:
 
@@ -137,9 +137,9 @@ namespace vantagefx {
 
 			void optionExpireChanged();
 
-			void firstBetChanged();
+			void betAmountChanged();
 
-			void betGrowthChanged();
+			void betsCountChanged();
 
 		public:
 
@@ -224,9 +224,9 @@ namespace vantagefx {
 
 		inline const QString &MainViewModel::optionExpire() const { return _optionExpire; }
 
-        inline int MainViewModel::firstBet() const { return _model.firstBet(); }
+        inline int MainViewModel::betAmount() const { return _model.betAmount(); }
 
-        inline int MainViewModel::betGrowth() const { return _model.betGrowth(); }
+        inline int MainViewModel::betsCount() const { return _model.betsCount(); }
     }
 }
 

@@ -81,7 +81,7 @@ Rectangle {
       model: options
 
       delegate: Rectangle {
-        Layout.preferredWidth: 90
+        Layout.preferredWidth: 76
         height: 24
 
         Button {
@@ -94,22 +94,11 @@ Rectangle {
         Rectangle {
           anchors.right: parent.right
           y: 3
-          width: 30
+          width: 18
           height: 18
           border.width: 1
           border.color: model.border
           color: model.background
-
-          Text {
-            width: 30
-            y: 1
-            height: 18
-            text: model.bet
-            renderType: Text.NativeRendering
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            color: model.foreground
-          }
         }
       }
     }

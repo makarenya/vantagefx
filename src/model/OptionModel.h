@@ -41,8 +41,6 @@ namespace vantagefx {
 
 			int rate(const QString &name) const;
 
-			int currentBet() const;
-
 			QDateTime close() const;
 
             void setOptionId(int64_t optionId);
@@ -54,8 +52,6 @@ namespace vantagefx {
             void setPrice(double price);
 
             void setClose(QDateTime close);
-
-			void setCurrentBet(int bet);
 
 			OptionStatus status() const;
 
@@ -72,7 +68,6 @@ namespace vantagefx {
             int _seconds;
             double _price;
             QDateTime _close;
-			int _currentBet;
 			OptionStatus _status;
 			QDateTime _openTime;
         };
@@ -96,8 +91,6 @@ namespace vantagefx {
         inline AssetModel &OptionModel::asset() const { return *_asset; }
 
         inline int64_t OptionModel::optionId() const { return _optionId; }
-
-		inline int OptionModel::currentBet() const { return _currentBet; }
     }
 }
 

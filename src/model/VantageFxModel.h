@@ -30,10 +30,10 @@ namespace vantagefx {
 			bool isLoggedIn() const;
 			const QString &userName() const;
 
-			void setFirstBet(int firstBet);
-			int firstBet() const;
-			void setBetGrowth(int betGrowth);
-			int betGrowth() const;
+			void setBetAmount(int betAmount);
+			int betAmount() const;
+			void setBetsCount(int betsCount);
+			int betsCount() const;
 
 			QList<TransactionModel> updateOptions(api::GwtObjectPtr refresh);
 			QMap<int64_t, OptionModel> &options();
@@ -59,8 +59,8 @@ namespace vantagefx {
 			QMap<int64_t, TransactionModel> _openedTransactions;
 			int64_t _currentMoney;
 
-			int _firstBet;
-			int _betGrowth;
+			int _betAmount;
+			int _betsCount;
         };
     }
 }

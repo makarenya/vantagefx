@@ -28,10 +28,10 @@ int start(int argc, char **argv);
 #ifdef GUI_MAIN
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
-    int argc;
+    int argc = 0;
 	auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	std::vector<std::vector<char>> items(argc);
-	std::vector<char*> args(argc);
+	std::vector<std::vector<char>> items(static_cast<unsigned>(argc));
+	std::vector<char*> args(static_cast<unsigned>(argc));
 	for(auto i = 0; i < argc; ++i) {
 		auto arg = boost::locale::conv::utf_to_utf<char>(argv[i]);;
 		items[i] = std::vector<char>(arg.begin(), arg.end());
@@ -45,7 +45,6 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpC
 	paths.append("platforms");
 	paths.append("sqldrivers");
 	QCoreApplication::setLibraryPaths(paths);
-
 	return start(argc, &args[0]);
 }
 #else

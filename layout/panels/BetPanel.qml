@@ -6,34 +6,34 @@ Rectangle {
   Text {
     y: 4
     width: 80
-    text: "First bet"
+    text: "Bet amount"
     renderType: Text.NativeRendering
     horizontalAlignment: Text.AlignRight
   }
 
   TextField {
-    id: firstBet
+    id: betAmount
     x: 90
     width: 40
     height: 22
-    text: root.firstBet
+    text: root.betAmount
   }
 
   Text {
     x: 140
     y: 4
     width: 80
-    text: "Bet growth"
+    text: "Bets count"
     renderType: Text.NativeRendering
     horizontalAlignment: Text.AlignRight
   }
 
   TextField {
-    id: betGrowth
+    id: betsCount
     x: 230
     width: 40
     height: 22
-    text: root.betGrowth
+    text: root.betsCount
   }
 
   Button {
@@ -41,6 +41,6 @@ Rectangle {
     width: 100
     height: 22
     text: "Update bet"
-    onClicked: root.setBet(parseInt(firstBet.text), parseInt(betGrowth.text));
+    onClicked: root.setBet(parseInt(betAmount.text), parseInt(betsCount.text));
   }
 }
