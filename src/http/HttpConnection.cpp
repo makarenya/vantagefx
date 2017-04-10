@@ -149,6 +149,7 @@ namespace vantagefx {
 						_response = HttpResponse();
 
                         _handler(std::move(response), error_code());
+						_handler = nullptr;
                         _busy = false;
 					}
                     return true;
@@ -161,7 +162,8 @@ namespace vantagefx {
         {
             if (ec) {
                 _handler(std::move(_response), ec);
-                return true;
+				_handler = nullptr;
+				return true;
             }
             return false;
         }
