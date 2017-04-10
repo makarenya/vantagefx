@@ -6,6 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (MSVC)
     set(CMAKE_PREFIX_PATH "c:/msvc_2017")
+    set(BOOST_ROOT ${CMAKE_PREFIX_PATH})
     set(Boost_USE_STATIC_LIBS ON) # only find static libs
     add_definitions(-D_WIN32_WINNT=0x0502 -DWINVER=0x0502)
     add_definitions(-D_UNICODE -DUNICODE)
@@ -56,14 +57,9 @@ set(SOURCE_FILES
         src/main.cpp
         src/GwtHttpRequest.cpp
         src/GwtHttpRequest.h
+		)
 
-        #layout/views/Details.qml
-        #layout/views/List.qml
-        #layout/views/Loading.qml
-        #layout/views/Login.qml
-        #layout/views/OptionLine.qml
-        #layout/panels/LoginPanel.qml
-
+set(SOURCE_FILES_API 
         src/api/GwtRpcResponse.cpp
         src/api/GwtRpcResponse.h
         src/api/GwtResponseData.h
@@ -96,7 +92,9 @@ set(SOURCE_FILES
         src/api/GwtPathExpression.h
 		src/api/GwtHttpRequestContext.cpp
 		src/api/GwtHttpRequestContext.h
+		)
 
+set(SOURCE_FILES_HTTP
         src/http/HttpContext.cpp
         src/http/HttpContext.h
         src/http/HttpRequest.cpp
@@ -109,14 +107,18 @@ set(SOURCE_FILES
         src/http/HttpConnection.h
         src/http/Url.cpp
         src/http/Url.h
+		)
 
+set(SOURCE_FILES_ANALYZER
         src/analyzer/FiddlerLogEntry.cpp
         src/analyzer/FiddlerLogEntry.h
         src/analyzer/FiddlerLogParser.cpp
         src/analyzer/FiddlerLogParser.h
         src/analyzer/GwtAnalyzer.cpp
         src/analyzer/GwtAnalyzer.h
+		)
 
+set(SOURCE_FILES_VIEWMODEL
 		src/viewmodel/MainViewModel.cpp
 		src/viewmodel/MainViewModel.h
         src/viewmodel/VantageFxService.cpp
@@ -131,7 +133,9 @@ set(SOURCE_FILES
 		src/viewmodel/OptionItem.h
 		src/viewmodel/ComboBoxModel.cpp
 		src/viewmodel/ComboBoxModel.h
+		)
 
+set(SOURCE_FILES_MODEL
         src/model/OptionModel.cpp
         src/model/OptionModel.h
         src/model/VantageFxModel.cpp
@@ -142,14 +146,32 @@ set(SOURCE_FILES
 		src/model/CurrentSettings.h
 		src/model/TransactionModel.cpp
 		src/model/TransactionModel.h
+		)
 
+set(SOURCE_FILES_CONTROLLER
 		src/controller/StatisticRenderer.cpp
         src/controller/StatisticRenderer.h
 		)
 
+source_group("" FILES ${SOURCE_FILES} ${RESOURCES})
+source_group("api" FILES ${SOURCE_FILES_API})
+source_group("http" FILES ${SOURCE_FILES_HTTP})
+source_group("analyzer" FILES ${SOURCE_FILES_ANALYZER})
+source_group("viewmodel" FILES ${SOURCE_FILES_VIEWMODEL})
+source_group("model" FILES ${SOURCE_FILES_MODEL})
+source_group("controller" FILES ${SOURCE_FILES_CONTROLLER})
 
 qt5_add_resources(RESOURCES layout/qml.qrc)
-add_executable(vantagefx ${SOURCE_FILES} ${RESOURCES})
+add_executable(vantagefx 
+	${SOURCE_FILES} 
+	${SOURCE_FILES_API}
+	${SOURCE_FILES_HTTP}
+	${SOURCE_FILES_ANALYZER}
+	${SOURCE_FILES_VIEWMODEL}
+	${SOURCE_FILES_MODEL}
+	${SOURCE_FILES_CONTROLLER}
+	${RESOURCES}
+	)
 include_directories(. ${Boost_INCLUDE_DIRS})
 target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 if(WIN32)
