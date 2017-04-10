@@ -6,6 +6,10 @@
 #include <thread>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/locale.hpp>
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/configurator.h>
+#include <log4cplus/initializer.h>
 #include "src/api/GwtRpcRequest.h"
 #include "src/api/GwtType.h"
 #include "src/api/GwtBundle.h"
@@ -22,13 +26,15 @@
 using namespace vantagefx::api;
 using namespace vantagefx::serialized;
 namespace fs = boost::filesystem;
+using namespace log4cplus;
 
 int start(int argc, char **argv);
 
 #ifdef GUI_MAIN
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpCmdLine, int nCmdShow)
 {
-    int argc = 0;
+	Initializer initializer;
+	int argc = 0;
 	auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	std::vector<std::vector<char>> items(static_cast<unsigned>(argc));
 	std::vector<char*> args(static_cast<unsigned>(argc));
@@ -50,6 +56,7 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t *lpC
 #else
 int main(int argc, char** argv)
 {
+	Initializer initializer;
 	return start(argc, argv);
 }
 #endif
@@ -71,11 +78,19 @@ int start(int argc, char **argv)
     using namespace vantagefx::analyzer;
     using namespace vantagefx::viewmodel;
 
+	fs::path logPropPath = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "log.properties";
+	if (!fs::exists(logPropPath)) {
+		logPropPath = fs::path(DATA_DIR) / "log.properties";
+	}
+	auto path = logPropPath.generic_wstring();
+	PropertyConfigurator config(path);
+	config.configure();
+
 	QApplication app(argc, argv);
 
-	fs::path cert_path = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
-	if (!fs::exists(cert_path)) {
-		cert_path = fs::path(DATA_DIR) / "ca.cer";
+	fs::path certPath = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
+	if (!fs::exists( certPath )) {
+		certPath = fs::path(DATA_DIR) / "ca.cer";
 	}
 
 	QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
@@ -90,7 +105,7 @@ int start(int argc, char **argv)
 	auto ctx = ssl::context(ssl::context::tlsv1_client);
 	SSL_CTX_set_cipher_list(ctx.native_handle(), "TLSv1:SSLv3:SSLv2");
 
-	ctx.load_verify_file(cert_path.string());
+	ctx.load_verify_file(certPath.string());
 	ctx.set_options(ssl::context::default_workarounds);
 
 	std::thread worker([&io_service]() {

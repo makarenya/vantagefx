@@ -51,6 +51,7 @@ find_package(Qt5Xml REQUIRED)
 find_package(Qt5OpenGLExtensions REQUIRED)
 find_package(Boost 1.55 REQUIRED COMPONENTS date_time filesystem regex atomic system locale)
 find_package(OpenSSL 1.0.2 REQUIRED)
+find_package(log4cplus REQUIRED)
 
 
 set(SOURCE_FILES
@@ -173,7 +174,7 @@ add_executable(vantagefx
 	${RESOURCES}
 	)
 include_directories(. ${Boost_INCLUDE_DIRS})
-target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
+target_link_libraries(vantagefx Qt5::Core Qt5::Qml Qt5::Quick Qt5::Widgets Qt5::Xml log4cplus::log4cplusU ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 if(WIN32)
     target_link_libraries(vantagefx wsock32 ws2_32 Shell32 Winhttp)
     add_definitions(-D_WIN32_WINNT=0x0501)
