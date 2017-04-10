@@ -36,7 +36,7 @@ if (APPLE)
     set(OPENSSL_ROOT_DIR /opt/local)
 endif()
 
-add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/data/")
+add_definitions(-DDATA_DIR="${CMAKE_SOURCE_DIR}/res/")
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
