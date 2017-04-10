@@ -2,6 +2,8 @@
 // Created by alexx on 09.03.2016.
 //
 #include "MainViewModel.h"
+#include <log4cplus/loggingmacros.h>
+#include <boost/locale/encoding_utf.hpp>
 
 namespace vantagefx {
     namespace viewmodel {
@@ -10,7 +12,8 @@ namespace vantagefx {
         using std::placeholders::_2;
 
         MainViewModel::MainViewModel(VantageFxService &service)
-                : _mode(""),
+                : _logger(log4cplus::Logger::getInstance(L"MainViewModel")),
+			      _mode(""),
 			      _description("Loading stuff..."),
 				  _loggedIn(false),
 			      _service(service),
@@ -67,7 +70,7 @@ namespace vantagefx {
 
         void MainViewModel::loadingError(std::exception e)
         {
-			qDebug() << e.what();
+			LOG4CPLUS_WARN(_logger, L"loading error " << boost::locale::conv::utf_to_utf<wchar_t>(e.what()));
 			Sleep(1000);
 			doLoad();
         }
@@ -111,7 +114,7 @@ namespace vantagefx {
 
         void MainViewModel::refreshError(std::exception e)
         {
-            qDebug() << e.what();
+			LOG4CPLUS_WARN(_logger, L"refresh error " << boost::locale::conv::utf_to_utf<wchar_t>(e.what()));
 			_refreshTimeout = 10;
 		}
 
@@ -145,7 +148,7 @@ namespace vantagefx {
 
 		void MainViewModel::authError(std::exception e)
         {
-			qDebug() << e.what();
+			LOG4CPLUS_WARN(_logger, L"auth error " << boost::locale::conv::utf_to_utf<wchar_t>(e.what()));
 			setMode("view");
 			_refreshTimeout = 10;
 		}
@@ -170,7 +173,7 @@ namespace vantagefx {
 
 		void MainViewModel::purchaseError(std::exception e)
         {
-			qDebug() << e.what();
+			LOG4CPLUS_WARN(_logger, L"purchase error " << boost::locale::conv::utf_to_utf<wchar_t>(e.what()));
 			setMode("view");
 			_refreshTimeout = 40;
 		}
@@ -328,7 +331,7 @@ namespace vantagefx {
 				if (!option.isAvailable()) continue;
 				if (!_options.isSelected(option.optionId())) continue;
 				if (_model.hasTransactionFor(option.optionId())) {
-					qDebug("second buy");
+					LOG4CPLUS_WARN(_logger, L"second buy");
 					continue;
 				}
 				int threshold = 70;

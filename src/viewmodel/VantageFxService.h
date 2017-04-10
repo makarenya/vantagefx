@@ -6,6 +6,7 @@
 #define VANTAGEFX_CONTROLLER_H
 
 #include <memory>
+#include <log4cplus/logger.h>
 #include "../GwtHttpRequest.h"
 
 namespace vantagefx {
@@ -154,6 +155,7 @@ namespace vantagefx {
 
         private:
 
+			log4cplus::Logger _logger;
             GwtHttpContext _context;
         };
     }

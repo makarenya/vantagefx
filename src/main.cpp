@@ -85,6 +85,10 @@ int start(int argc, char **argv)
 	PropertyConfigurator config(logPropPath.wstring());
 	config.configure();
 
+	Logger logger = Logger::getInstance(L"main");
+
+	LOG4CPLUS_INFO(logger, L">>> PROGRAM START");
+
 	QApplication app(argc, argv);
 
 	fs::path certPath = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
@@ -125,7 +129,9 @@ int start(int argc, char **argv)
     controller.stop();
     io_service.stop();
     worker.join();
-    return code;
+	LOG4CPLUS_INFO(logger, L"<<< PROGRAM STOP");
+
+	return code;
 }
 
 

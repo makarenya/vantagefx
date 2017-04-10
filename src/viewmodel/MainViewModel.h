@@ -13,6 +13,7 @@
 #include "../model/VantageFxModel.h"
 #include "../model/CurrentSettings.h"
 #include "../controller/StatisticRenderer.h"
+#include <log4cplus/logger.h>
 
 namespace vantagefx {
     namespace viewmodel {
@@ -167,6 +168,8 @@ namespace vantagefx {
 			Q_SLOT void purchased(PurchaseContextPtr ctx);
 			Q_SLOT void purchaseError(std::exception e);
 
+        private:
+			log4cplus::Logger _logger;
 
 			bool makePurchases(const QMap<int64_t, model::OptionModel> &options);
 			

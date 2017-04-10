@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include "AssetModel.h"
+#include <log4cplus/logger.h>
 
 
 namespace vantagefx {
@@ -63,6 +64,7 @@ namespace vantagefx {
 			void closeReturn();
 		
 		private:
+			log4cplus::Logger _logger;
             int64_t _optionId;
 			AssetModel *_asset;
             int _seconds;

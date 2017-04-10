@@ -5,6 +5,7 @@
 #include "VantageFxService.h"
 #include <regex>
 #include "../model/VantageFxModel.h"
+#include <log4cplus/loggingmacros.h>
 
 namespace vantagefx {
     namespace viewmodel {
@@ -19,16 +20,13 @@ namespace vantagefx {
         /*********************************************************************/
 
         LoadingContext::LoadingContext(GwtHttpContext &context, Handler handler, Fail error)
-                : _context(context),
-                  _handler(handler),
-                  _error(error)
-        {
-            qDebug("Loading context created");
-        }
+	    : _brandId(0),
+	      _context(context),
+	      _handler(handler),
+	      _error(error) { }
 
         LoadingContext::~LoadingContext()
         {
-            qDebug("Loading context free");
         }
 
 	    void LoadingContext::send()
@@ -122,12 +120,10 @@ namespace vantagefx {
                   _handler(handler),
                   _error(error)
         {
-            qDebug("Refresh context created");
         }
 
         RefreshContext::~RefreshContext()
         {
-            qDebug("Refresh context free");
         }
 
 	    void RefreshContext::send(int instrumentTypeId)
@@ -158,12 +154,10 @@ namespace vantagefx {
                   _handler(handler),
                   _error(error)
         {
-            qDebug("Auth context created");
         }
 
         AuthContext::~AuthContext()
         {
-            qDebug("Auth context free");
         }
 
 	    void AuthContext::send(const std::string& login, const std::string& password, const std::string& server)
@@ -193,12 +187,10 @@ namespace vantagefx {
                   _handler(handler),
                   _error(error)
         {
-            qDebug("Purchase context created");
         }
 
         PurchaseContext::~PurchaseContext()
         {
-            qDebug("Purchase context free");
         }
 
 	    void PurchaseContext::send(int64_t accountId, int64_t optionId, int assetId, 
@@ -234,7 +226,8 @@ namespace vantagefx {
         /*********************************************************************/
 
         VantageFxService::VantageFxService(GwtHttpContext &&context)
-                : _context(std::move(context))
+                : _logger(log4cplus::Logger::getInstance(L"VantageFxService")),
+			      _context(std::move(context))
         {}
 
         LoadingContextPtr VantageFxService::load(LoadingContext::Handler handler, LoadingContext::Fail error)
@@ -266,7 +259,7 @@ namespace vantagefx {
                                                  PurchaseContext::Fail error)
         {
 			auto msg = QString("buy(%1, %2, %3, %4, %L5, %6)").arg(accountId).arg(optionId).arg(assetId).arg(money).arg(price, 0, 'f').arg(positionType);
-			qDebug() << msg;
+			LOG4CPLUS_INFO(_logger, msg.toStdWString());
 			auto result = std::make_shared<PurchaseContext>(_context, handler, error);
 			result->send(accountId, optionId, assetId, money, price, positionType);
 			return result;

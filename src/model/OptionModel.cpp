@@ -4,15 +4,17 @@
 
 #include "OptionModel.h"
 #include "TransactionModel.h"
+#include <log4cplus/loggingmacros.h>
 
 namespace vantagefx {
     namespace model {
 
 	    OptionModel::OptionModel()
-				: _optionId(0),
+				: _logger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("OptionModel"))),
+	              _optionId(0),
 	              _asset(nullptr),
 	              _seconds(0),
-	              _price(0),
+			      _price(0),
 			      _status(Idle),
 			      _openTime()
 			{}
@@ -59,7 +61,7 @@ namespace vantagefx {
 			auto time = QDateTime::currentDateTime().addSecs(10);
 			if (time > _openTime) _openTime = time;
 			else if (time.secsTo(_openTime) > 5) {
-				qDebug("something wrong");
+				LOG4CPLUS_ERROR(_logger, LOG4CPLUS_TEXT("something wrong on close success"));
 			}
 	    }
 
@@ -69,7 +71,7 @@ namespace vantagefx {
 			auto time = QDateTime::currentDateTime().addSecs(10);
 			if (time > _openTime) _openTime = time;
 			else if (time.secsTo(_openTime) > 5) {
-				qDebug("something wrong");
+				LOG4CPLUS_ERROR(_logger, LOG4CPLUS_TEXT("something wrong on close fail"));
 			}
 		}
 
@@ -79,7 +81,7 @@ namespace vantagefx {
 			auto time = QDateTime::currentDateTime().addSecs(10);
 			if (time > _openTime) _openTime = time;
 			else if (time.secsTo(_openTime) > 5) {
-				qDebug("something wrong");
+				LOG4CPLUS_ERROR(_logger, LOG4CPLUS_TEXT("something wrong on close return"));
 			}
 		}
 
