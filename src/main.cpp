@@ -82,14 +82,13 @@ int start(int argc, char **argv)
 	if (!fs::exists(logPropPath)) {
 		logPropPath = fs::path(DATA_DIR) / "log.properties";
 	}
-	auto path = logPropPath.generic_wstring();
-	PropertyConfigurator config(path);
+	PropertyConfigurator config(logPropPath.wstring());
 	config.configure();
 
 	QApplication app(argc, argv);
 
 	fs::path certPath = fs::path(QCoreApplication::applicationDirPath().toStdWString()) / "ca.cer";
-	if (!fs::exists( certPath )) {
+	if (!fs::exists(certPath)) {
 		certPath = fs::path(DATA_DIR) / "ca.cer";
 	}
 
