@@ -163,6 +163,7 @@ namespace vantagefx {
             if (ec) {
                 _handler(std::move(_response), ec);
 				_handler = nullptr;
+				closeConnection();
 				return true;
             }
             return false;

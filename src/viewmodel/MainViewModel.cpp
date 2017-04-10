@@ -68,6 +68,7 @@ namespace vantagefx {
         void MainViewModel::loadingError(std::exception e)
         {
 			qDebug() << e.what();
+			Sleep(1000);
 			doLoad();
         }
 
